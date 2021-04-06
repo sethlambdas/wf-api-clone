@@ -1,0 +1,13 @@
+.idea/
+.vscode/
+node_modules/
+dist/
+build/
+src/**/*.gql
+test/coverage/
+tmp/
+temp/
+uploads/
+test/uploads/*
+!test/uploads/test-image.jpg
+sample.sh

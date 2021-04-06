@@ -1,0 +1,31 @@
+server:
+  origin: http://localhost:3001
+  port: 3000
+  prefix: 'api'
+  payload:
+    limit: '50mb'
+
+db:
+  type: 'mysql'
+  port: 3306
+  database: 'sample'
+  synchronize: false
+  logging: false
+
+jwt:
+  secret: 'TokenSecret'
+  accessToken:
+    expiresIn: '30min'
+  refreshToken:
+    expiresIn: '12h'
+    maxAge: 43200000
+
+cache:
+  expiresIn: 300000
+
+logLevel:
+  - 'log'
+  - 'debug'
+
+files:
+  dir: './uploads/'

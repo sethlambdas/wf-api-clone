@@ -1,0 +1,13 @@
+db:
+  host: 'localhost'
+  database: 'sample'
+  username: 'root'
+  password: '12345'
+  dropSchema: true
+  migrationsRun: true
+
+jwt:
+  secret: 'topSecretTest51'
+
+files:
+  dir: './test/uploads/'

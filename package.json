@@ -1,0 +1,110 @@
+{
+  "name": "nestjs-task-management",
+  "version": "0.0.1",
+  "description": "",
+  "author": "",
+  "license": "MIT",
+  "scripts": {
+    "build": "tsc -p tsconfig.build.json",
+    "prettier": "prettier **/*.{js,ts} --check",
+    "prettier:fix": "npm run prettier -- --write",
+    "start": "NODE_ENV=development ts-node -r tsconfig-paths/register src/main.ts",
+    "start:docker": "docker-compose up --build",
+    "watch": "NODE_ENV=development nodemon",
+    "watch:debug": "nodemon --config nodemon-debug.json",
+    "prestart:prod": "rimraf dist && npm run build",
+    "start:prod": "NODE_ENV=production node dist/main.js",
+    "lint": "tslint -p tsconfig.json -c tslint.json",
+    "lint:fix": "npm run lint -- --fix",
+    "test": "npm run test:e2e && npm run test:unit",
+    "test:e2e": "jest --config ./test/jest-e2e.json --verbose --runInBand --passWithNoTests --testTimeout=60000 --forceExit",
+    "test:unit": "jest --config ./test/jest-unit.json --verbose --runInBand --passWithNoTests --testTimeout=60000 --forceExit",
+    "test:watch:e2e": "npm run test:e2e -- --watch",
+    "test:watch:unit": "npm run test:unit -- --watch",
+    "typeorm": "ts-node -r tsconfig-paths/register ./node_modules/typeorm/cli.js --config src/config/typeorm.config.ts",
+    "typeorm:create": "npm run typeorm migration:create -- -n",
+    "typeorm:generate": "npm run typeorm migration:generate -- -n",
+    "typeorm:run": "npm run typeorm migration:run",
+    "typeorm:revert": "npm run typeorm migration:revert",
+    "generate:resource": "nest g resource"
+  },
+  "dependencies": {
+    "@commitlint/cli": "^11.0.0",
+    "@commitlint/config-conventional": "^11.0.0",
+    "@nestjs/cli": "^7.5.6",
+    "@nestjs/common": "^7.6.13",
+    "@nestjs/core": "^7.4.2",
+    "@nestjs/graphql": "^7.6.0",
+    "@nestjs/jwt": "^7.1.0",
+    "@nestjs/passport": "^7.1.0",
+    "@nestjs/platform-express": "^7.4.2",
+    "@nestjs/typeorm": "^7.1.0",
+    "@types/express": "^4.17.7",
+    "@types/lodash": "^4.14.165",
+    "@types/node": "^12.12.54",
+    "apollo-server-express": "^2.16.1",
+    "bcryptjs": "^2.4.3",
+    "body-parser": "^1.19.0",
+    "class-transformer": "^0.3.1",
+    "class-validator": "^0.12.2",
+    "config": "^3.3.1",
+    "cookie-parser": "^1.4.5",
+    "graphql": "^15.3.0",
+    "graphql-tools": "^7.0.4",
+    "lodash": "^4.17.20",
+    "mysql": "^2.18.1",
+    "passport": "^0.4.1",
+    "passport-jwt": "^4.0.0",
+    "reflect-metadata": "^0.1.13",
+    "rimraf": "^3.0.2",
+    "rxjs": "^6.6.2",
+    "ts-node": "^8.10.2",
+    "typeorm": "^0.2.25",
+    "typescript": "^3.9.7",
+    "utils-decorators": "^1.8.0"
+  },
+  "devDependencies": {
+    "@nestjs/testing": "^7.4.2",
+    "@types/faker": "^4.1.12",
+    "@types/jest": "^26.0.9",
+    "@types/supertest": "^2.0.10",
+    "eslint": "^7.12.0",
+    "faker": "^4.1.0",
+    "husky": ">=4",
+    "jest": "^26.2.2",
+    "lint-staged": ">=10",
+    "nodemon": "^2.0.4",
+    "prettier": "^2.0.5",
+    "supertest": "^4.0.2",
+    "ts-jest": "^26.1.4",
+    "tsconfig-paths": "^3.9.0",
+    "tslint": "6.1.3",
+    "tslint-config-prettier": "^1.18.0"
+  },
+  "jest": {
+    "moduleFileExtensions": [
+      "js",
+      "json",
+      "ts"
+    ],
+    "rootDir": "src",
+    "testRegex": ".spec.ts$",
+    "transform": {
+      "^.+\\.(t|j)s$": "ts-jest"
+    },
+    "coverageDirectory": "../coverage",
+    "testEnvironment": "node"
+  },
+  "husky": {
+    "hooks": {
+      "pre-commit": "lint-staged",
+      "commit-msg": "commitlint -E HUSKY_GIT_PARAMS"
+    }
+  },
+  "lint-staged": {
+    "**/*.{js,ts}": [
+      "npm run lint",
+      "npm run prettier"
+    ]
+  }
+}

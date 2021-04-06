@@ -1,0 +1,105 @@
+####################################
+### BASE
+####################################
+FROM node:14.15.1-alpine3.12 as base
+
+LABEL org.opencontainers.image.authors=devs@lambdas.io
+LABEL org.opencontainers.image.title="Node.js images"
+LABEL io.lambdas.nodeversion=$NODE_VERSION
+
+ENV NODE_ENV=production
+
+EXPOSE 3000
+
+ENV PORT 3000
+
+WORKDIR /app
+
+COPY package*.json ./
+
+RUN npm config list
+
+RUN npm ci \
+    && npm cache clean --force
+
+ENV PATH /app/node_modules/.bin:$PATH
+
+RUN apk add --no-cache tini
+RUN apk add curl
+
+RUN addgroup appgroup \
+    && adduser -G appgroup -D appuser
+
+ENTRYPOINT ["tini", "--", "./entrypoint.sh"]
+
+# CMD ["node", "main.js"]
+
+####################################
+### DEV
+####################################
+FROM base as dev
+
+ENV NODE_ENV=development
+
+#RUN apt-get update -qq && apt-get install -qy \
+RUN apk add --no-cache \
+    ca-certificates \
+    bzip2 \
+    curl
+
+RUN npm config list
+
+RUN npm install --only=development \
+    && npm cache clean --force
+
+RUN chown -R appuser:appgroup /app
+
+USER appuser
+
+CMD ["nodemon"]
+
+####################################
+### TEST
+####################################
+FROM dev as test
+
+COPY . .
+
+RUN npm audit --audit-level=moderate
+
+# ARG MICROSCANNER_TOKEN
+
+# ADD https://get.aquasec.com/microscanner /
+
+USER root
+
+# RUN chmod +x /microscanner
+
+# RUN /microscanner $MICROSCANNER_TOKEN --continue-on-failure
+
+####################################
+### PRE PRODUCTION
+####################################
+FROM test as pre-prod
+
+RUN npm run build
+
+RUN rm -rf ./test* \
+    && rm -rf ./node_modules
+
+####################################
+### PRODUCTION
+####################################
+FROM base as prod
+
+RUN apk add --no-cache python3 py-pip jq \
+    && pip install awscli
+
+COPY --from=pre-prod /app/config/default.yml /app/config/
+COPY --from=pre-prod /app/config/production.yml /app/config/
+COPY --from=pre-prod /app/dist /app
+COPY --from=pre-prod /app/entrypoint.sh /app
+
+RUN chown -R appuser:appgroup /app
+
+USER appuser:appgroup

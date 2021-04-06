@@ -1,0 +1,454 @@
+{
+	"info": {
+		"_postman_id": "b3fd09f9-295e-466e-bbd5-af83f6772ef6",
+		"name": "NestJS Template",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "List Tasks",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "graphql",
+					"graphql": {
+						"query": "query ListTasks($listTasksFilterInput: ListTasksFilterInput!) {\n  ListTasks(listTasksFilterInput: $listTasksFilterInput) {\n    totalPages\n    totalRecords\n    page\n    pageSize\n    data {\n      id\n      title\n      description\n      status\n    }\n  }\n}",
+						"variables": "{\n    \"listTasksFilterInput\": {\n        \"filter\": [],\n        \"operators\": [],\n        \"sorting\": {},\n        \"pagination\": {}\n    }\n}"
+					}
+				},
+				"url": {
+					"raw": "http://localhost:3000/api/graphql",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "3000",
+					"path": [
+						"api",
+						"graphql"
+					]
+				}
+			},
+			"response": [
+				{
+					"name": "List Tasks",
+					"originalRequest": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "graphql",
+							"graphql": {
+								"query": "query ListTasks($listTasksFilterInput: ListTasksFilterInput!) {\n  ListTasks(listTasksFilterInput: $listTasksFilterInput) {\n    totalPages\n    totalRecords\n    page\n    pageSize\n    data {\n      id\n      title\n      description\n      status\n    }\n  }\n}",
+								"variables": "{\n    \"listTasksFilterInput\": {\n        \"filter\": [],\n        \"operators\": [],\n        \"sorting\": {},\n        \"pagination\": {}\n    }\n}"
+							}
+						},
+						"url": {
+							"raw": "http://localhost:3000/api/graphql",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "3000",
+							"path": [
+								"api",
+								"graphql"
+							]
+						}
+					},
+					"status": "OK",
+					"code": 200,
+					"_postman_previewlanguage": "json",
+					"header": [
+						{
+							"key": "X-Powered-By",
+							"value": "Express"
+						},
+						{
+							"key": "Access-Control-Allow-Origin",
+							"value": "*"
+						},
+						{
+							"key": "Content-Type",
+							"value": "application/json; charset=utf-8"
+						},
+						{
+							"key": "Content-Length",
+							"value": "240"
+						},
+						{
+							"key": "ETag",
+							"value": "W/\"f0-ZGP7LRpNrZha7rj1AZUBBa4kALA\""
+						},
+						{
+							"key": "Date",
+							"value": "Wed, 10 Feb 2021 05:51:09 GMT"
+						},
+						{
+							"key": "Connection",
+							"value": "keep-alive"
+						}
+					],
+					"cookie": [],
+					"body": "{\n    \"data\": {\n        \"ListTasks\": {\n            \"totalPages\": 1,\n            \"totalRecords\": 1,\n            \"page\": 1,\n            \"pageSize\": 10,\n            \"data\": [\n                {\n                    \"id\": 1,\n                    \"title\": \"aut repellat perferendis\",\n                    \"description\": \"Itaque voluptas non voluptas aut numquam et accusantium quia dolor.\",\n                    \"status\": \"IN_PROGRESS\"\n                }\n            ]\n        }\n    }\n}"
+				}
+			]
+		},
+		{
+			"name": "List Tasks - Pagination",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "graphql",
+					"graphql": {
+						"query": "query ListTasks($listTasksFilterInput: ListTasksFilterInput!) {\n  ListTasks(listTasksFilterInput: $listTasksFilterInput) {\n    totalPages\n    totalRecords\n    page\n    pageSize\n    data {\n      id\n      title\n      description\n      status\n    }\n  }\n}",
+						"variables": "{\n    \"listTasksFilterInput\": {\n        \"filter\": [],\n        \"operators\": [],\n        \"sorting\": {},\n        \"pagination\": {\n            \"page\": 2,\n            \"pageSize\": 20\n        }\n    }\n}"
+					}
+				},
+				"url": {
+					"raw": "http://localhost:3000/api/graphql",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "3000",
+					"path": [
+						"api",
+						"graphql"
+					]
+				}
+			},
+			"response": [
+				{
+					"name": "List Tasks - Pagination",
+					"originalRequest": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "graphql",
+							"graphql": {
+								"query": "query ListTasks($listTasksFilterInput: ListTasksFilterInput!) {\n  ListTasks(listTasksFilterInput: $listTasksFilterInput) {\n    totalPages\n    totalRecords\n    page\n    pageSize\n    data {\n      id\n      title\n      description\n      status\n    }\n  }\n}",
+								"variables": "{\n    \"listTasksFilterInput\": {\n        \"filter\": [],\n        \"operators\": [],\n        \"sorting\": {},\n        \"pagination\": {\n            \"page\": 2,\n            \"pageSize\": 20\n        }\n    }\n}"
+							}
+						},
+						"url": {
+							"raw": "http://localhost:3000/api/graphql",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "3000",
+							"path": [
+								"api",
+								"graphql"
+							]
+						}
+					},
+					"status": "OK",
+					"code": 200,
+					"_postman_previewlanguage": "json",
+					"header": [
+						{
+							"key": "X-Powered-By",
+							"value": "Express"
+						},
+						{
+							"key": "Access-Control-Allow-Origin",
+							"value": "*"
+						},
+						{
+							"key": "Content-Type",
+							"value": "application/json; charset=utf-8"
+						},
+						{
+							"key": "Content-Length",
+							"value": "90"
+						},
+						{
+							"key": "ETag",
+							"value": "W/\"5a-PDQ5TSmvOAg6zc4X4A/8Ycm1L+A\""
+						},
+						{
+							"key": "Date",
+							"value": "Wed, 10 Feb 2021 05:52:12 GMT"
+						},
+						{
+							"key": "Connection",
+							"value": "keep-alive"
+						}
+					],
+					"cookie": [],
+					"body": "{\n    \"data\": {\n        \"ListTasks\": {\n            \"totalPages\": 1,\n            \"totalRecords\": 1,\n            \"page\": 2,\n            \"pageSize\": 20,\n            \"data\": []\n        }\n    }\n}"
+				}
+			]
+		},
+		{
+			"name": "List Tasks - Sorting",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "graphql",
+					"graphql": {
+						"query": "query ListTasks($listTasksFilterInput: ListTasksFilterInput!) {\n  ListTasks(listTasksFilterInput: $listTasksFilterInput) {\n    totalPages\n    totalRecords\n    page\n    pageSize\n    data {\n      id\n      title\n      description\n      status\n    }\n  }\n}",
+						"variables": "{\n    \"listTasksFilterInput\": {\n        \"filter\": [],\n        \"operators\": [],\n        \"sorting\": {\n            \"sortBy\": [\"id\"],\n            \"sortDir\": [\"DESC\"]\n        },\n        \"pagination\": {\n            \"page\": 1,\n            \"pageSize\": 20\n        }\n    }\n}"
+					}
+				},
+				"url": {
+					"raw": "http://localhost:3000/api/graphql",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "3000",
+					"path": [
+						"api",
+						"graphql"
+					]
+				}
+			},
+			"response": [
+				{
+					"name": "List Tasks - Sorting",
+					"originalRequest": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "graphql",
+							"graphql": {
+								"query": "query ListTasks($listTasksFilterInput: ListTasksFilterInput!) {\n  ListTasks(listTasksFilterInput: $listTasksFilterInput) {\n    totalPages\n    totalRecords\n    page\n    pageSize\n    data {\n      id\n      title\n      description\n      status\n    }\n  }\n}",
+								"variables": "{\n    \"listTasksFilterInput\": {\n        \"filter\": [],\n        \"operators\": [],\n        \"sorting\": {\n            \"sortBy\": [\"id\"],\n            \"sortDir\": [\"DESC\"]\n        },\n        \"pagination\": {\n            \"page\": 1,\n            \"pageSize\": 20\n        }\n    }\n}"
+							}
+						},
+						"url": {
+							"raw": "http://localhost:3000/api/graphql",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "3000",
+							"path": [
+								"api",
+								"graphql"
+							]
+						}
+					},
+					"status": "OK",
+					"code": 200,
+					"_postman_previewlanguage": "json",
+					"header": [
+						{
+							"key": "X-Powered-By",
+							"value": "Express"
+						},
+						{
+							"key": "Access-Control-Allow-Origin",
+							"value": "*"
+						},
+						{
+							"key": "Content-Type",
+							"value": "application/json; charset=utf-8"
+						},
+						{
+							"key": "Content-Length",
+							"value": "240"
+						},
+						{
+							"key": "ETag",
+							"value": "W/\"f0-tKuoyyenJ+iIs5iw1dolwQvpR/M\""
+						},
+						{
+							"key": "Date",
+							"value": "Wed, 10 Feb 2021 05:53:08 GMT"
+						},
+						{
+							"key": "Connection",
+							"value": "keep-alive"
+						}
+					],
+					"cookie": [],
+					"body": "{\n    \"data\": {\n        \"ListTasks\": {\n            \"totalPages\": 1,\n            \"totalRecords\": 1,\n            \"page\": 1,\n            \"pageSize\": 20,\n            \"data\": [\n                {\n                    \"id\": 1,\n                    \"title\": \"aut repellat perferendis\",\n                    \"description\": \"Itaque voluptas non voluptas aut numquam et accusantium quia dolor.\",\n                    \"status\": \"IN_PROGRESS\"\n                }\n            ]\n        }\n    }\n}"
+				}
+			]
+		},
+		{
+			"name": "List Tasks - Filter",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "graphql",
+					"graphql": {
+						"query": "query ListTasks($listTasksFilterInput: ListTasksFilterInput!) {\n  ListTasks(listTasksFilterInput: $listTasksFilterInput) {\n    totalPages\n    totalRecords\n    page\n    pageSize\n    data {\n      id\n      title\n      description\n      status\n    }\n  }\n}",
+						"variables": "{\n    \"listTasksFilterInput\": {\n        \"filter\": [\n            {\n                \"id\": 1\n            }\n        ],\n        \"operators\": [],\n        \"sorting\": {\n            \"sortBy\": [\"id\"],\n            \"sortDir\": [\"DESC\"]\n        },\n        \"pagination\": {\n            \"page\": 1,\n            \"pageSize\": 20\n        }\n    }\n}"
+					}
+				},
+				"url": {
+					"raw": "http://localhost:3000/api/graphql",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "3000",
+					"path": [
+						"api",
+						"graphql"
+					]
+				}
+			},
+			"response": [
+				{
+					"name": "List Tasks - Filter",
+					"originalRequest": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "graphql",
+							"graphql": {
+								"query": "query ListTasks($listTasksFilterInput: ListTasksFilterInput!) {\n  ListTasks(listTasksFilterInput: $listTasksFilterInput) {\n    totalPages\n    totalRecords\n    page\n    pageSize\n    data {\n      id\n      title\n      description\n      status\n    }\n  }\n}",
+								"variables": "{\n    \"listTasksFilterInput\": {\n        \"filter\": [\n            {\n                \"id\": 1\n            }\n        ],\n        \"operators\": [],\n        \"sorting\": {\n            \"sortBy\": [\"id\"],\n            \"sortDir\": [\"DESC\"]\n        },\n        \"pagination\": {\n            \"page\": 1,\n            \"pageSize\": 20\n        }\n    }\n}"
+							}
+						},
+						"url": {
+							"raw": "http://localhost:3000/api/graphql",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "3000",
+							"path": [
+								"api",
+								"graphql"
+							]
+						}
+					},
+					"status": "OK",
+					"code": 200,
+					"_postman_previewlanguage": "json",
+					"header": [
+						{
+							"key": "X-Powered-By",
+							"value": "Express"
+						},
+						{
+							"key": "Access-Control-Allow-Origin",
+							"value": "*"
+						},
+						{
+							"key": "Content-Type",
+							"value": "application/json; charset=utf-8"
+						},
+						{
+							"key": "Content-Length",
+							"value": "240"
+						},
+						{
+							"key": "ETag",
+							"value": "W/\"f0-tKuoyyenJ+iIs5iw1dolwQvpR/M\""
+						},
+						{
+							"key": "Date",
+							"value": "Wed, 10 Feb 2021 05:54:58 GMT"
+						},
+						{
+							"key": "Connection",
+							"value": "keep-alive"
+						}
+					],
+					"cookie": [],
+					"body": "{\n    \"data\": {\n        \"ListTasks\": {\n            \"totalPages\": 1,\n            \"totalRecords\": 1,\n            \"page\": 1,\n            \"pageSize\": 20,\n            \"data\": [\n                {\n                    \"id\": 1,\n                    \"title\": \"aut repellat perferendis\",\n                    \"description\": \"Itaque voluptas non voluptas aut numquam et accusantium quia dolor.\",\n                    \"status\": \"IN_PROGRESS\"\n                }\n            ]\n        }\n    }\n}"
+				}
+			]
+		},
+		{
+			"name": "ListTasks - Operators",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "graphql",
+					"graphql": {
+						"query": "query ListTasks($listTasksFilterInput: ListTasksFilterInput!) {\n  ListTasks(listTasksFilterInput: $listTasksFilterInput) {\n    totalPages\n    totalRecords\n    page\n    pageSize\n    data {\n      id\n      title\n      description\n      status\n    }\n  }\n}",
+						"variables": "{\n    \"listTasksFilterInput\": {\n        \"filter\": [\n            {\n                \"id\": [1]\n            }\n        ],\n        \"operators\": [\n            {\n                \"id\": \"In\"\n            }\n        ],\n        \"sorting\": {\n            \"sortBy\": [\"id\"],\n            \"sortDir\": [\"DESC\"]\n        },\n        \"pagination\": {\n            \"page\": 1,\n            \"pageSize\": 20\n        }\n    }\n}"
+					}
+				},
+				"url": {
+					"raw": "http://localhost:3000/api/graphql",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "3000",
+					"path": [
+						"api",
+						"graphql"
+					]
+				}
+			},
+			"response": [
+				{
+					"name": "ListTasks - Operators",
+					"originalRequest": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "graphql",
+							"graphql": {
+								"query": "query ListTasks($listTasksFilterInput: ListTasksFilterInput!) {\n  ListTasks(listTasksFilterInput: $listTasksFilterInput) {\n    totalPages\n    totalRecords\n    page\n    pageSize\n    data {\n      id\n      title\n      description\n      status\n    }\n  }\n}",
+								"variables": "{\n    \"listTasksFilterInput\": {\n        \"filter\": [\n            {\n                \"id\": [1]\n            }\n        ],\n        \"operators\": [\n            {\n                \"id\": \"In\"\n            }\n        ],\n        \"sorting\": {\n            \"sortBy\": [\"id\"],\n            \"sortDir\": [\"DESC\"]\n        },\n        \"pagination\": {\n            \"page\": 1,\n            \"pageSize\": 20\n        }\n    }\n}"
+							}
+						},
+						"url": {
+							"raw": "http://localhost:3000/api/graphql",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "3000",
+							"path": [
+								"api",
+								"graphql"
+							]
+						}
+					},
+					"status": "OK",
+					"code": 200,
+					"_postman_previewlanguage": "json",
+					"header": [
+						{
+							"key": "X-Powered-By",
+							"value": "Express"
+						},
+						{
+							"key": "Access-Control-Allow-Origin",
+							"value": "*"
+						},
+						{
+							"key": "Content-Type",
+							"value": "application/json; charset=utf-8"
+						},
+						{
+							"key": "Content-Length",
+							"value": "240"
+						},
+						{
+							"key": "ETag",
+							"value": "W/\"f0-tKuoyyenJ+iIs5iw1dolwQvpR/M\""
+						},
+						{
+							"key": "Date",
+							"value": "Wed, 10 Feb 2021 05:55:56 GMT"
+						},
+						{
+							"key": "Connection",
+							"value": "keep-alive"
+						}
+					],
+					"cookie": [],
+					"body": "{\n    \"data\": {\n        \"ListTasks\": {\n            \"totalPages\": 1,\n            \"totalRecords\": 1,\n            \"page\": 1,\n            \"pageSize\": 20,\n            \"data\": [\n                {\n                    \"id\": 1,\n                    \"title\": \"aut repellat perferendis\",\n                    \"description\": \"Itaque voluptas non voluptas aut numquam et accusantium quia dolor.\",\n                    \"status\": \"IN_PROGRESS\"\n                }\n            ]\n        }\n    }\n}"
+				}
+			]
+		}
+	]
+}
