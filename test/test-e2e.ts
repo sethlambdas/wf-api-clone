@@ -7,7 +7,6 @@ import * as typeOrmTestConfig from './../src/config/typeorm.test-config';
 import { AppModule } from './../src/graphql/app.module';
 import { UserService } from './../src/graphql/users/user.service';
 import { ConfigUtil } from './../src/utils/config.util';
-// import * as dynamoose from 'dynamoose';
 
 let app: INestApplication;
 let userService: UserService;
@@ -33,25 +32,6 @@ export const tearDownTesting = async () => {
 
 export const getHttpServerTesting = () => {
   return app.getHttpServer();
-};
-
-export const removeDynamoTable = async (TableName: string) => {
-  // dynamoose.aws.ddb.local(ConfigUtil.get('dynamodb.local'));
-  // const ddb = new dynamoose.aws.sdk.DynamoDB({
-  //   accessKeyId: ConfigUtil.get('aws.accessKeyId'),
-  //   secretAccessKey: ConfigUtil.get('aws.secretAccessKey'),
-  //   region: ConfigUtil.get('aws.region'),
-  //   endpoint: ConfigUtil.get('dynamodb.local'),
-  // });
-  // const dynamoDB = dynamoose.aws.ddb();
-  // await new Promise((resolve, reject) => {
-  //   ddb.deleteTable({ TableName }, (err, resp) => {
-  //     console.log(err);
-  //     console.log(resp);
-  //     if (err) return reject(err);
-  //     return resolve(resp);
-  //   });
-  // });
 };
 
 export const authBearerToken = (accessToken) => {

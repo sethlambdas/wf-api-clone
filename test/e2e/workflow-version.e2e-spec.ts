@@ -1,7 +1,6 @@
 import * as request from 'supertest';
 import { v4 } from 'uuid';
-import { ConfigUtil } from '../../src/utils/config.util';
-import { getHttpServerTesting, removeDynamoTable, setUpTesting, tearDownTesting } from '../test-e2e';
+import { getHttpServerTesting, setUpTesting, tearDownTesting } from '../test-e2e';
 
 const gql = {
   createWorkflowVersionMutation: `
@@ -66,7 +65,6 @@ let getWorkflowVersionData: any = {};
 describe('WorkflowVersionResolver (e2e)', () => {
   beforeAll(async () => {
     await setUpTesting();
-    // await removeDynamoTable(ConfigUtil.get('dynamodb.schema.workflowVersions'));
   });
 
   afterAll(async () => {

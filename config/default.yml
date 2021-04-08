@@ -8,7 +8,7 @@ server:
 db:
   type: 'mysql'
   port: 3306
-  database: 'sample_new_9'
+  database: 'sample'
   synchronize: false
   logging: false
 
