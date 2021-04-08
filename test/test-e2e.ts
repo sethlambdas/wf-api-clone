@@ -2,14 +2,12 @@ import { INestApplication } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import * as cookieParser from 'cookie-parser';
-import { resolve } from 'dns';
 import * as faker from 'faker';
 import * as typeOrmTestConfig from './../src/config/typeorm.test-config';
 import { AppModule } from './../src/graphql/app.module';
 import { UserService } from './../src/graphql/users/user.service';
 import { ConfigUtil } from './../src/utils/config.util';
-
-// const dynamoose = require('dynamoose');
+import * as dynamoose from "dynamoose";
 
 let app: INestApplication;
 let userService: UserService;
@@ -38,9 +36,18 @@ export const getHttpServerTesting = () => {
 };
 
 export const removeDynamoTable = async (TableName: string) => {
-  // const dynamoDB = dynamoose.ddb();
+  // dynamoose.aws.ddb.local(ConfigUtil.get('dynamodb.local'));
+  const ddb = new dynamoose.aws.sdk.DynamoDB({
+    accessKeyId: ConfigUtil.get('aws.accessKeyId'),
+    secretAccessKey: ConfigUtil.get('aws.secretAccessKey'),
+    region: ConfigUtil.get('aws.region'),
+    endpoint: ConfigUtil.get('dynamodb.local'),
+});
+  // const dynamoDB = dynamoose.aws.ddb();
   // await new Promise((resolve, reject) => {
-  //   dynamoDB.deleteTable({ TableName }, (err, resp) => {
+  //   ddb.deleteTable({ TableName }, (err, resp) => {
+  //     console.log(err);
+  //     console.log(resp);
   //     if (err) return reject(err);
   //     return resolve(resp);
   //   });

@@ -1,17 +1,6 @@
-import { HttpStatus } from '@nestjs/common';
-import * as faker from 'faker';
 import * as request from 'supertest';
-import { SortDir } from '../../src/graphql/common/enums/sort-dir.enum';
-import { WorkflowVersion } from '../../src/graphql/workflow-versions/workflow-version.entity';
 import { ConfigUtil } from '../../src/utils/config.util';
-import {
-  authBearerToken,
-  dataTesting,
-  getHttpServerTesting,
-  removeDynamoTable,
-  setUpTesting,
-  tearDownTesting,
-} from '../test-e2e';
+import { getHttpServerTesting, removeDynamoTable, setUpTesting, tearDownTesting } from '../test-e2e';
 
 const gql = {
   createWorkflowVersionMutation: `
