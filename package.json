@@ -9,6 +9,7 @@
     "prettier": "prettier **/*.{js,ts} --check",
     "prettier:fix": "npm run prettier -- --write",
     "start": "NODE_ENV=development ts-node -r tsconfig-paths/register src/main.ts",
+    "start:workflow": "NODE_ENV=development ts-node -r tsconfig-paths/register src/workflow-processor.ts",
     "start:docker": "docker-compose up --build",
     "watch": "NODE_ENV=development nodemon",
     "watch:debug": "nodemon --config nodemon-debug.json",
@@ -49,10 +50,12 @@
     "class-validator": "^0.12.2",
     "config": "^3.3.1",
     "cookie-parser": "^1.4.5",
+    "dynamoose": "^2.7.3",
     "graphql": "^15.3.0",
     "graphql-tools": "^7.0.4",
     "lodash": "^4.17.20",
     "mysql": "^2.18.1",
+    "nestjs-dynamoose": "^0.3.0",
     "passport": "^0.4.1",
     "passport-jwt": "^4.0.0",
     "reflect-metadata": "^0.1.13",
@@ -61,7 +64,8 @@
     "ts-node": "^8.10.2",
     "typeorm": "^0.2.25",
     "typescript": "^3.9.7",
-    "utils-decorators": "^1.8.0"
+    "utils-decorators": "^1.8.0",
+    "uuid": "^8.3.2"
   },
   "devDependencies": {
     "@nestjs/testing": "^7.4.2",

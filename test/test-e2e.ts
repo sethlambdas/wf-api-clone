@@ -2,11 +2,14 @@ import { INestApplication } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import * as cookieParser from 'cookie-parser';
+import { resolve } from 'dns';
 import * as faker from 'faker';
 import * as typeOrmTestConfig from './../src/config/typeorm.test-config';
 import { AppModule } from './../src/graphql/app.module';
 import { UserService } from './../src/graphql/users/user.service';
 import { ConfigUtil } from './../src/utils/config.util';
+
+const dynamoose = require('dynamoose');
 
 let app: INestApplication;
 let userService: UserService;
@@ -33,6 +36,16 @@ export const tearDownTesting = async () => {
 export const getHttpServerTesting = () => {
   return app.getHttpServer();
 };
+
+export const removeDynamoTable = async (TableName: string) => {
+  // const dynamoDB = dynamoose.ddb();
+  // await new Promise((resolve, reject) => {
+  //   dynamoDB.deleteTable({ TableName }, (err, resp) => {
+  //     if (err) return reject(err);
+  //     return resolve(resp);
+  //   });
+  // });
+}
 
 export const authBearerToken = (accessToken) => {
   return `Bearer ${accessToken}`;

@@ -8,7 +8,7 @@ server:
 db:
   type: 'mysql'
   port: 3306
-  database: 'sample'
+  database: 'sample_new_9'
   synchronize: false
   logging: false
 
@@ -29,3 +29,13 @@ logLevel:
 
 files:
   dir: './uploads/'
+
+aws:
+  accessKeyId: 'sampleAccessKeyId'
+  secretAccessKey: 'sampleSecretAccessKey'
+  region: 'ap-southeast-2'
+  dynamodb:
+    local: 'http://localhost:4566'
+    schema:
+      workflowVersions: 'workflow_versions'
+      workflowSpecs: 'workflow_specs'

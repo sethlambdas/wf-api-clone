@@ -11,3 +11,9 @@ jwt:
 
 files:
   dir: './test/uploads/'
+
+aws:
+  dynamodb:
+    schema:
+      workflowVersions: 'workflow_versions_test'
+      workflowSpecs: 'workflow_specs_test'

@@ -2,11 +2,14 @@ import { Logger, Module } from '@nestjs/common';
 import { GraphQLModule } from '@nestjs/graphql';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { GraphQLError } from 'graphql';
+import { DynamooseModule } from 'nestjs-dynamoose';
 import { ConfigUtil } from '../utils/config.util';
 import * as typeOrmConfig from './../config/typeorm.config';
 import { FileModule } from './files/file.module';
 import { TaskModule } from './tasks/task.module';
 import { UserModule } from './users/user.module';
+import { WorkflowSpecModule } from './workflow-specs/workflow-spec.module';
+import { WorkflowVersionModule } from './workflow-versions/workflow-version.module';
 
 @Module({
   imports: [
@@ -39,6 +42,16 @@ import { UserModule } from './users/user.module';
     FileModule,
     TaskModule,
     UserModule,
+    DynamooseModule.forRoot({
+      local: ConfigUtil.get('aws.dynamodb.local'),
+      aws: {
+        accessKeyId: ConfigUtil.get('aws.accessKeyId'),
+        secretAccessKey: ConfigUtil.get('aws.secretAccessKey'),
+        region: ConfigUtil.get('aws.region'),
+      },
+    }),
+    WorkflowVersionModule,
+    WorkflowSpecModule,
   ],
 })
 export class AppModule {}
