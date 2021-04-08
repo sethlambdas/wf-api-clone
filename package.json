@@ -9,7 +9,6 @@
     "prettier": "prettier **/*.{js,ts} --check",
     "prettier:fix": "npm run prettier -- --write",
     "start": "NODE_ENV=development ts-node -r tsconfig-paths/register src/main.ts",
-    "start:workflow": "NODE_ENV=development ts-node -r tsconfig-paths/register src/workflow-processor.ts",
     "start:docker": "docker-compose up --build",
     "watch": "NODE_ENV=development nodemon",
     "watch:debug": "nodemon --config nodemon-debug.json",

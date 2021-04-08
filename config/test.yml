@@ -6,13 +6,13 @@ db:
   dropSchema: true
   migrationsRun: true
 
+dynamodb:
+  schema:
+    workflowVersions: 'workflow_versions_test'
+    workflowSpecs: 'workflow_specs_test'
+
 jwt:
   secret: 'topSecretTest51'
 
 files:
   dir: './test/uploads/'
-
-dynamodb:
-  schema:
-    workflowVersions: 'workflow_versions_test'
-    workflowSpecs: 'workflow_specs_test'
