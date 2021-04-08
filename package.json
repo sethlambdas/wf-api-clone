@@ -19,7 +19,7 @@
     "lint:fix": "npm run lint -- --fix",
     "test": "npm run test:e2e && npm run test:unit",
     "test:e2e": "jest --config ./test/jest-e2e.json --verbose --runInBand --passWithNoTests --testTimeout=120000 --forceExit",
-    "test:unit": "jest --config ./test/jest-unit.json --verbose --runInBand --passWithNoTests --testTimeout=60000 --forceExit",
+    "test:unit": "jest --config ./test/jest-unit.json --verbose --runInBand --passWithNoTests --testTimeout=120000 --forceExit",
     "test:watch:e2e": "npm run test:e2e -- --watch",
     "test:watch:unit": "npm run test:unit -- --watch",
     "typeorm": "ts-node -r tsconfig-paths/register ./node_modules/typeorm/cli.js --config src/config/typeorm.config.ts",

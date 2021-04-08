@@ -65,7 +65,7 @@ let getWorkflowVersionData: any = {};
 describe('WorkflowVersionResolver (e2e)', () => {
   beforeAll(async () => {
     await setUpTesting();
-    await removeDynamoTable(ConfigUtil.get('dynamodb.schema.workflowVersions'));
+    // await removeDynamoTable(ConfigUtil.get('dynamodb.schema.workflowVersions'));
   });
 
   afterAll(async () => {
