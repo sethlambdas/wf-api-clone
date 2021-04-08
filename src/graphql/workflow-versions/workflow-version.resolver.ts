@@ -1,7 +1,7 @@
 import { Args, Mutation, Query, Resolver } from '@nestjs/graphql';
 import { CreateWorkflowVersionInput } from './inputs/create-workflow-version.input';
 import { SaveWorkflowVersionInput } from './inputs/save-workflow-version.input';
-import { WorkflowVersion, WorkflowVersionKey } from './workflow-version.entity';
+import { WorkflowVersion } from './workflow-version.entity';
 import { WorkflowVersionService } from './workflow-version.service';
 
 @Resolver((of) => WorkflowVersion)
@@ -23,7 +23,7 @@ export class WorkflowVersionResolver {
     return this.workflowVersionService.saveWorkflowVersion(id, saveWorkflowVersionInput);
   }
 
-  @Query((returns) => WorkflowVersion)
+  @Mutation((returns) => Boolean, { nullable: true })
   async DeleteWorkflowVersion(@Args('id', { type: () => String }) id: string) {
     return this.workflowVersionService.deleteWorkflowVersion(id);
   }

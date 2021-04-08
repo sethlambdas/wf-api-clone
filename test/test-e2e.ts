@@ -9,7 +9,7 @@ import { AppModule } from './../src/graphql/app.module';
 import { UserService } from './../src/graphql/users/user.service';
 import { ConfigUtil } from './../src/utils/config.util';
 
-const dynamoose = require('dynamoose');
+// const dynamoose = require('dynamoose');
 
 let app: INestApplication;
 let userService: UserService;
@@ -45,7 +45,7 @@ export const removeDynamoTable = async (TableName: string) => {
   //     return resolve(resp);
   //   });
   // });
-}
+};
 
 export const authBearerToken = (accessToken) => {
   return `Bearer ${accessToken}`;
