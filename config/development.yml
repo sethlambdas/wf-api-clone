@@ -6,3 +6,10 @@ db:
 
 jwt:
   secret: 'topSecret51'
+
+logLevel:
+  - 'log'
+  - 'error'
+  - 'warn'
+  - 'info'
+  - 'debug'
