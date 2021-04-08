@@ -2,6 +2,7 @@ import { Module } from '@nestjs/common';
 import { DynamooseModule } from 'nestjs-dynamoose';
 import { ConfigUtil } from '../../utils/config.util';
 import { WorkflowSpecRepository } from './workflow-spec.repository';
+import { WorkflowSpecResolver } from './workflow-spec.resolver';
 import { WorkflowSpecSchema } from './workflow-spec.schema';
 import { WorkflowSpecService } from './workflow-spec.service';
 
@@ -14,6 +15,6 @@ import { WorkflowSpecService } from './workflow-spec.service';
       },
     ]),
   ],
-  providers: [WorkflowSpecService, WorkflowSpecRepository],
+  providers: [WorkflowSpecResolver, WorkflowSpecService, WorkflowSpecRepository],
 })
 export class WorkflowSpecModule {}

@@ -6,5 +6,11 @@ export class CreateWorkflowSpecInput {
   WVID: string;
 
   @Field()
-  WID: string;
+  NAID: string;
+
+  @Field()
+  AID: string;
+
+  @Field()
+  ACT: string;
 }
