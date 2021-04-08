@@ -10,7 +10,7 @@ import { WorkflowVersionService } from './workflow-version.service';
   imports: [
     DynamooseModule.forFeature([
       {
-        name: ConfigUtil.get('aws.dynamodb.schema.workflowVersions'),
+        name: ConfigUtil.get('dynamodb.schema.workflowVersions'),
         schema: WorkflowVersionSchema,
       },
     ]),

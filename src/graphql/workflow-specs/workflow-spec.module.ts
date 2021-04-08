@@ -9,7 +9,7 @@ import { WorkflowSpecService } from './workflow-spec.service';
   imports: [
     DynamooseModule.forFeature([
       {
-        name: ConfigUtil.get('aws.dynamodb.schema.workflowSpecs'),
+        name: ConfigUtil.get('dynamodb.schema.workflowSpecs'),
         schema: WorkflowSpecSchema,
       },
     ]),

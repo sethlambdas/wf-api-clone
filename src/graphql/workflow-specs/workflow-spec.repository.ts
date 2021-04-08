@@ -6,7 +6,7 @@ import { WorkflowSpec, WorkflowSpecKey } from './workflow-spec.interface';
 @Injectable()
 export class WorkflowSpecRepository {
   constructor(
-    @InjectModel(ConfigUtil.get('aws.dynamodb.schema.workflowSpecs'))
+    @InjectModel(ConfigUtil.get('dynamodb.schema.workflowSpecs'))
     private workflowSpecModel: Model<WorkflowSpec, WorkflowSpecKey>,
   ) {}
 

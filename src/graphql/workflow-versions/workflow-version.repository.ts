@@ -6,7 +6,7 @@ import { WorkflowVersion, WorkflowVersionKey } from './workflow-version.entity';
 @Injectable()
 export class WorkflowVersionRepository {
   constructor(
-    @InjectModel(ConfigUtil.get('aws.dynamodb.schema.workflowVersions'))
+    @InjectModel(ConfigUtil.get('dynamodb.schema.workflowVersions'))
     private workflowVersionModel: Model<WorkflowVersion, WorkflowVersionKey>,
   ) {}
 

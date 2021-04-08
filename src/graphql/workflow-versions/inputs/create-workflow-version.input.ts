@@ -7,4 +7,10 @@ export class CreateWorkflowVersionInput {
 
   @Field()
   WID: string;
+
+  @Field()
+  WV: string;
+
+  @Field()
+  FAID: string;
 }

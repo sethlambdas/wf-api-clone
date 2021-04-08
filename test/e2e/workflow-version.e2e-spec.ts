@@ -28,12 +28,14 @@ const gql = {
 const createWorkflowVersionInput = {
   CID: '5252',
   WID: '321',
+  WV: '',
+  FAID: '',
 };
 
 describe('WorkflowVersionResolver (e2e)', () => {
   beforeAll(async () => {
     await setUpTesting();
-    await removeDynamoTable(ConfigUtil.get('aws.dynamodb.schema.workflowVersions'));
+    await removeDynamoTable(ConfigUtil.get('dynamodb.schema.workflowVersions'));
   });
 
   afterAll(async () => {

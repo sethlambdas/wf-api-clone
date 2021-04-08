@@ -43,7 +43,7 @@ import { WorkflowVersionModule } from './workflow-versions/workflow-version.modu
     TaskModule,
     UserModule,
     DynamooseModule.forRoot({
-      local: ConfigUtil.get('aws.dynamodb.local'),
+      local: ConfigUtil.get('dynamodb.local'),
       aws: {
         accessKeyId: ConfigUtil.get('aws.accessKeyId'),
         secretAccessKey: ConfigUtil.get('aws.secretAccessKey'),
