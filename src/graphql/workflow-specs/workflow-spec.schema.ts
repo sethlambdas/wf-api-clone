@@ -9,9 +9,6 @@ export const WorkflowSpecSchema = new Schema(
     WVID: {
       type: String,
     },
-    WID: {
-      type: String,
-    },
     NAID: {
       type: String,
     },

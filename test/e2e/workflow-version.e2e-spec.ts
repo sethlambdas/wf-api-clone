@@ -1,4 +1,5 @@
 import * as request from 'supertest';
+import { v4 } from 'uuid';
 import { ConfigUtil } from '../../src/utils/config.util';
 import { getHttpServerTesting, removeDynamoTable, setUpTesting, tearDownTesting } from '../test-e2e';
 
@@ -49,15 +50,15 @@ const gql = {
 };
 
 const createWorkflowVersionInput = {
-  CID: '5252',
-  WID: '321',
-  WV: '',
-  FAID: '',
+  CID: v4(),
+  WID: v4(),
+  WV: '1',
+  FAID: '[1, 2, 3]',
 };
 
 const saveWorkflowVersionInput = {
-  WV: '123',
-  FAID: '321',
+  WV: '2',
+  FAID: '[4, 5, 6]',
 };
 
 let getWorkflowVersionData: any = {};

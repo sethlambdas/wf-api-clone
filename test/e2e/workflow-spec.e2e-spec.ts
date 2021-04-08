@@ -1,4 +1,5 @@
 import * as request from 'supertest';
+import { v4 } from 'uuid';
 import { ConfigUtil } from '../../src/utils/config.util';
 import { getHttpServerTesting, removeDynamoTable, setUpTesting, tearDownTesting } from '../test-e2e';
 
@@ -49,15 +50,15 @@ const gql = {
 };
 
 const createWorkflowSpecInput = {
-  WVID: '5252',
-  NAID: '321',
-  AID: '',
-  ACT: '',
+  WVID: v4(),
+  NAID: '[1, 2, 3]',
+  AID: v4(),
+  ACT: '{}',
 };
 
 const saveWorkflowSpecInput = {
-  AID: '123',
-  ACT: '321',
+  AID: v4(),
+  ACT: '{ T: "WebSrv" }',
 };
 
 let getWorkflowSpecData: any = {};
