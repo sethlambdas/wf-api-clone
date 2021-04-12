@@ -17,8 +17,8 @@
     "lint": "tslint -p tsconfig.json -c tslint.json",
     "lint:fix": "npm run lint -- --fix",
     "test": "npm run test:e2e && npm run test:unit",
-    "test:e2e": "jest --config ./test/jest-e2e.json --verbose --runInBand --passWithNoTests --testTimeout=60000 --forceExit",
-    "test:unit": "jest --config ./test/jest-unit.json --verbose --runInBand --passWithNoTests --testTimeout=60000 --forceExit",
+    "test:e2e": "jest --config ./test/jest-e2e.json --verbose --runInBand --passWithNoTests --testTimeout=120000 --forceExit",
+    "test:unit": "jest --config ./test/jest-unit.json --verbose --runInBand --passWithNoTests --testTimeout=120000 --forceExit",
     "test:watch:e2e": "npm run test:e2e -- --watch",
     "test:watch:unit": "npm run test:unit -- --watch",
     "typeorm": "ts-node -r tsconfig-paths/register ./node_modules/typeorm/cli.js --config src/config/typeorm.config.ts",
@@ -49,10 +49,12 @@
     "class-validator": "^0.12.2",
     "config": "^3.3.1",
     "cookie-parser": "^1.4.5",
+    "dynamoose": "^2.7.3",
     "graphql": "^15.3.0",
     "graphql-tools": "^7.0.4",
     "lodash": "^4.17.20",
     "mysql": "^2.18.1",
+    "nestjs-dynamoose": "^0.3.0",
     "passport": "^0.4.1",
     "passport-jwt": "^4.0.0",
     "reflect-metadata": "^0.1.13",
@@ -61,7 +63,8 @@
     "ts-node": "^8.10.2",
     "typeorm": "^0.2.25",
     "typescript": "^3.9.7",
-    "utils-decorators": "^1.8.0"
+    "utils-decorators": "^1.8.0",
+    "uuid": "^8.3.2"
   },
   "devDependencies": {
     "@nestjs/testing": "^7.4.2",

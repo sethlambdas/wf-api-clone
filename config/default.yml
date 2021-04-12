@@ -12,6 +12,17 @@ db:
   synchronize: false
   logging: false
 
+aws:
+  accessKeyId: 'sampleAccessKeyId'
+  secretAccessKey: 'sampleSecretAccessKey'
+  region: 'ap-southeast-2'
+
+dynamodb:
+  local: 'http://localhost:4566'
+  schema:
+    workflowVersions: 'workflow_versions'
+    workflowSpecs: 'workflow_specs'
+
 jwt:
   secret: 'TokenSecret'
   accessToken:
