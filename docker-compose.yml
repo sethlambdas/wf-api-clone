@@ -1,15 +1,15 @@
 version: '3.8'
 
 services:
-  backend:
-    build:
-      context: .
-      target: dev
-      dockerfile: Dockerfile.dev
-    volumes:
-      - '.:/app'
-      - '/app/node_modules'
+  localstack:
+    image: localstack/localstack:latest
     environment:
-      - NODE_ENV=development
-    network_mode: host
-    stdin_open: true
+      - AWS_DEFAULT_REGION=ap-southeast-2
+      - EDGE_PORT=4566
+      - SERVICES=sqs,events,cloudformation,dynamodb
+      - DEBUG=1
+    ports:
+      - '4566:4566'
+    volumes:
+      - '${TMPDIR:-/tmp/localstack}:/tmp/localstack'
+      - '/var/run/docker.sock:/var/run/docker.sock'

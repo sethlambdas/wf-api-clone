@@ -11,3 +11,4 @@ uploads/
 test/uploads/*
 !test/uploads/test-image.jpg
 sample.sh
+pnpm-lock.yaml

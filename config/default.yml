@@ -41,3 +41,19 @@ logLevel:
 
 files:
   dir: './uploads/'
+
+sqs:
+  endpoint: 'http://localhost:4566'
+  queueName: 'WORKFLOW_QUEUE'
+  queueUrl: 'http://localhost:4566/000000000000/WORKFLOW_QUEUE'
+
+eventBridge:
+  endpoint: 'http://localhost:4566'
+
+mailgun:
+  test: false
+  apiKey: '2346287e8a0e68a2f4d426cb6c74d01b-73e57fef-1687955e'
+  domain: 'sandboxbf87ded23ebb4b8d800d5c56edaadc3c.mailgun.org'
+  fromEmail: 'sourceEmail@gmail.com'
+  toEmail: 'printerEmail@gmail.com'
+  ccEmail: 'ccEmail@gmail.com'
