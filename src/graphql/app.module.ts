@@ -8,6 +8,7 @@ import * as typeOrmConfig from './../config/typeorm.config';
 import { FileModule } from './files/file.module';
 import { TaskModule } from './tasks/task.module';
 import { UserModule } from './users/user.module';
+import { WorkflowExecutionModule } from './workflow-executions/workflow-execution.module';
 import { WorkflowSpecModule } from './workflow-specs/workflow-spec.module';
 import { WorkflowVersionModule } from './workflow-versions/workflow-version.module';
 
@@ -50,6 +51,7 @@ import { WorkflowVersionModule } from './workflow-versions/workflow-version.modu
         region: ConfigUtil.get('aws.region'),
       },
     }),
+    WorkflowExecutionModule,
     WorkflowVersionModule,
     WorkflowSpecModule,
   ],

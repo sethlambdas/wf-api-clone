@@ -8,6 +8,7 @@ db:
 
 dynamodb:
   schema:
+    workflowExecutions: 'workflow_executions_test'
     workflowVersions: 'workflow_versions_test'
     workflowSpecs: 'workflow_specs_test'
 
