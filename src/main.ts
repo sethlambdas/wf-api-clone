@@ -5,7 +5,7 @@ import * as bodyParser from 'body-parser';
 import * as cookieParser from 'cookie-parser';
 import { Consumer } from 'sqs-consumer';
 import { AppModule } from './graphql/app.module';
-import { WorkflowSpecService } from './graphql/workflow-specs/workflow-spec.service';
+import { WorkflowStepService } from './graphql/workflow-steps/workflow-step.service';
 import activityRegistry, { ActivityTypes } from './utils/activity/activity-registry.util';
 import { ConfigUtil } from './utils/config.util';
 import { putEventsEB } from './utils/event-bridge/event-bridge.util';
@@ -20,7 +20,7 @@ async function bootstrap() {
   const app = await NestFactory.create(AppModule, {
     logger: ConfigUtil.get('logLevel'),
   });
-  const workflowSpecService = app.get(WorkflowSpecService);
+  const workflowStepService = app.get(WorkflowStepService);
 
   if (process.env.NODE_ENV === 'development') {
     logger.log('Setting up local stack');
@@ -62,28 +62,28 @@ async function bootstrap() {
 
             const nextActIds = JSON.parse(msgPayload.detail.NAID);
             for (const nextActId of nextActIds) {
-              let workflowSpec;
+              let workflowStep;
               if (act.T === ActivityTypes.Conditional) {
                 if (actResult) {
-                  workflowSpec = await workflowSpecService.getWorkflowSpec(nextActId[1]);
+                  workflowStep = await workflowStepService.getWorkflowStep(nextActId[1]);
                 } else {
-                  workflowSpec = await workflowSpecService.getWorkflowSpec(nextActId[0]);
+                  workflowStep = await workflowStepService.getWorkflowStep(nextActId[0]);
                 }
               } else {
-                workflowSpec = await workflowSpecService.getWorkflowSpec(nextActId);
+                workflowStep = await workflowStepService.getWorkflowStep(nextActId);
               }
 
               let source = 'workflow.initiate';
-              const wfSpecAct = JSON.parse(workflowSpec.ACT);
+              const wfStepAct = JSON.parse(workflowStep.ACT);
 
               if (act.T === ActivityTypes.AssignData) {
-                wfSpecAct.data = actResult;
+                wfStepAct.data = actResult;
               }
               if (act.T === ActivityTypes.Delay) {
                 source = actResult as string;
               }
               params.Entries.push({
-                Detail: JSON.stringify(wfSpecAct),
+                Detail: JSON.stringify(wfStepAct),
                 DetailType: `workflowStep`,
                 Source: source,
               });
@@ -116,18 +116,6 @@ async function bootstrap() {
   });
 
   workflowSQSQueue.start();
-  // const workflowSpec = await workflowSpecService.getWorkflowSpec("8ef99307-fe78-4aca-b5ff-374c50432592");
-  // const params = {
-  //   Entries: [
-  //     {
-  //       Detail: JSON.stringify(workflowSpec),
-  //       DetailType: `workflowStep`,
-  //       Source: 'workflow.initiate',
-  //     },
-  //   ],
-  // };
-
-  // await putEventsEB(params);
 }
 
 bootstrap();

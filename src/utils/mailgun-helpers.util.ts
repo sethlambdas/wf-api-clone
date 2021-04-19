@@ -1,9 +1,9 @@
 import { Logger } from '@nestjs/common';
-import Mailgun from 'mailgun.js';
 import { ConfigUtil } from './config.util';
 
 // @ts-ignore
 const formData = require('form-data');
+const Mailgun = require('mailgun.js');
 const apiKey = ConfigUtil.get('mailgun.apiKey');
 const domain = ConfigUtil.get('mailgun.domain');
 const mailgun = new Mailgun(formData);

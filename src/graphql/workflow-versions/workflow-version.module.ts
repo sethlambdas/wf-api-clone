@@ -16,5 +16,6 @@ import { WorkflowVersionService } from './workflow-version.service';
     ]),
   ],
   providers: [WorkflowVersionResolver, WorkflowVersionService, WorkflowVersionRepository],
+  exports: [WorkflowVersionService],
 })
 export class WorkflowVersionModule {}

@@ -9,8 +9,9 @@ import { FileModule } from './files/file.module';
 import { TaskModule } from './tasks/task.module';
 import { UserModule } from './users/user.module';
 import { WorkflowExecutionModule } from './workflow-executions/workflow-execution.module';
-import { WorkflowSpecModule } from './workflow-specs/workflow-spec.module';
+import { WorkflowStepModule } from './workflow-steps/workflow-step.module';
 import { WorkflowVersionModule } from './workflow-versions/workflow-version.module';
+import { WorkflowModule } from './workflow/workflow.module';
 
 @Module({
   imports: [
@@ -51,9 +52,10 @@ import { WorkflowVersionModule } from './workflow-versions/workflow-version.modu
         region: ConfigUtil.get('aws.region'),
       },
     }),
+    WorkflowModule,
     WorkflowExecutionModule,
     WorkflowVersionModule,
-    WorkflowSpecModule,
+    WorkflowStepModule,
   ],
 })
 export class AppModule {}

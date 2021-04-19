@@ -26,6 +26,11 @@ export class WorkflowVersionRepository {
     return this.workflowVersionModel.get(key);
   }
 
+  async queryWorkflowVersion(filter: { [key: string]: any }): Promise<WorkflowVersion[]> {
+    const workflowVersions: any = await this.workflowVersionModel.scan(filter).exec();
+    return workflowVersions.toJSON();
+  }
+
   async listWorkflowVersions(): Promise<WorkflowVersion[]> {
     const workflowVersions: any = await this.workflowVersionModel.scan().exec();
     return workflowVersions.toJSON();

@@ -22,7 +22,7 @@ dynamodb:
   schema:
     workflowExecutions: 'workflow_executions'
     workflowVersions: 'workflow_versions'
-    workflowSpecs: 'workflow_specs'
+    workflowSteps: 'workflow_steps'
 
 jwt:
   secret: 'TokenSecret'

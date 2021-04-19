@@ -6,10 +6,15 @@ import * as faker from 'faker';
 import * as typeOrmTestConfig from './../src/config/typeorm.test-config';
 import { AppModule } from './../src/graphql/app.module';
 import { UserService } from './../src/graphql/users/user.service';
+import { WorkflowStepService } from './../src/graphql/workflow-steps/workflow-step.service';
+import { WorkflowVersionService } from './../src/graphql/workflow-versions/workflow-version.service';
 import { ConfigUtil } from './../src/utils/config.util';
 
 let app: INestApplication;
 let userService: UserService;
+
+export let workflowStepService: WorkflowStepService;
+export let workflowVersionService: WorkflowVersionService;
 
 export const setUpTesting = async () => {
   const module: TestingModule = await Test.createTestingModule({
@@ -22,6 +27,8 @@ export const setUpTesting = async () => {
   app.use(cookieParser());
 
   userService = await module.get(UserService);
+  workflowStepService = await module.get(WorkflowStepService);
+  workflowVersionService = await module.get(WorkflowVersionService);
 
   await app.init();
 };

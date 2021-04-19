@@ -1,11 +1,11 @@
 import { Field, ObjectType } from '@nestjs/graphql';
 
-export interface WorkflowSpecKey {
+export interface WorkflowStepKey {
   WSID: string;
 }
 
 @ObjectType()
-export class WorkflowSpec implements WorkflowSpecKey {
+export class WorkflowStep implements WorkflowStepKey {
   @Field()
   WSID: string;
 

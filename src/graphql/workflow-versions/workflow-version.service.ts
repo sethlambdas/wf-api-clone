@@ -37,6 +37,10 @@ export class WorkflowVersionService {
     return this.workflowVersionRepository.getWorkflowVersion(workflowVersionKey);
   }
 
+  async queryWorkflowVersion(filter: { [key: string]: any }) {
+    return this.workflowVersionRepository.queryWorkflowVersion(filter);
+  }
+
   async deleteWorkflowVersion(id: string) {
     const workflowVersionKey = {
       WVID: id,

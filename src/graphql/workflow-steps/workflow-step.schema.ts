@@ -1,6 +1,6 @@
 import { Schema } from 'dynamoose';
 
-export const WorkflowSpecSchema = new Schema(
+export const WorkflowStepSchema = new Schema(
   {
     WSID: {
       type: String,
