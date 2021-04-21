@@ -6,12 +6,12 @@ const logger = new Logger('email');
 export default async function email(payload: any) {
   logger.log('Email Activity');
   try {
-    if (!payload.email) {
+    if (!payload.Email) {
       logger.error('No email specified.');
       throw new Error();
     }
-    await mailgunSendEmail(payload.email);
-    logger.log(`Email sent to ${payload.email}`);
+    await mailgunSendEmail(payload.Email);
+    logger.log(`Email sent to ${payload.Email}`);
   } catch (err) {
     logger.log(err);
   }

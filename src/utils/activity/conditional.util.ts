@@ -2,7 +2,7 @@ import { Logger } from '@nestjs/common';
 
 const logger = new Logger('conditional');
 
-export default async function conditional(payload: any) {
+export default async function conditional(payload: any, state?: any) {
   logger.log('Conditional Activity');
   try {
     const { variable, operator, rightHand, data } = payload;

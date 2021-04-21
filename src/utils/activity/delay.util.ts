@@ -4,7 +4,7 @@ import { putRuleEB } from '../event-bridge/event-bridge.util';
 
 const logger = new Logger('delay');
 
-export default async function delay(payload: any) {
+export default async function delay(payload: any, state?: any) {
   logger.log('Delay Activity');
   try {
     if (!payload.date) {

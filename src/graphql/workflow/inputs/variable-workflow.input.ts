@@ -44,4 +44,8 @@ export class VariableWorkflowInput {
   // WebService
   @Field({ nullable: true })
   Endpoint?: string;
+
+  // WebService
+  @Field({ nullable: true })
+  Name?: string;
 }

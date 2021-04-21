@@ -7,7 +7,7 @@ import webService from './web-service.util';
 
 interface ActivityRegistryItem {
   label: string;
-  processActivity: (payload?: any) => Promise<unknown>;
+  processActivity: (payload?: any, state?: any) => Promise<unknown>;
 }
 
 interface ActivityRegistry {
@@ -15,38 +15,48 @@ interface ActivityRegistry {
 }
 
 export enum ActivityTypes {
-  WebService = 'WebService',
+  WebService = 'Web Service',
   Delay = 'Delay',
   Email = 'Email',
   Conditional = 'Conditional',
-  AssignData = 'AssignData',
-  ManualInput = 'ManualInput',
+  AssignData = 'Assign Data',
+  ManualInput = 'Manual Input',
+  ParallelStart = 'Parallel Start',
+  ParallelEnd = 'Parallel End',
 }
 
 const activityRegistry = {
-  ManualInput: {
-    label: 'Manual Input',
-    processActivity: (payload?: any) => manualInput(payload),
+  'Parallel Start': {
+    label: 'Parallel Start',
+    processActivity: () => null,
   },
-  WebService: {
+  'Parallel End': {
+    label: 'Parallel End',
+    processActivity: () => null,
+  },
+  'Manual Input': {
+    label: 'Manual Input',
+    processActivity: (payload?: any, state?: any) => manualInput(payload),
+  },
+  'Web Service': {
     label: 'Web Service',
-    processActivity: (payload?: any) => webService(payload),
+    processActivity: (payload?: any, state?: any) => webService(payload),
   },
   Delay: {
     label: 'Delay',
-    processActivity: (payload?: any) => delay(payload),
+    processActivity: (payload?: any, state?: any) => delay(payload),
   },
   Email: {
     label: 'Email',
-    processActivity: (payload?: any) => email(payload),
+    processActivity: (payload?: any, state?: any) => email(payload),
   },
   Conditional: {
     label: 'Conditional',
-    processActivity: (payload?: any) => conditional(payload),
+    processActivity: (payload?: any, state?: any) => conditional(payload),
   },
-  AssignData: {
-    label: 'AssignData',
-    processActivity: (payload?: any) => assignData(payload),
+  'Assign Data': {
+    label: 'Assign Data',
+    processActivity: (payload?: any, state?: any) => assignData(payload),
   },
 } as ActivityRegistry;
 

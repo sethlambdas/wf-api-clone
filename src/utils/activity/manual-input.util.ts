@@ -1,7 +1,7 @@
 import { Logger } from '@nestjs/common';
 const logger = new Logger('email');
 
-export default async function manualInput(payload: any) {
+export default async function manualInput(payload: any, state?: any) {
   logger.log('Manual Input Activity');
   try {
     if (payload.Completed) {

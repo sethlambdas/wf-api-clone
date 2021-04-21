@@ -13,10 +13,10 @@ export class WorkflowExecutionService {
   ) {}
 
   async createWorkflowExecution(createWorkflowExecutionInput: CreateWorkflowExecutionInput) {
-    const workflowExecution = {
+    const workflowExecution = ({
       ...createWorkflowExecutionInput,
       WXID: v4(),
-    } as WorkflowExecution;
+    } as unknown) as WorkflowExecution;
     return this.workflowExecutionRepository.createWorkflowExecution(workflowExecution);
   }
 
@@ -42,6 +42,10 @@ export class WorkflowExecutionService {
       WXID: id,
     } as WorkflowExecutionKey;
     return this.workflowExecutionRepository.deleteWorkflowExecution(workflowExecutionKey);
+  }
+
+  async queryWorkflowExecution(filter: { [key: string]: any }) {
+    return this.workflowExecutionRepository.queryWorkflowExecution(filter);
   }
 
   async listWorkflowExecutions() {

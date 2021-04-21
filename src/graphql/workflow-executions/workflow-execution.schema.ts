@@ -6,6 +6,9 @@ export const WorkflowExecutionSchema = new Schema(
       type: String,
       hashKey: true,
     },
+    WVID: {
+      type: String,
+    },
     WSID: {
       type: String,
     },
@@ -14,6 +17,15 @@ export const WorkflowExecutionSchema = new Schema(
     },
     STE: {
       type: String,
+    },
+    isParallel: {
+      type: Boolean,
+    },
+    totalParallelCount: {
+      type: Number,
+    },
+    finishedParallelCount: {
+      type: Number,
     },
   },
   {

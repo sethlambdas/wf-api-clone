@@ -26,6 +26,11 @@ export class WorkflowExecutionRepository {
     return this.workflowExecutionModel.get(key);
   }
 
+  async queryWorkflowExecution(filter: { [key: string]: any }): Promise<WorkflowExecution[]> {
+    const workflowExecutions: any = await this.workflowExecutionModel.scan(filter).exec();
+    return workflowExecutions.toJSON();
+  }
+
   async listWorkflowExecutions(): Promise<WorkflowExecution[]> {
     const workflowExecutions: any = await this.workflowExecutionModel.scan().exec();
     return workflowExecutions.toJSON();
