@@ -5,8 +5,8 @@ const logger = new Logger('assignData');
 export default async function assignData(payload: any, state?: any) {
   logger.log('AssignData Activity');
   try {
-    const { variables } = payload;
-    return variables;
+    const { FieldValues } = payload;
+    return FieldValues;
   } catch (err) {
     logger.log(err);
   }

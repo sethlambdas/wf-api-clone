@@ -111,8 +111,7 @@ async function bootstrap() {
             const actResult = await activityRegistry[act?.T].processActivity(act?.MD);
 
             logger.log('==============Activity Result=================');
-            console.log(actResult);
-            logger.log(actResult as any);
+            logger.log(`${JSON.stringify(actResult)}`);
             logger.log('==============Activity Result=================');
 
             const params = {
@@ -121,7 +120,7 @@ async function bootstrap() {
 
             logger.log('Saving workflow execution');
             let STE = { ...state };
-            if (actResult && typeof actResult === 'object') {
+            if (actResult && typeof actResult === 'object' && act.T !== ActivityTypes.Condition) {
               STE = { ...state, ...(actResult as any) };
             }
 
@@ -136,33 +135,35 @@ async function bootstrap() {
               source = actResult as string;
             }
 
-            for (const nextActId of nextActIds) {
-              let workflowStep;
-              if (act.T === ActivityTypes.Conditional) {
-                if (actResult) {
-                  workflowStep = await workflowStepService.queryWorkflowStep({
-                    AID: { eq: nextActId[1] },
-                  });
-                } else {
-                  workflowStep = await workflowStepService.queryWorkflowStep({
-                    AID: { eq: nextActId[0] },
-                  });
-                }
-              } else {
-                logger.log('Next Activity ID: ', nextActId);
+            let workflowStep;
+            if (act.T === ActivityTypes.Condition) {
+              if (actResult) {
                 workflowStep = await workflowStepService.queryWorkflowStep({
-                  AID: { eq: nextActId },
+                  AID: { eq: actResult },
                 });
               }
-
-              workflowStep = workflowStep[0];
-              logger.log(workflowStep);
 
               params.Entries.push({
                 Detail: JSON.stringify(workflowStep),
                 DetailType: `workflowStep`,
                 Source: source,
               });
+            } else {
+              for (const nextActId of nextActIds) {
+                logger.log('Next Activity ID: ', nextActId);
+                workflowStep = await workflowStepService.queryWorkflowStep({
+                  AID: { eq: nextActId },
+                });
+
+                workflowStep = workflowStep[0];
+                logger.log(workflowStep);
+
+                params.Entries.push({
+                  Detail: JSON.stringify(workflowStep),
+                  DetailType: `workflowStep`,
+                  Source: source,
+                });
+              }
             }
 
             logger.log(params);
@@ -181,6 +182,8 @@ async function bootstrap() {
               } else {
                 logger.log('Parallel tasks are not yet finished!');
               }
+            } else if (act.END) {
+              logger.log('Workflow has finished executing!');
             } else {
               await putEventsEB(params);
             }

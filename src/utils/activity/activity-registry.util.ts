@@ -1,8 +1,9 @@
 import assignData from './assign-data.util';
-import conditional from './conditional.util';
+import condition from './condition.util';
 import delay from './delay.util';
 import email from './email.util';
 import manualInput from './manual-input.util';
+import mergeData from './merge-data.util';
 import webService from './web-service.util';
 
 interface ActivityRegistryItem {
@@ -18,7 +19,7 @@ export enum ActivityTypes {
   WebService = 'Web Service',
   Delay = 'Delay',
   Email = 'Email',
-  Conditional = 'Conditional',
+  Condition = 'Condition',
   AssignData = 'Assign Data',
   MergeData = 'Merge Data',
   ManualInput = 'Manual Input',
@@ -51,13 +52,17 @@ const activityRegistry = {
     label: 'Email',
     processActivity: (payload?: any, state?: any) => email(payload),
   },
-  Conditional: {
-    label: 'Conditional',
-    processActivity: (payload?: any, state?: any) => conditional(payload),
+  Condition: {
+    label: 'Condition',
+    processActivity: (payload?: any, state?: any) => condition(payload),
   },
   'Assign Data': {
     label: 'Assign Data',
     processActivity: (payload?: any, state?: any) => assignData(payload),
+  },
+  'Merge Data': {
+    label: 'Merge Data',
+    processActivity: (payload?: any, state?: any) => mergeData(payload),
   },
 } as ActivityRegistry;
 

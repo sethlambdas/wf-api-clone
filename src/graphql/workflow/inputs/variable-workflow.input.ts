@@ -39,7 +39,7 @@ export class VariableWorkflowInput {
 
   // AssignData
   @Field({ nullable: true })
-  Data?: string;
+  FieldValues?: string;
 
   // WebService
   @Field({ nullable: true })
