@@ -107,7 +107,7 @@ async function bootstrap() {
             logger.log(act?.MD);
             logger.log('==================MD===============');
 
-            const actResult = await activityRegistry[act?.T].processActivity(act?.MD);
+            const actResult = await activityRegistry[act?.T].processActivity(act?.MD, state);
 
             logger.log('==============Activity Result=================');
             logger.log(`${JSON.stringify(actResult)}`);

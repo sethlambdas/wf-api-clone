@@ -62,7 +62,7 @@ const activityRegistry = {
   },
   'Merge Data': {
     label: 'Merge Data',
-    processActivity: (payload?: any, state?: any) => mergeData(payload),
+    processActivity: (payload?: any, state?: any) => mergeData(payload, state),
   },
 } as ActivityRegistry;
 
