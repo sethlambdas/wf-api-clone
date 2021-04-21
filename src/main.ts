@@ -61,7 +61,7 @@ async function bootstrap() {
       let wfExec;
       if (wfExecs.length === 1) {
         wfExec = wfExecs[0];
-        let CAT = JSON.parse(wfExec.CAT);
+        const CAT = JSON.parse(wfExec.CAT);
         CAT.push({ ...act, Status: WorkflowStepStatus.Started });
         wfExec = await workflowExecutionService.saveWorkflowExecution(wfExec.WXID, {
           WSID: currentWfStepId,
@@ -98,7 +98,6 @@ async function bootstrap() {
               });
             }
 
-            console.log(wfExec);
             const state = JSON.parse(wfExec.STE);
 
             logger.log('================WF Execution State===============');
@@ -188,7 +187,7 @@ async function bootstrap() {
               await putEventsEB(params);
             }
 
-            let CAT = JSON.parse(wfExec.CAT);
+            const CAT = JSON.parse(wfExec.CAT);
             const getCurrentActivity = CAT.pop();
             CAT.push({ ...getCurrentActivity, Status: WorkflowStepStatus.Finished });
             await workflowExecutionService.saveWorkflowExecution(wfExec.WXID, {
@@ -197,7 +196,7 @@ async function bootstrap() {
           }
         }
       } catch (err) {
-        let CAT = JSON.parse(wfExec.CAT);
+        const CAT = JSON.parse(wfExec.CAT);
         const getCurrentActivity = CAT.pop();
         CAT.push({ ...getCurrentActivity, Status: WorkflowStepStatus.Error });
         await workflowExecutionService.saveWorkflowExecution(wfExec.WXID, {

@@ -1,10 +1,17 @@
 import { Field, InputType } from '@nestjs/graphql';
+import { ChoiceWorkflowInput } from './choice-workflow.input';
 
 @InputType()
 export class VariableWorkflowInput {
   // Email
   @Field({ nullable: true })
   Email?: string;
+
+  @Field({ nullable: true })
+  Subject?: string;
+
+  @Field({ nullable: true })
+  Body?: string;
 
   // Delay
   @Field({ nullable: true })
@@ -21,17 +28,11 @@ export class VariableWorkflowInput {
   Date?: string;
 
   // Conditional
-  @Field({ nullable: true })
-  Variable?: string;
+  @Field((type) => [ChoiceWorkflowInput], { nullable: true })
+  Choices?: ChoiceWorkflowInput[];
 
   @Field({ nullable: true })
-  Operator?: string;
-
-  @Field({ nullable: true })
-  RightHand?: string;
-
-  @Field({ nullable: true })
-  ResultAction?: string;
+  DefaultNext?: string;
 
   // ManualInput
   @Field((type) => Boolean, { nullable: true })
@@ -40,6 +41,13 @@ export class VariableWorkflowInput {
   // AssignData
   @Field({ nullable: true })
   FieldValues?: string;
+
+  // MergeData
+  @Field({ nullable: true })
+  StoreVariable?: string;
+
+  @Field({ nullable: true })
+  JoinValues?: string;
 
   // WebService
   @Field({ nullable: true })

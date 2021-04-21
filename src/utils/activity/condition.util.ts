@@ -6,8 +6,8 @@ export default async function condition(payload: any, state?: any) {
   logger.log('Conditional Activity');
   try {
     const { Choices, DefaultNext } = payload;
-    for (const condition of Choices) {
-      const { Variable, Operator, RightHand, Next } = condition;
+    for (const choice of Choices) {
+      const { Variable, Operator, RightHand, Next } = choice;
 
       if (!Variable || !Operator || !RightHand) {
         logger.error('Invalid operation');
