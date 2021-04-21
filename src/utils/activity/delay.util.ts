@@ -12,9 +12,9 @@ export default async function delay(payload: any, state?: any) {
       throw new Error();
     }
 
-    const date = moment(payload.date);
-    const minutes = payload.minute || 0;
-    const hours = payload.hours || 0;
+    const date = moment(payload.Date);
+    const minutes = payload.Minutes || 0;
+    const hours = payload.Hours || 0;
     const dayOfMonth = date.date();
     const month = date.month() + 1;
     const year = date.year();
