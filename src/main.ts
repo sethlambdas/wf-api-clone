@@ -6,6 +6,7 @@ import * as cookieParser from 'cookie-parser';
 import { Consumer } from 'sqs-consumer';
 import { AppModule } from './graphql/app.module';
 import { WorkflowExecutionService } from './graphql/workflow-executions/workflow-execution.service';
+import { WorkflowStepStatus } from './graphql/workflow-steps/enums/workflow-step-status.enum';
 import { WorkflowStepService } from './graphql/workflow-steps/workflow-step.service';
 import activityRegistry, { ActivityTypes } from './utils/activity/activity-registry.util';
 import { ConfigUtil } from './utils/config.util';
@@ -49,29 +50,35 @@ async function bootstrap() {
   const workflowSQSQueue = Consumer.create({
     queueUrl: WORKFLOW_QUEUE_URL,
     handleMessage: async (message) => {
+      const msgPayload = JSON.parse(message.Body);
+      const { WVID: wfVersionId, WSID: currentWfStepId } = msgPayload.detail;
+      const act = JSON.parse(msgPayload?.detail?.ACT);
+
+      const wfExecs = (await workflowExecutionService.queryWorkflowExecution({
+        WVID: wfVersionId,
+      })) as any;
+
+      let wfExec;
+      if (wfExecs.length === 1) {
+        wfExec = wfExecs[0];
+        let CAT = JSON.parse(wfExec.CAT);
+        CAT.push({ ...act, Status: WorkflowStepStatus.Started });
+        wfExec = await workflowExecutionService.saveWorkflowExecution(wfExec.WXID, {
+          WSID: currentWfStepId,
+          CAT: JSON.stringify(CAT),
+        });
+      } else if (!wfExecs.length) {
+        wfExec = await workflowExecutionService.createWorkflowExecution({
+          WVID: wfVersionId,
+          CAT: JSON.stringify([{ ...act, Status: WorkflowStepStatus.Started }]),
+          STE: '{}',
+          WSID: currentWfStepId,
+        });
+      }
+
       try {
-        const msgPayload = JSON.parse(message.Body);
         logger.log(msgPayload);
         if (msgPayload?.detail?.ACT) {
-          const act = JSON.parse(msgPayload?.detail?.ACT);
-          const { WVID: wfVersionId, WSID: currentWfStepId } = msgPayload.detail;
-
-          const wfExecs = (await workflowExecutionService.queryWorkflowExecution({
-            WVID: wfVersionId,
-          })) as any;
-
-          let wfExec;
-          if (wfExecs.length === 1) {
-            wfExec = wfExecs[0];
-          } else if (!wfExecs.length) {
-            wfExec = await workflowExecutionService.createWorkflowExecution({
-              WVID: wfVersionId,
-              CAT: JSON.stringify(act),
-              STE: '{}',
-              WSID: currentWfStepId,
-            });
-          }
-
           logger.log('================Activity Type===============');
           logger.log(act?.T);
           logger.log('================Activity Type===============');
@@ -112,6 +119,23 @@ async function bootstrap() {
               Entries: [],
             };
 
+            logger.log('Saving workflow execution');
+            let STE = { ...state };
+            if (actResult && typeof actResult === 'object') {
+              STE = { ...state, ...(actResult as any) };
+            }
+
+            let source = 'workflow.initiate';
+
+            await workflowExecutionService.saveWorkflowExecution(wfExec.WXID, {
+              STE: JSON.stringify(STE),
+            });
+            logger.log('Successfully saved workflow execution');
+
+            if (act.T === ActivityTypes.Delay) {
+              source = actResult as string;
+            }
+
             for (const nextActId of nextActIds) {
               let workflowStep;
               if (act.T === ActivityTypes.Conditional) {
@@ -131,28 +155,9 @@ async function bootstrap() {
                 });
               }
 
-              let source = 'workflow.initiate';
               workflowStep = workflowStep[0];
               logger.log(workflowStep);
 
-              logger.log('Saving workflow execution');
-              let STE = { ...state };
-              if (actResult && typeof actResult === 'object') {
-                STE = { ...state, ...(actResult as any) };
-              }
-              await workflowExecutionService.saveWorkflowExecution(wfExec.WXID, {
-                STE: JSON.stringify(STE),
-                WSID: workflowStep.WSID,
-                CAT: workflowStep.ACT,
-              });
-              logger.log('Successfully saved workflow execution');
-
-              if (act.T === ActivityTypes.AssignData) {
-                workflowStep.data = actResult;
-              }
-              if (act.T === ActivityTypes.Delay) {
-                source = actResult as string;
-              }
               params.Entries.push({
                 Detail: JSON.stringify(workflowStep),
                 DetailType: `workflowStep`,
@@ -179,9 +184,22 @@ async function bootstrap() {
             } else {
               await putEventsEB(params);
             }
+
+            let CAT = JSON.parse(wfExec.CAT);
+            const getCurrentActivity = CAT.pop();
+            CAT.push({ ...getCurrentActivity, Status: WorkflowStepStatus.Finished });
+            await workflowExecutionService.saveWorkflowExecution(wfExec.WXID, {
+              CAT: JSON.stringify(CAT),
+            });
           }
         }
       } catch (err) {
+        let CAT = JSON.parse(wfExec.CAT);
+        const getCurrentActivity = CAT.pop();
+        CAT.push({ ...getCurrentActivity, Status: WorkflowStepStatus.Error });
+        await workflowExecutionService.saveWorkflowExecution(wfExec.WXID, {
+          CAT: JSON.stringify(CAT),
+        });
         logger.error(err);
       }
     },

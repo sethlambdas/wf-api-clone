@@ -20,6 +20,7 @@ export enum ActivityTypes {
   Email = 'Email',
   Conditional = 'Conditional',
   AssignData = 'Assign Data',
+  MergeData = 'Merge Data',
   ManualInput = 'Manual Input',
   ParallelStart = 'Parallel Start',
   ParallelEnd = 'Parallel End',
