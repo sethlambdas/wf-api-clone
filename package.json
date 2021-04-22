@@ -16,6 +16,7 @@
     "start:prod": "NODE_ENV=production node dist/main.js",
     "lint": "tslint -p tsconfig.json -c tslint.json",
     "lint:fix": "npm run lint -- --fix",
+    "format": "npm run prettier:fix && npm run lint:fix",
     "test": "npm run test:e2e && npm run test:unit",
     "test:e2e": "jest --config ./test/jest-e2e.json --verbose --runInBand --passWithNoTests --testTimeout=120000 --forceExit",
     "test:unit": "jest --config ./test/jest-unit.json --verbose --runInBand --passWithNoTests --testTimeout=120000 --forceExit",

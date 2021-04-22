@@ -23,13 +23,16 @@ export class WorkflowService {
   async createWorkflow(createWorkflowInput: CreateWorkflowInput) {
     const { WorkflowId, Design, StartAt, States } = createWorkflowInput;
     let WV = 1;
+    let WID = v4();
 
     if (WorkflowId) {
+      WID = WorkflowId;
       const queryWorkflowVersions = await this.workflowVersionService.queryWorkflowVersion({
         WID: { eq: WorkflowId },
       });
-      if (queryWorkflowVersions.length > 0) {
-        WV = +queryWorkflowVersions[0].WV + 1;
+      const length = queryWorkflowVersions.length;
+      if (length > 0) {
+        WV = +queryWorkflowVersions[length - 1].WV + 1;
       }
     }
 
@@ -43,7 +46,7 @@ export class WorkflowService {
 
     const createWorkflowVersionInput: CreateWorkflowVersionInput = {
       CID: v4(),
-      WID: v4(),
+      WID,
       WV: JSON.stringify(WV),
       FAID: '',
     };
