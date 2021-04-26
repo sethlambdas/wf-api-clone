@@ -54,7 +54,7 @@ const activityRegistry = {
   },
   [ActivityTypes.Condition]: {
     label: ActivityTypes.Condition,
-    processActivity: (payload?: any, state?: any) => condition(payload),
+    processActivity: (payload?: any, state?: any) => condition(payload, state),
   },
   [ActivityTypes.AssignData]: {
     label: ActivityTypes.AssignData,

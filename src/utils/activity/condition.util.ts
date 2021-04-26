@@ -1,4 +1,5 @@
 import { Logger } from '@nestjs/common';
+import { isInteger } from 'lodash';
 
 const logger = new Logger('conditional');
 
@@ -14,7 +15,12 @@ export default async function condition(payload: any, state?: any) {
         throw new Error();
       }
 
-      if (eval(`${Variable} ${Operator} ${RightHand}`)) {
+      const stateVariable = (state && state[Variable]) || '';
+      const variableData = (!isInteger(stateVariable) && JSON.stringify(stateVariable)) || stateVariable;
+      const rightHandData = (!isInteger(RightHand) && JSON.stringify(RightHand)) || RightHand;
+      const evaluate = eval(`${variableData} ${Operator} ${rightHandData}`);
+
+      if (evaluate) {
         return Next;
       }
     }
