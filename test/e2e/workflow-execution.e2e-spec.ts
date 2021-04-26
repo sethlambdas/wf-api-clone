@@ -1,5 +1,6 @@
 import * as request from 'supertest';
 import { v4 } from 'uuid';
+import { SaveWorkflowExecutionInput } from '../../src/graphql/workflow-executions/inputs/save-workflow-execution.input';
 import { getHttpServerTesting, setUpTesting, tearDownTesting } from '../test-e2e';
 
 const gql = {
@@ -8,7 +9,18 @@ const gql = {
       CreateWorkflowExecution(createWorkflowExecutionInput: $createWorkflowExecutionInput) {
         WXID
         WSID
-        CAT
+        CAT {
+          T
+          NM
+          Status
+          MD {
+            Email
+            Subject
+            Body
+            Name
+            Endpoint
+          }
+        }
       }
     }
   `,
@@ -17,7 +29,18 @@ const gql = {
       ListWorkflowExecutions {
         WXID
         WSID
-        CAT
+        CAT {
+          T
+          NM
+          Status
+          MD {
+            Email
+            Subject
+            Body
+            Name
+            Endpoint
+          }
+        }
       }
     }
   `,
@@ -26,7 +49,18 @@ const gql = {
       GetWorkflowExecution(id: $id) {
         WXID
         WSID
-        CAT
+        CAT {
+          T
+          NM
+          Status
+          MD {
+            Email
+            Subject
+            Body
+            Name
+            Endpoint
+          }
+        }
       }
     }
   `,
@@ -35,7 +69,10 @@ const gql = {
       SaveWorkflowExecution(id: $id, saveWorkflowExecutionInput: $saveWorkflowExecutionInput) {
         WXID
         WSID
-        CAT
+        CAT {
+          T
+          Status
+        }
         STE
       }
     }
@@ -49,12 +86,12 @@ const gql = {
 
 const createWorkflowExecutionInput = {
   WSID: v4(),
-  CAT: '{}',
+  CAT: [],
   STE: '{}',
 };
 
-const saveWorkflowExecutionInput = {
-  CAT: '{ T: "WebSrv" }',
+const saveWorkflowExecutionInput: SaveWorkflowExecutionInput = {
+  CAT: [{ T: 'WebSrv', Status: 'Finished' }],
   STE: '{ data: [] }',
 };
 
@@ -82,7 +119,7 @@ describe('WorkflowExecutionResolver (e2e)', () => {
         .expect(({ body: { data } }) => {
           const createWorkflowExecution = data.CreateWorkflowExecution;
           expect(createWorkflowExecution.WSID).toBe(createWorkflowExecutionInput.WSID);
-          expect(createWorkflowExecution.CAT).toBe(createWorkflowExecutionInput.CAT);
+          expect(createWorkflowExecution.CAT).toStrictEqual(createWorkflowExecutionInput.CAT);
         })
         .expect(200);
     });
@@ -100,10 +137,13 @@ describe('WorkflowExecutionResolver (e2e)', () => {
           getWorkflowExecutionData = listWorkflowExecutions[0];
           expect(
             listWorkflowExecutions.some((workflowExecution) => {
-              return (
-                workflowExecution.WSID === createWorkflowExecutionInput.WSID &&
-                workflowExecution.CAT === createWorkflowExecutionInput.CAT
-              );
+              let isSameCAT = true;
+              for (const id of createWorkflowExecutionInput.CAT) {
+                if (workflowExecution.CAT.includes(id)) continue;
+                isSameCAT = false;
+              }
+
+              return workflowExecution.WSID === createWorkflowExecutionInput.WSID && isSameCAT;
             }),
           ).toBe(true);
         })
@@ -146,7 +186,7 @@ describe('WorkflowExecutionResolver (e2e)', () => {
           const saveWorkflowExecution = data.SaveWorkflowExecution;
           expect(saveWorkflowExecution.WXID).toBe(getWorkflowExecutionData.WXID);
           expect(saveWorkflowExecution.STE).toBe(saveWorkflowExecutionInput.STE);
-          expect(saveWorkflowExecution.CAT).toBe(saveWorkflowExecutionInput.CAT);
+          for (const cat of saveWorkflowExecutionInput.CAT) expect(saveWorkflowExecution.CAT[0]).toEqual(cat);
         })
         .expect(200);
     });

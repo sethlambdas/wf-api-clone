@@ -1,5 +1,7 @@
 import * as request from 'supertest';
 import { v4 } from 'uuid';
+import { CreateWorkflowStepInput } from '../../src/graphql/workflow-steps/inputs/create-workflow-step.input';
+import { SaveWorkflowStepInput } from '../../src/graphql/workflow-steps/inputs/save-workflow-step.input';
 import { getHttpServerTesting, setUpTesting, tearDownTesting } from '../test-e2e';
 
 const gql = {
@@ -37,7 +39,17 @@ const gql = {
         WVID
         NAID
         AID
-        ACT
+        ACT {
+          T
+          NM
+          MD {
+            Name
+            Endpoint
+          }
+          DESIGN {
+            id
+          }
+        }
       }
     }
   `,
@@ -48,16 +60,32 @@ const gql = {
   `,
 };
 
-const createWorkflowStepInput = {
+const createWorkflowStepInput: CreateWorkflowStepInput = {
   WVID: v4(),
-  NAID: '[1, 2, 3]',
+  NAID: ['1', '2', '3'],
   AID: v4(),
-  ACT: '{}',
+  ACT: {
+    T: 'Web Service',
+    NM: 'node_1',
+    MD: {
+      Endpoint: 'https://google.com',
+      Name: 'countries',
+    },
+    DESIGN: [],
+  },
 };
 
-const saveWorkflowStepInput = {
+const saveWorkflowStepInput: SaveWorkflowStepInput = {
   AID: v4(),
-  ACT: '{ T: "WebSrv" }',
+  ACT: {
+    T: 'Web Service',
+    NM: 'node_1',
+    MD: {
+      Endpoint: 'https://google.com',
+      Name: 'countries',
+    },
+    DESIGN: [],
+  },
 };
 
 let getWorkflowStepData: any = {};
@@ -84,7 +112,7 @@ describe('WorkflowStepResolver (e2e)', () => {
         .expect(({ body: { data } }) => {
           const createWorkflowStep = data.CreateWorkflowStep;
           expect(createWorkflowStep.WVID).toBe(createWorkflowStepInput.WVID);
-          expect(createWorkflowStep.NAID).toBe(createWorkflowStepInput.NAID);
+          expect(createWorkflowStep.NAID).toEqual(createWorkflowStepInput.NAID);
         })
         .expect(200);
     });
@@ -102,9 +130,13 @@ describe('WorkflowStepResolver (e2e)', () => {
           getWorkflowStepData = listWorkflowSteps[0];
           expect(
             listWorkflowSteps.some((workflowStep) => {
-              return (
-                workflowStep.WVID === createWorkflowStepInput.WVID && workflowStep.NAID === createWorkflowStepInput.NAID
-              );
+              let isSameNAID = true;
+              for (const id of createWorkflowStepInput.NAID) {
+                if (workflowStep.NAID.includes(id)) continue;
+                isSameNAID = false;
+              }
+
+              return workflowStep.WVID === createWorkflowStepInput.WVID && isSameNAID;
             }),
           ).toBe(true);
         })
@@ -147,7 +179,7 @@ describe('WorkflowStepResolver (e2e)', () => {
           const saveWorkflowStep = data.SaveWorkflowStep;
           expect(saveWorkflowStep.WSID).toBe(getWorkflowStepData.WSID);
           expect(saveWorkflowStep.AID).toBe(saveWorkflowStepInput.AID);
-          expect(saveWorkflowStep.ACT).toBe(saveWorkflowStepInput.ACT);
+          expect(saveWorkflowStep.ACT).toEqual(saveWorkflowStepInput.ACT);
         })
         .expect(200);
     });

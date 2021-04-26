@@ -4,7 +4,7 @@ import { ActivityTypes } from '../../utils/activity/activity-registry.util';
 import { putEventsEB } from '../../utils/event-bridge/event-bridge.util';
 import { CreateWorkflowStepInput } from '../workflow-steps/inputs/create-workflow-step.input';
 import { SaveWorkflowStepInput } from '../workflow-steps/inputs/save-workflow-step.input';
-import { WorkflowStep } from '../workflow-steps/workflow-step.entity';
+import { ACT as TypeACT, WorkflowStep } from '../workflow-steps/workflow-step.entity';
 import { WorkflowStepService } from '../workflow-steps/workflow-step.service';
 import { CreateWorkflowVersionInput } from '../workflow-versions/inputs/create-workflow-version.input';
 import { SaveWorkflowVersionInput } from '../workflow-versions/inputs/save-workflow-version.input';
@@ -55,19 +55,19 @@ export class WorkflowService {
     const workflowSteps: WorkflowStep[] = [];
 
     for (const state of States) {
-      const ACT = {
+      const ACT: TypeACT = {
         T: state.ActivityType,
         NM: state.ActivityId,
         MD: state.Variables,
         END: state.End,
-        DESIGN: this.getDesign(Design, state),
+        DESIGN: await this.getDesign(Design, state),
       };
 
       const createWorkflowStepInput: CreateWorkflowStepInput = {
         WVID: workflowVersion.WVID,
-        NAID: '[]',
+        NAID: [],
         AID: v4(),
-        ACT: JSON.stringify(ACT),
+        ACT,
       };
 
       const workflowStep = await this.workflowStepService.createWorkflowStep(createWorkflowStepInput);
@@ -77,20 +77,20 @@ export class WorkflowService {
     const nextStates = States.filter((state) => state.NextActivities?.length > 0);
 
     for (const state of nextStates) {
-      const NAID = state.NextActivities.map((nextActivities) => {
+      const NAID = state.NextActivities.map((nextActivityId) => {
         return workflowSteps.find((workflowStep) => {
-          const ACT = JSON.parse(workflowStep.ACT);
-          return ACT.NM === nextActivities;
+          const ACT = workflowStep.ACT;
+          return ACT.NM === nextActivityId;
         })?.AID;
       });
 
       const getWorkflowStep = workflowSteps.find((workflowStep) => {
-        const ACT = JSON.parse(workflowStep.ACT);
+        const ACT = workflowStep.ACT;
         return ACT.NM === state.ActivityId;
       });
 
       const saveWorkflowStepInput: SaveWorkflowStepInput = {
-        NAID: JSON.stringify(NAID),
+        NAID,
       };
 
       await this.workflowStepService.saveWorkflowStep(getWorkflowStep.WSID, saveWorkflowStepInput);
@@ -99,7 +99,7 @@ export class WorkflowService {
     await this.updateWorkflowStepsConditional(workflowSteps, States);
 
     const FAID = workflowSteps.find((workflowStep) => {
-      const ACT = JSON.parse(workflowStep.ACT);
+      const ACT = workflowStep.ACT;
       return ACT.NM === StartAt;
     })?.AID;
 
@@ -119,7 +119,7 @@ export class WorkflowService {
 
     const getCurrentStepByNM = (value: string) => {
       return workflowSteps.find((workflowStep) => {
-        const ACT = JSON.parse(workflowStep.ACT);
+        const ACT = workflowStep.ACT;
         return ACT.NM === value;
       });
     };
@@ -129,7 +129,7 @@ export class WorkflowService {
 
       const getWorkflowStep = getCurrentStepByNM(state.ActivityId);
 
-      const ACT = JSON.parse(getWorkflowStep.ACT);
+      const ACT = getWorkflowStep.ACT;
       if (ACT.MD) {
         ACT.MD.DefaultNext = DefaultNext;
 
@@ -140,7 +140,7 @@ export class WorkflowService {
       }
 
       const saveWorkflowStepInput: SaveWorkflowStepInput = {
-        ACT: JSON.stringify(ACT),
+        ACT,
       };
 
       await this.workflowStepService.saveWorkflowStep(getWorkflowStep.WSID, saveWorkflowStepInput);

@@ -7,6 +7,7 @@ import { Consumer } from 'sqs-consumer';
 import { AppModule } from './graphql/app.module';
 import { WorkflowExecutionService } from './graphql/workflow-executions/workflow-execution.service';
 import { WorkflowStepStatus } from './graphql/workflow-steps/enums/workflow-step-status.enum';
+import { ACT } from './graphql/workflow-steps/workflow-step.entity';
 import { WorkflowStepService } from './graphql/workflow-steps/workflow-step.service';
 import activityRegistry, { ActivityTypes } from './utils/activity/activity-registry.util';
 import { ConfigUtil } from './utils/config.util';
@@ -52,7 +53,7 @@ async function bootstrap() {
     handleMessage: async (message) => {
       const msgPayload = JSON.parse(message.Body);
       const { WVID: wfVersionId, WSID: currentWfStepId } = msgPayload.detail;
-      const act = JSON.parse(msgPayload?.detail?.ACT);
+      const act: ACT = msgPayload?.detail?.ACT;
 
       const wfExecs = (await workflowExecutionService.queryWorkflowExecution({
         WVID: wfVersionId,
@@ -61,16 +62,16 @@ async function bootstrap() {
       let wfExec;
       if (wfExecs.length === 1) {
         wfExec = wfExecs[0];
-        const CAT = JSON.parse(wfExec.CAT);
+        const CAT = wfExec.CAT;
         CAT.push({ ...act, Status: WorkflowStepStatus.Started });
         wfExec = await workflowExecutionService.saveWorkflowExecution(wfExec.WXID, {
           WSID: currentWfStepId,
-          CAT: JSON.stringify(CAT),
+          CAT,
         });
       } else if (!wfExecs.length) {
         wfExec = await workflowExecutionService.createWorkflowExecution({
           WVID: wfVersionId,
-          CAT: JSON.stringify([{ ...act, Status: WorkflowStepStatus.Started }]),
+          CAT: [{ ...act, Status: WorkflowStepStatus.Started }],
           STE: '{}',
           WSID: currentWfStepId,
         });
@@ -84,7 +85,7 @@ async function bootstrap() {
           logger.log('================Activity Type===============');
 
           if (activityRegistry[act?.T]) {
-            const nextActIds = JSON.parse(msgPayload.detail.NAID);
+            const nextActIds = msgPayload.detail.NAID;
             if (act.T === ActivityTypes.ParallelStart) {
               wfExec = await workflowExecutionService.saveWorkflowExecution(wfExec.WXID, {
                 isParallel: true,
@@ -187,20 +188,20 @@ async function bootstrap() {
               await putEventsEB(params);
             }
 
-            const CAT = JSON.parse(wfExec.CAT);
+            const CAT = wfExec.CAT;
             const getCurrentActivity = CAT.pop();
             CAT.push({ ...getCurrentActivity, Status: WorkflowStepStatus.Finished });
             await workflowExecutionService.saveWorkflowExecution(wfExec.WXID, {
-              CAT: JSON.stringify(CAT),
+              CAT,
             });
           }
         }
       } catch (err) {
-        const CAT = JSON.parse(wfExec.CAT);
+        const CAT = wfExec.CAT;
         const getCurrentActivity = CAT.pop();
         CAT.push({ ...getCurrentActivity, Status: WorkflowStepStatus.Error });
         await workflowExecutionService.saveWorkflowExecution(wfExec.WXID, {
-          CAT: JSON.stringify(CAT),
+          CAT,
         });
         logger.error(err);
       }

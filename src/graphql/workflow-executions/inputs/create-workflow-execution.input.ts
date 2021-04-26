@@ -1,4 +1,11 @@
-import { Field, InputType, Int } from '@nestjs/graphql';
+import { Field, InputType, Int, PartialType } from '@nestjs/graphql';
+import { ACTInput } from '../../workflow-steps/inputs/create-workflow-step.input';
+
+@InputType()
+class CATInput extends PartialType(ACTInput) {
+  @Field()
+  Status: string;
+}
 
 @InputType()
 export class CreateWorkflowExecutionInput {
@@ -8,8 +15,8 @@ export class CreateWorkflowExecutionInput {
   @Field({ nullable: true })
   WSID?: string;
 
-  @Field({ nullable: true })
-  CAT?: string;
+  @Field((type) => [CATInput], { nullable: true })
+  CAT?: CATInput[];
 
   @Field({ nullable: true })
   STE?: string;

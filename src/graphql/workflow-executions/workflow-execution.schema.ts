@@ -1,4 +1,5 @@
 import { Schema } from 'dynamoose';
+import { ACTSchema } from '../workflow-steps/workflow-step.schema';
 
 export const WorkflowExecutionSchema = new Schema(
   {
@@ -13,7 +14,8 @@ export const WorkflowExecutionSchema = new Schema(
       type: String,
     },
     CAT: {
-      type: String,
+      type: Array,
+      schema: [ACTSchema],
     },
     STE: {
       type: String,

@@ -12,11 +12,14 @@ class LabelInput {
 
 @InputType()
 class DataInput {
-  @Field((type) => LabelInput)
-  label: LabelInput;
+  @Field((type) => LabelInput, { nullable: true })
+  label?: LabelInput;
 
   @Field()
   nodeType: string;
+
+  @Field()
+  labelIconName: string;
 
   @Field()
   state: string;

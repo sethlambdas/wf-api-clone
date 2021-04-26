@@ -1,4 +1,5 @@
 import * as request from 'supertest';
+import { CreateWorkflowInput } from '../../src/graphql/workflow/inputs/create-workflow.input';
 import {
   getHttpServerTesting,
   setUpTesting,
@@ -15,7 +16,7 @@ const gql = {
   `,
 };
 
-const createWorkflowInput = {
+const createWorkflowInput: CreateWorkflowInput = {
   Design: [
     {
       id: 'step_0',
@@ -26,6 +27,7 @@ const createWorkflowInput = {
           name: 'Start',
         },
         nodeType: 'Start',
+        labelIconName: 'StartIcon',
         state: 'Start',
       },
       position: {
@@ -42,6 +44,7 @@ const createWorkflowInput = {
           name: 'Web Service',
         },
         nodeType: 'WebService',
+        labelIconName: 'WebIcon',
         state: 'WebService',
       },
       position: {
@@ -58,6 +61,7 @@ const createWorkflowInput = {
           name: 'End',
         },
         nodeType: 'End',
+        labelIconName: 'EndIcon',
         state: 'End',
       },
       position: {
@@ -184,14 +188,14 @@ describe('WorkflowResolver (e2e)', () => {
       for (const state of createWorkflowInput.States) {
         expect(
           workflowSteps.some((workflowStep) => {
-            const ACT = JSON.parse(workflowStep.ACT);
+            const ACT = workflowStep.ACT;
             return ACT.T === state.ActivityType && ACT.NM === state.ActivityId;
           }),
         ).toBe(true);
 
         expect(
           workflowSteps.some((workflowStep) => {
-            const ACT = JSON.parse(workflowStep.ACT);
+            const ACT = workflowStep.ACT;
             if (!ACT.DESIGN || !Array.isArray(ACT.DESIGN)) return true;
             return createWorkflowInput.Design.find((design) => {
               return ACT.DESIGN.find((actDesign) => {
