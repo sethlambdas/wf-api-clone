@@ -28,40 +28,40 @@ export enum ActivityTypes {
 }
 
 const activityRegistry = {
-  'Parallel Start': {
-    label: 'Parallel Start',
+  [ActivityTypes.ParallelStart]: {
+    label: ActivityTypes.ParallelStart,
     processActivity: () => null,
   },
-  'Parallel End': {
-    label: 'Parallel End',
+  [ActivityTypes.ParallelEnd]: {
+    label: ActivityTypes.ParallelEnd,
     processActivity: () => null,
   },
-  'Manual Input': {
-    label: 'Manual Input',
+  [ActivityTypes.ManualInput]: {
+    label: ActivityTypes.ManualInput,
     processActivity: (payload?: any, state?: any) => manualInput(payload),
   },
-  'Web Service': {
-    label: 'Web Service',
+  [ActivityTypes.WebService]: {
+    label: ActivityTypes.WebService,
     processActivity: (payload?: any, state?: any) => webService(payload),
   },
-  Delay: {
-    label: 'Delay',
+  [ActivityTypes.Delay]: {
+    label: ActivityTypes.Delay,
     processActivity: (payload?: any, state?: any) => delay(payload),
   },
-  Email: {
-    label: 'Email',
-    processActivity: (payload?: any, state?: any) => email(payload),
+  [ActivityTypes.Email]: {
+    label: ActivityTypes.Email,
+    processActivity: (payload?: any, state?: any) => email(payload, state),
   },
-  Condition: {
-    label: 'Condition',
+  [ActivityTypes.Condition]: {
+    label: ActivityTypes.Condition,
     processActivity: (payload?: any, state?: any) => condition(payload),
   },
-  'Assign Data': {
-    label: 'Assign Data',
+  [ActivityTypes.AssignData]: {
+    label: ActivityTypes.AssignData,
     processActivity: (payload?: any, state?: any) => assignData(payload),
   },
-  'Merge Data': {
-    label: 'Merge Data',
+  [ActivityTypes.MergeData]: {
+    label: ActivityTypes.MergeData,
     processActivity: (payload?: any, state?: any) => mergeData(payload, state),
   },
 } as ActivityRegistry;
