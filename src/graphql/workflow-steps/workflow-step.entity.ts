@@ -1,5 +1,5 @@
 /* tslint:disable:max-classes-per-file */
-import { Field, InputType, Int, ObjectType } from '@nestjs/graphql';
+import { Field, Int, ObjectType } from '@nestjs/graphql';
 
 @ObjectType()
 export class Label {

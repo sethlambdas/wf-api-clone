@@ -1,5 +1,7 @@
-import { Args, Mutation, Resolver } from '@nestjs/graphql';
+import { Args, Mutation, Query, Resolver } from '@nestjs/graphql';
 import { CreateWorkflowInput } from './inputs/create-workflow.input';
+import { GetWorkflowDetailsInput } from './inputs/get-workflow.input';
+import { WorkflowDetails } from './workflow.entity';
 import { WorkflowService } from './workflow.service';
 
 @Resolver()
@@ -9,5 +11,10 @@ export class WorkflowResolver {
   @Mutation((returns) => String)
   async CreateWorkflow(@Args('createWorkflowInput') createWorkflowInput: CreateWorkflowInput) {
     return this.workflowService.createWorkflow(createWorkflowInput);
+  }
+
+  @Query((returns) => WorkflowDetails)
+  async GetWorkflowDetails(@Args('getWorkflowDetailsInput') getWorkflowDetailsInput: GetWorkflowDetailsInput) {
+    return this.workflowService.getWorkflowDetails(getWorkflowDetailsInput);
   }
 }

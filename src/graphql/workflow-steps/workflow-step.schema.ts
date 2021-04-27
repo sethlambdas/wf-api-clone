@@ -14,6 +14,17 @@ const DataSchema = new Schema({
     type: Object,
     schema: LabelSchema,
   },
+  nodeType: {
+    type: String,
+  },
+
+  labelIconName: {
+    type: String,
+  },
+
+  state: {
+    type: String,
+  },
 });
 
 const PositionSchema = new Schema({

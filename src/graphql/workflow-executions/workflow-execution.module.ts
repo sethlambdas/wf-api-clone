@@ -16,5 +16,6 @@ import { WorkflowExecutionService } from './workflow-execution.service';
     ]),
   ],
   providers: [WorkflowExecutionResolver, WorkflowExecutionService, WorkflowExecutionRepository],
+  exports: [WorkflowExecutionService],
 })
 export class WorkflowExecutionModule {}
