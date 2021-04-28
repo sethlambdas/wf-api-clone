@@ -1,6 +1,18 @@
 import { Schema } from 'dynamoose';
 import { ACTSchema } from '../workflow-steps/workflow-step.schema';
 
+const ParallelSchema = new Schema({
+  isParallelActive: {
+    type: Boolean,
+  },
+  totalParallelCount: {
+    type: Number,
+  },
+  finishedParallelCount: {
+    type: Number,
+  },
+});
+
 export const WorkflowExecutionSchema = new Schema(
   {
     WXID: {
@@ -20,14 +32,9 @@ export const WorkflowExecutionSchema = new Schema(
     STE: {
       type: String,
     },
-    isParallel: {
-      type: Boolean,
-    },
-    totalParallelCount: {
-      type: Number,
-    },
-    finishedParallelCount: {
-      type: Number,
+    PARALLEL: {
+      type: Array,
+      schema: [ParallelSchema],
     },
   },
   {

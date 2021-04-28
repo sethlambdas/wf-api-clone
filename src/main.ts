@@ -3,8 +3,10 @@ import { NestFactory } from '@nestjs/core';
 import * as AWS from 'aws-sdk';
 import * as bodyParser from 'body-parser';
 import * as cookieParser from 'cookie-parser';
+import { find } from 'lodash';
 import { Consumer } from 'sqs-consumer';
 import { AppModule } from './graphql/app.module';
+import { WorkflowExecution } from './graphql/workflow-executions/workflow-execution.entity';
 import { WorkflowExecutionService } from './graphql/workflow-executions/workflow-execution.service';
 import { WorkflowStepStatus } from './graphql/workflow-steps/enums/workflow-step-status.enum';
 import { ACT } from './graphql/workflow-steps/workflow-step.entity';
@@ -52,14 +54,14 @@ async function bootstrap() {
     queueUrl: WORKFLOW_QUEUE_URL,
     handleMessage: async (message) => {
       const msgPayload = JSON.parse(message.Body);
-      const { WVID: wfVersionId, WSID: currentWfStepId } = msgPayload.detail;
+      const { WVID: wfVersionId, WSID: currentWfStepId, parallelIndex, parallelIndexes } = msgPayload.detail;
       const act: ACT = msgPayload?.detail?.ACT;
 
       const wfExecs = (await workflowExecutionService.queryWorkflowExecution({
         WVID: wfVersionId,
       })) as any;
 
-      let wfExec;
+      let wfExec: WorkflowExecution;
       if (wfExecs.length === 1) {
         wfExec = wfExecs[0];
         const CAT = wfExec.CAT;
@@ -77,6 +79,9 @@ async function bootstrap() {
         });
       }
 
+      let currentParallelIndex = (!isNaN(parallelIndex) && parallelIndex) || 0;
+      const currentParallelIndexes = parallelIndexes || [];
+
       try {
         logger.log(msgPayload);
         if (msgPayload?.detail?.ACT) {
@@ -87,15 +92,27 @@ async function bootstrap() {
           if (activityRegistry[act?.T]) {
             const nextActIds = msgPayload.detail.NAID;
             if (act.T === ActivityTypes.ParallelStart) {
-              wfExec = await workflowExecutionService.saveWorkflowExecution(wfExec.WXID, {
-                isParallel: true,
+              const PARALLEL = wfExec.PARALLEL || [];
+              PARALLEL.push({
+                isParallelActive: true,
                 totalParallelCount: nextActIds.length,
                 finishedParallelCount: 0,
               });
+              wfExec = await workflowExecutionService.saveWorkflowExecution(wfExec.WXID, {
+                PARALLEL,
+              });
+              currentParallelIndex = PARALLEL.length - 1;
+              currentParallelIndexes.push(currentParallelIndex);
             }
             if (act.T === ActivityTypes.ParallelEnd) {
+              const updatedPARALLEL = wfExec.PARALLEL.map((updateParallel, updateParallelIndex) => {
+                if (updateParallelIndex === currentParallelIndex) {
+                  updateParallel.finishedParallelCount = updateParallel.finishedParallelCount + 1;
+                }
+                return updateParallel;
+              });
               wfExec = await workflowExecutionService.saveWorkflowExecution(wfExec.WXID, {
-                finishedParallelCount: wfExec.finishedParallelCount + 1,
+                PARALLEL: updatedPARALLEL,
               });
             }
 
@@ -144,7 +161,11 @@ async function bootstrap() {
               }
 
               params.Entries.push({
-                Detail: JSON.stringify(workflowStep),
+                Detail: JSON.stringify({
+                  ...workflowStep,
+                  parallelIndex: currentParallelIndex,
+                  parallelIndexes: currentParallelIndexes,
+                }),
                 DetailType: `workflowStep`,
                 Source: source,
               });
@@ -159,7 +180,11 @@ async function bootstrap() {
                 logger.log(workflowStep);
 
                 params.Entries.push({
-                  Detail: JSON.stringify(workflowStep),
+                  Detail: JSON.stringify({
+                    ...workflowStep,
+                    parallelIndex: currentParallelIndex,
+                    parallelIndexes: currentParallelIndexes,
+                  }),
                   DetailType: `workflowStep`,
                   Source: source,
                 });
@@ -174,9 +199,29 @@ async function bootstrap() {
                 await putEventsEB(params);
               }, actResult as number);
             } else if (act.T === ActivityTypes.ParallelEnd) {
-              if (wfExec.finishedParallelCount === wfExec.totalParallelCount && wfExec.isParallel) {
+              const currentPARALLEL = find(wfExec.PARALLEL, null, currentParallelIndex);
+              const finishedParallelCount = currentPARALLEL.finishedParallelCount;
+              const totalParallelCount = currentPARALLEL.totalParallelCount;
+              const isParallelActive = currentPARALLEL.isParallelActive;
+              if (finishedParallelCount === totalParallelCount && isParallelActive) {
+                const updatedPARALLEL = wfExec.PARALLEL.map((updateParallel, updateParallelIndex) => {
+                  if (updateParallelIndex === currentParallelIndex) {
+                    updateParallel.isParallelActive = false;
+                  }
+                  return updateParallel;
+                });
                 await workflowExecutionService.saveWorkflowExecution(wfExec.WXID, {
-                  isParallel: false,
+                  PARALLEL: updatedPARALLEL,
+                });
+                const updatedParallelIndexes = currentParallelIndexes.filter((filterParallelIndex) => {
+                  return filterParallelIndex !== currentParallelIndex;
+                });
+                params.Entries = params.Entries.map((Entry) => {
+                  const Detail = JSON.parse(Entry.Detail);
+                  Detail.parallelIndexes = updatedParallelIndexes;
+                  Detail.parallelIndex = find(updatedParallelIndexes, null, updatedParallelIndexes.length - 1);
+                  Entry.Detail = JSON.stringify(Detail);
+                  return Entry;
                 });
                 await putEventsEB(params);
               } else {
