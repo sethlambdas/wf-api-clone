@@ -14,6 +14,7 @@ import { WorkflowVersionService } from '../workflow-versions/workflow-version.se
 import { CreateWorkflowInput } from './inputs/create-workflow.input';
 import { DesignWorkflowInput } from './inputs/design-workflow.input';
 import { GetWorkflowDetailsInput } from './inputs/get-workflow.input';
+import { InitiateCurrentStepInput } from './inputs/initiate-step.input';
 import { StateWorkflowInput } from './inputs/state-workflow.input';
 import { WorkflowDetails } from './workflow.entity';
 
@@ -281,5 +282,31 @@ export class WorkflowService {
     }
 
     return {};
+  }
+
+  async initiateCurrentStep(initiateCurrentStepInput: InitiateCurrentStepInput) {
+    const { WSID, ActivityType, Approve } = initiateCurrentStepInput;
+
+    const queryWorkflowSteps = await this.workflowStepService.queryWorkflowStep({
+      WSID: { eq: WSID },
+    });
+
+    if (!queryWorkflowSteps.length) return;
+
+    if (ActivityType === ActivityTypes.ManualInput) queryWorkflowSteps[0].ACT.MD.Completed = true;
+
+    const params = {
+      Entries: [
+        {
+          Detail: JSON.stringify(queryWorkflowSteps[0]),
+          DetailType: `workflowStep`,
+          Source: 'workflow.initiate',
+        },
+      ],
+    };
+
+    await putEventsEB(params);
+
+    return 'Successfuly Initiated Event';
   }
 }

@@ -6,10 +6,9 @@ import * as cookieParser from 'cookie-parser';
 import { find } from 'lodash';
 import { Consumer } from 'sqs-consumer';
 import { AppModule } from './graphql/app.module';
-import { WorkflowExecution } from './graphql/workflow-executions/workflow-execution.entity';
+import { CAT, WorkflowExecution } from './graphql/workflow-executions/workflow-execution.entity';
 import { WorkflowExecutionService } from './graphql/workflow-executions/workflow-execution.service';
 import { WorkflowStepStatus } from './graphql/workflow-steps/enums/workflow-step-status.enum';
-import { ACT } from './graphql/workflow-steps/workflow-step.entity';
 import { WorkflowStepService } from './graphql/workflow-steps/workflow-step.service';
 import activityRegistry, { ActivityTypes } from './utils/activity/activity-registry.util';
 import { ConfigUtil } from './utils/config.util';
@@ -55,7 +54,8 @@ async function bootstrap() {
     handleMessage: async (message) => {
       const msgPayload = JSON.parse(message.Body);
       const { WVID: wfVersionId, WSID: currentWfStepId, parallelIndex, parallelIndexes } = msgPayload.detail;
-      const act: ACT = msgPayload?.detail?.ACT;
+      const act: CAT = msgPayload?.detail?.ACT;
+      if (act) act.WSID = currentWfStepId;
 
       const wfExecs = (await workflowExecutionService.queryWorkflowExecution({
         WVID: wfVersionId,
@@ -64,11 +64,11 @@ async function bootstrap() {
       let wfExec: WorkflowExecution;
       if (wfExecs.length === 1) {
         wfExec = wfExecs[0];
-        const CAT = wfExec.CAT;
-        CAT.push({ ...act, Status: WorkflowStepStatus.Started });
+        const createCAT = wfExec.CAT;
+        createCAT.push({ ...act, Status: WorkflowStepStatus.Started });
         wfExec = await workflowExecutionService.saveWorkflowExecution(wfExec.WXID, {
           WSID: currentWfStepId,
-          CAT,
+          CAT: createCAT,
         });
       } else if (!wfExecs.length) {
         wfExec = await workflowExecutionService.createWorkflowExecution({
@@ -233,20 +233,20 @@ async function bootstrap() {
               await putEventsEB(params);
             }
 
-            const CAT = wfExec.CAT;
-            const getCurrentActivity = CAT.pop();
-            CAT.push({ ...getCurrentActivity, Status: WorkflowStepStatus.Finished });
+            const updateCAT = wfExec.CAT;
+            const getCurrentActivity = updateCAT.pop();
+            updateCAT.push({ ...getCurrentActivity, Status: WorkflowStepStatus.Finished });
             await workflowExecutionService.saveWorkflowExecution(wfExec.WXID, {
-              CAT,
+              CAT: updateCAT,
             });
           }
         }
       } catch (err) {
-        const CAT = wfExec.CAT;
-        const getCurrentActivity = CAT.pop();
-        CAT.push({ ...getCurrentActivity, Status: WorkflowStepStatus.Error });
+        const catchUpdateCAT = wfExec.CAT;
+        const getCurrentActivity = catchUpdateCAT.pop();
+        catchUpdateCAT.push({ ...getCurrentActivity, Status: WorkflowStepStatus.Error });
         await workflowExecutionService.saveWorkflowExecution(wfExec.WXID, {
-          CAT,
+          CAT: catchUpdateCAT,
         });
         logger.error(err);
       }

@@ -8,6 +8,9 @@ export interface WorkflowExecutionKey {
 @ObjectType()
 export class CAT extends PartialType(ACT) {
   @Field()
+  WSID: string;
+
+  @Field()
   Status: string;
 }
 
@@ -30,9 +33,6 @@ export class WorkflowExecution implements WorkflowExecutionKey {
 
   @Field()
   WVID: string;
-
-  @Field()
-  WSID: string;
 
   @Field((type) => [CAT])
   CAT: CAT[];

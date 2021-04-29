@@ -22,9 +22,6 @@ export const WorkflowExecutionSchema = new Schema(
     WVID: {
       type: String,
     },
-    WSID: {
-      type: String,
-    },
     CAT: {
       type: Array,
       schema: [ACTSchema],

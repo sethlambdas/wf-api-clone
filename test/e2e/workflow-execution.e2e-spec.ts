@@ -8,7 +8,6 @@ const gql = {
     mutation CreateWorkflowExecution($createWorkflowExecutionInput: CreateWorkflowExecutionInput!) {
       CreateWorkflowExecution(createWorkflowExecutionInput: $createWorkflowExecutionInput) {
         WXID
-        WSID
         CAT {
           T
           NM
@@ -28,7 +27,6 @@ const gql = {
     query ListWorkflowExecutions {
       ListWorkflowExecutions {
         WXID
-        WSID
         CAT {
           T
           NM
@@ -48,7 +46,6 @@ const gql = {
     query GetWorkflowExecution($id: String!) {
       GetWorkflowExecution(id: $id) {
         WXID
-        WSID
         CAT {
           T
           NM
@@ -68,7 +65,6 @@ const gql = {
     mutation SaveWorkflowExecution($id: String!, $saveWorkflowExecutionInput: SaveWorkflowExecutionInput!) {
       SaveWorkflowExecution(id: $id, saveWorkflowExecutionInput: $saveWorkflowExecutionInput) {
         WXID
-        WSID
         CAT {
           T
           Status
@@ -85,7 +81,6 @@ const gql = {
 };
 
 const createWorkflowExecutionInput = {
-  WSID: v4(),
   CAT: [],
   STE: '{}',
 };
@@ -118,7 +113,6 @@ describe('WorkflowExecutionResolver (e2e)', () => {
         })
         .expect(({ body: { data } }) => {
           const createWorkflowExecution = data.CreateWorkflowExecution;
-          expect(createWorkflowExecution.WSID).toBe(createWorkflowExecutionInput.WSID);
           expect(createWorkflowExecution.CAT).toStrictEqual(createWorkflowExecutionInput.CAT);
         })
         .expect(200);
@@ -143,7 +137,7 @@ describe('WorkflowExecutionResolver (e2e)', () => {
                 isSameCAT = false;
               }
 
-              return workflowExecution.WSID === createWorkflowExecutionInput.WSID && isSameCAT;
+              return isSameCAT;
             }),
           ).toBe(true);
         })
@@ -164,7 +158,6 @@ describe('WorkflowExecutionResolver (e2e)', () => {
         .expect(({ body: { data } }) => {
           const getWorkflowExecution = data.GetWorkflowExecution;
           expect(getWorkflowExecution.WXID).toBe(getWorkflowExecutionData.WXID);
-          expect(getWorkflowExecution.WSID).not.toBe('');
           expect(getWorkflowExecution.CAT).not.toBe('');
         })
         .expect(200);

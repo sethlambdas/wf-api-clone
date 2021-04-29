@@ -152,6 +152,10 @@ export const ACTSchema = new Schema({
     type: Array,
     schema: [DesignWorkflowSchema],
   },
+  WSID: {
+    type: String,
+    required: false,
+  },
   Status: {
     type: String,
     required: false,

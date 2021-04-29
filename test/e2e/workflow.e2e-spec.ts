@@ -1,6 +1,7 @@
 import * as request from 'supertest';
+import { CreateWorkflowStepInput } from '../../src/graphql/workflow-steps/inputs/create-workflow-step.input';
 import { CreateWorkflowInput } from '../../src/graphql/workflow/inputs/create-workflow.input';
-import { GetWorkflowDetailsInput } from '../../src/graphql/workflow/inputs/get-workflow.input';
+import { InitiateCurrentStepInput } from '../../src/graphql/workflow/inputs/initiate-step.input';
 import {
   getHttpServerTesting,
   setUpTesting,
@@ -33,7 +34,6 @@ const gql = {
       CreateWorkflowExecution(createWorkflowExecutionInput: $createWorkflowExecutionInput) {
         WXID
         WVID
-        WSID
         CAT {
           T
           DESIGN {
@@ -43,6 +43,44 @@ const gql = {
       }
     }
   `,
+  createWorkflowStep: `
+    mutation CreateWorkflowStep($createWorkflowStepInput: CreateWorkflowStepInput!) {
+      CreateWorkflowStep(createWorkflowStepInput: $createWorkflowStepInput) {
+        WSID
+        WVID
+        AID
+        ACT {
+          T
+        }
+      }
+    }
+  `,
+  initiateCurrentStep: `
+    query InitiateCurrentStep($initiateCurrentStepInput: InitiateCurrentStepInput!) {
+      InitiateCurrentStep(initiateCurrentStepInput: $initiateCurrentStepInput)
+    }
+  `,
+};
+
+const createWorkflowStepInput: CreateWorkflowStepInput = {
+  WVID: 'WVID123',
+  AID: 'AID123',
+  NAID: [],
+  ACT: {
+    T: 'Manual Input',
+    NM: 'node_0',
+    MD: {
+      Completed: false,
+    },
+    DESIGN: [],
+    END: true,
+  },
+};
+
+const initiateCurrentStepInput: InitiateCurrentStepInput = {
+  WSID: '',
+  ActivityType: 'Manual Input',
+  Approve: true,
 };
 
 const createWorkflowInput: CreateWorkflowInput = {
@@ -297,6 +335,39 @@ describe('WorkflowResolver (e2e)', () => {
       expect(result2.GetWorkflowDetails.WVID).toEqual(result1.CreateWorkflowExecution.WVID);
       expect(result2.GetWorkflowDetails.ACTIVITIES[0].T).toEqual(result1.CreateWorkflowExecution.CAT[0].T);
       expect(result2.GetWorkflowDetails.DESIGN[0].id).toEqual(result1.CreateWorkflowExecution.CAT[0].DESIGN[0].id);
+    });
+  });
+
+  describe('inititateWorkflowStep', () => {
+    it('should initiate workflow step', async () => {
+      // Create workflow step
+      const {
+        body: { data: result1 },
+      } = await request(getHttpServerTesting())
+        .post('/api/graphql')
+        .send({
+          query: gql.createWorkflowStep,
+          variables: {
+            createWorkflowStepInput,
+          },
+        })
+        .expect(200);
+
+      initiateCurrentStepInput.WSID = result1.CreateWorkflowStep.WSID;
+
+      const {
+        body: { data: result2 },
+      } = await request(getHttpServerTesting())
+        .post('/api/graphql')
+        .send({
+          query: gql.initiateCurrentStep,
+          variables: {
+            initiateCurrentStepInput,
+          },
+        })
+        .expect(200);
+
+      expect(result2.InitiateCurrentStep).toEqual('Successfuly Initiated Event');
     });
   });
 });
