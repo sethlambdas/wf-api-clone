@@ -16,7 +16,7 @@ export const defaultListParams = {};
 export const defaultCreateParams = {
   QueueName: QUEUE_NAME,
   Attributes: {
-    DelaySeconds: '60',
+    DelaySeconds: '0',
     MessageRetentionPeriod: '86400',
   },
 };
@@ -24,7 +24,7 @@ export const defaultCreateParams = {
 export const defaultSendMessageParams = (msg: string = '') => {
   return {
     // Remove DelaySeconds parameter and value for FIFO queues
-    DelaySeconds: 10,
+    DelaySeconds: 0,
     MessageAttributes: {
       Title: {
         DataType: 'String',
@@ -51,6 +51,6 @@ export const defaultReceiveMessageParams = {
   MaxNumberOfMessages: 10,
   MessageAttributeNames: ['All'],
   QueueUrl: WORKFLOW_QUEUE_URL,
-  VisibilityTimeout: 20,
+  VisibilityTimeout: 0,
   WaitTimeSeconds: 0,
 };

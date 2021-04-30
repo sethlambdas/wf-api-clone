@@ -53,13 +53,15 @@ async function bootstrap() {
     queueUrl: WORKFLOW_QUEUE_URL,
     handleMessage: async (message) => {
       const msgPayload = JSON.parse(message.Body);
-      const { WVID: wfVersionId, WSID: currentWfStepId, parallelIndex, parallelIndexes } = msgPayload.detail;
-      const act: CAT = msgPayload?.detail?.ACT;
+      const delayedDetail = msgPayload.delayedDetail && JSON.parse(msgPayload.delayedDetail);
+      const detail = delayedDetail || msgPayload.detail;
+      const { WVID: wfVersionId, WSID: currentWfStepId, parallelIndex, parallelIndexes } = detail;
+      const act: CAT = detail?.ACT;
       if (act) act.WSID = currentWfStepId;
 
-      const wfExecs = (await workflowExecutionService.queryWorkflowExecution({
-        WVID: wfVersionId,
-      })) as any;
+      const wfExecs = await workflowExecutionService.queryWorkflowExecution({
+        WVID: { eq: wfVersionId },
+      });
 
       let wfExec: WorkflowExecution;
       if (wfExecs.length === 1) {
@@ -84,13 +86,13 @@ async function bootstrap() {
 
       try {
         logger.log(msgPayload);
-        if (msgPayload?.detail?.ACT) {
+        if (detail?.ACT) {
           logger.log('================Activity Type===============');
           logger.log(act?.T);
           logger.log('================Activity Type===============');
 
           if (activityRegistry[act?.T]) {
-            const nextActIds = msgPayload.detail.NAID;
+            const nextActIds = detail.NAID;
             if (act.T === ActivityTypes.ParallelStart) {
               const PARALLEL = wfExec.PARALLEL || [];
               PARALLEL.push({
@@ -141,16 +143,12 @@ async function bootstrap() {
               STE = { ...state, ...(actResult as any) };
             }
 
-            let source = 'workflow.initiate';
+            const source = 'workflow.initiate';
 
             await workflowExecutionService.saveWorkflowExecution(wfExec.WXID, {
               STE: JSON.stringify(STE),
             });
             logger.log('Successfully saved workflow execution');
-
-            if (act.T === ActivityTypes.Delay) {
-              source = actResult as string;
-            }
 
             let workflowStep;
             if (act.T === ActivityTypes.Condition) {
@@ -158,6 +156,9 @@ async function bootstrap() {
                 workflowStep = await workflowStepService.queryWorkflowStep({
                   AID: { eq: actResult },
                 });
+
+                workflowStep = workflowStep[0];
+                logger.log(workflowStep);
               }
 
               params.Entries.push({
@@ -195,9 +196,13 @@ async function bootstrap() {
             if (act.T === ActivityTypes.ManualInput && !act.MD.Completed) {
               logger.log('Waiting for Manual Input');
             } else if (act.T === ActivityTypes.Delay) {
-              setTimeout(async () => {
-                await putEventsEB(params);
-              }, actResult as number);
+              if (typeof actResult === 'function') {
+                const executeDelayEB = actResult as (delayedDetail: any) => any;
+                for (const Entry of params.Entries) {
+                  await executeDelayEB(Entry.Detail);
+                }
+                logger.log('Delay activity executing!');
+              }
             } else if (act.T === ActivityTypes.ParallelEnd) {
               const currentPARALLEL = find(wfExec.PARALLEL, null, currentParallelIndex);
               const finishedParallelCount = currentPARALLEL.finishedParallelCount;
