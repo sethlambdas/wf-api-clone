@@ -81,6 +81,10 @@ const gql = {
 };
 
 const createWorkflowExecutionInput = {
+  WVID: 'WVID123',
+  WSID: ' WSID123',
+  WLFN: 'SampleWorkflow100',
+  CRAT: 'Email',
   CAT: [],
   STE: '{}',
 };

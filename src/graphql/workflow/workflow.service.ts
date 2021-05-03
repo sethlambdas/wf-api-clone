@@ -2,7 +2,7 @@ import { Injectable, Logger } from '@nestjs/common';
 import { v4 } from 'uuid';
 import { ActivityTypes } from '../../utils/activity/activity-registry.util';
 import { putEventsEB } from '../../utils/event-bridge/event-bridge.util';
-import { WorkflowExecution } from '../workflow-executions/workflow-execution.entity';
+import { QueryWorkflowExecution, WorkflowExecution } from '../workflow-executions/workflow-execution.entity';
 import { WorkflowExecutionService } from '../workflow-executions/workflow-execution.service';
 import { CreateWorkflowStepInput } from '../workflow-steps/inputs/create-workflow-step.input';
 import { SaveWorkflowStepInput } from '../workflow-steps/inputs/save-workflow-step.input';
@@ -15,8 +15,9 @@ import { CreateWorkflowInput } from './inputs/create-workflow.input';
 import { DesignWorkflowInput } from './inputs/design-workflow.input';
 import { GetWorkflowDetailsInput } from './inputs/get-workflow.input';
 import { InitiateCurrentStepInput } from './inputs/initiate-step.input';
+import { ListWorkflowInput } from './inputs/list-workflow.input';
 import { StateWorkflowInput } from './inputs/state-workflow.input';
-import { WorkflowDetails } from './workflow.entity';
+import { ListWorkflows, WorkflowDetails } from './workflow.entity';
 
 @Injectable()
 export class WorkflowService {
@@ -29,7 +30,7 @@ export class WorkflowService {
   ) {}
 
   async createWorkflow(createWorkflowInput: CreateWorkflowInput) {
-    const { WorkflowId, Design, StartAt, States } = createWorkflowInput;
+    const { WorkflowId, Design, StartAt, States, WLFN } = createWorkflowInput;
     let WV = 1;
     let WID = v4();
 
@@ -57,6 +58,7 @@ export class WorkflowService {
       WID,
       WV: JSON.stringify(WV),
       FAID: '',
+      WLFN,
     };
 
     const workflowVersion = await this.workflowVersionService.createWorkflowVersion(createWorkflowVersionInput);
@@ -238,7 +240,7 @@ export class WorkflowService {
     let workflowExecution: WorkflowExecution[];
 
     if (WVID) {
-      workflowExecution = await this.workflowExecutionService.queryWorkflowExecution({
+      workflowExecution = await this.workflowExecutionService.scanWorkflowExecution({
         WVID: workflowVersionID,
       });
     } else {
@@ -255,7 +257,7 @@ export class WorkflowService {
           workflowVersionID = workflow.WVID;
         });
 
-        workflowExecution = await this.workflowExecutionService.queryWorkflowExecution({
+        workflowExecution = await this.workflowExecutionService.scanWorkflowExecution({
           WVID: workflowVersionID,
         });
       } catch (err) {
@@ -293,7 +295,7 @@ export class WorkflowService {
 
     if (!queryWorkflowSteps.length) return;
 
-    if (ActivityType === ActivityTypes.ManualInput) queryWorkflowSteps[0].ACT.MD.Completed = true;
+    if (ActivityType === ActivityTypes.ManualInput && Approve) queryWorkflowSteps[0].ACT.MD.Completed = true;
 
     const params = {
       Entries: [
@@ -308,5 +310,38 @@ export class WorkflowService {
     await putEventsEB(params);
 
     return 'Successfuly Initiated Event';
+  }
+
+  async listWorkflows(listWorkflowsInput: ListWorkflowInput): Promise<ListWorkflows> {
+    const { CRAT, pageSize, LastKey, page } = listWorkflowsInput;
+    let workflowExecutions: QueryWorkflowExecution = {
+      Executions: [],
+      totalRecords: 0,
+    };
+
+    workflowExecutions = await this.workflowExecutionService.queryIndexWorkflowExecution({
+      IndexName: 'GetCRAT',
+      PK: 'CRAT',
+      Value: CRAT,
+      pageSize,
+      page,
+      LastKey: LastKey || null,
+    });
+
+    const result: ListWorkflows = {
+      Workflows: [],
+      TotalRecords: workflowExecutions.totalRecords,
+      LastKey: workflowExecutions.lastKey,
+    };
+
+    result.Workflows = workflowExecutions.Executions.map((e) => {
+      return {
+        WXID: e.WXID,
+        WLFN: e.WLFN,
+        CRAT: e.CRAT,
+      };
+    });
+
+    return result;
   }
 }

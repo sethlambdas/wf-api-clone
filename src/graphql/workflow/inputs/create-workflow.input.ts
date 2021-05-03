@@ -15,4 +15,7 @@ export class CreateWorkflowInput {
 
   @Field((type) => [StateWorkflowInput])
   States: StateWorkflowInput[];
+
+  @Field()
+  WLFN: string;
 }

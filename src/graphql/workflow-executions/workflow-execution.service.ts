@@ -1,6 +1,7 @@
 import { Inject, Injectable } from '@nestjs/common';
 import { v4 } from 'uuid';
 import { CreateWorkflowExecutionInput } from './inputs/create-workflow-execution.input';
+import { QueryIndexWorkflowExecutionInput } from './inputs/queryIndex-workflow-execution.input';
 import { SaveWorkflowExecutionInput } from './inputs/save-workflow-execution.input';
 import { WorkflowExecution, WorkflowExecutionKey } from './workflow-execution.entity';
 import { WorkflowExecutionRepository } from './workflow-execution.repository';
@@ -44,11 +45,15 @@ export class WorkflowExecutionService {
     return this.workflowExecutionRepository.deleteWorkflowExecution(workflowExecutionKey);
   }
 
-  async queryWorkflowExecution(filter: { [key: string]: any }) {
-    return this.workflowExecutionRepository.queryWorkflowExecution(filter);
+  async scanWorkflowExecution(filter: { [key: string]: any }) {
+    return this.workflowExecutionRepository.scanWorkflowExecution(filter);
   }
 
   async listWorkflowExecutions() {
     return this.workflowExecutionRepository.listWorkflowExecutions();
+  }
+
+  async queryIndexWorkflowExecution(queryIndexWorkflowExecutionInput: QueryIndexWorkflowExecutionInput) {
+    return this.workflowExecutionRepository.queryIndexWorkflowExecution(queryIndexWorkflowExecutionInput);
   }
 }

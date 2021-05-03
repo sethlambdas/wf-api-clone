@@ -27,4 +27,10 @@ export class CreateWorkflowExecutionInput {
 
   @Field((type) => [PARALLELInput], { nullable: true })
   PARALLEL?: PARALLELInput[];
+
+  @Field()
+  WLFN: string;
+
+  @Field({ nullable: true })
+  CRAT: string;
 }

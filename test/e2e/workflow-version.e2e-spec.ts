@@ -53,6 +53,7 @@ const createWorkflowVersionInput = {
   WID: v4(),
   WV: '1',
   FAID: '[1, 2, 3]',
+  WLFN: 'SampleWorflowVersionName',
 };
 
 const saveWorkflowVersionInput = {

@@ -20,4 +20,7 @@ export class WorkflowVersion implements WorkflowVersionKey {
 
   @Field()
   FAID: string;
+
+  @Field()
+  WLFN: string;
 }

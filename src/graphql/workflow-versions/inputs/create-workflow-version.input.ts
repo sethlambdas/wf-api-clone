@@ -13,4 +13,7 @@ export class CreateWorkflowVersionInput {
 
   @Field()
   FAID: string;
+
+  @Field()
+  WLFN: string;
 }

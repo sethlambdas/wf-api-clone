@@ -10,6 +10,7 @@ import { CAT, WorkflowExecution } from './graphql/workflow-executions/workflow-e
 import { WorkflowExecutionService } from './graphql/workflow-executions/workflow-execution.service';
 import { WorkflowStepStatus } from './graphql/workflow-steps/enums/workflow-step-status.enum';
 import { WorkflowStepService } from './graphql/workflow-steps/workflow-step.service';
+import { WorkflowVersionService } from './graphql/workflow-versions/workflow-version.service';
 import activityRegistry, { ActivityTypes } from './utils/activity/activity-registry.util';
 import { ConfigUtil } from './utils/config.util';
 import { putEventsEB } from './utils/event-bridge/event-bridge.util';
@@ -26,6 +27,7 @@ async function bootstrap() {
   });
   const workflowStepService = app.get(WorkflowStepService);
   const workflowExecutionService = app.get(WorkflowExecutionService);
+  const workflowVersionService = app.get(WorkflowVersionService);
 
   if (process.env.NODE_ENV === 'development') {
     logger.log('Setting up local stack');
@@ -59,7 +61,9 @@ async function bootstrap() {
       const act: CAT = detail?.ACT;
       if (act) act.WSID = currentWfStepId;
 
-      const wfExecs = await workflowExecutionService.queryWorkflowExecution({
+      const workflowVersion = await workflowVersionService.getWorkflowVersion(wfVersionId);
+
+      const wfExecs = await workflowExecutionService.scanWorkflowExecution({
         WVID: { eq: wfVersionId },
       });
 
@@ -71,6 +75,7 @@ async function bootstrap() {
         wfExec = await workflowExecutionService.saveWorkflowExecution(wfExec.WXID, {
           WSID: currentWfStepId,
           CAT: createCAT,
+          CRAT: act.T,
         });
       } else if (!wfExecs.length) {
         wfExec = await workflowExecutionService.createWorkflowExecution({
@@ -78,6 +83,8 @@ async function bootstrap() {
           CAT: [{ ...act, Status: WorkflowStepStatus.Started }],
           STE: '{}',
           WSID: currentWfStepId,
+          WLFN: workflowVersion.WLFN,
+          CRAT: act.T,
         });
       }
 

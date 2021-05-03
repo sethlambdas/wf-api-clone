@@ -3,6 +3,7 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import * as cookieParser from 'cookie-parser';
 import * as faker from 'faker';
+import * as request from 'supertest';
 import * as typeOrmTestConfig from './../src/config/typeorm.test-config';
 import { AppModule } from './../src/graphql/app.module';
 import { UserService } from './../src/graphql/users/user.service';
@@ -53,4 +54,12 @@ export const dataTesting = async (): Promise<any> => {
   await userService.signUp(authCredentialsInput);
   const { accessToken } = await userService.signIn(authCredentialsInput);
   return { accessToken };
+};
+
+export const initiateGraphqlRequest = async (query: any, variables: any) => {
+  const {
+    body: { data },
+  } = await request(getHttpServerTesting()).post('/api/graphql').send({ query, variables }).expect(200);
+
+  return data;
 };

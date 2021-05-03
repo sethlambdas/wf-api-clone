@@ -18,6 +18,9 @@ export const WorkflowVersionSchema = new Schema(
     FAID: {
       type: String,
     },
+    WLFN: {
+      type: String,
+    },
   },
   {
     timestamps: {

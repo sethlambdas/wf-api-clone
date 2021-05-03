@@ -33,6 +33,20 @@ export const WorkflowExecutionSchema = new Schema(
       type: Array,
       schema: [ParallelSchema],
     },
+    WLFN: {
+      type: String,
+    },
+    CRAT: {
+      type: String,
+      required: true,
+      index: {
+        global: true,
+        rangeKey: 'WXID',
+        name: 'GetCRAT',
+        project: true,
+        throughput: 5,
+      },
+    },
   },
   {
     timestamps: {

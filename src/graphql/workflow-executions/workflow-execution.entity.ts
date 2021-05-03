@@ -27,6 +27,15 @@ export class PARALLEL {
 }
 
 @ObjectType()
+export class LastKey {
+  @Field()
+  WXID: string;
+
+  @Field({ nullable: true })
+  CRAT: string;
+}
+
+@ObjectType()
 export class WorkflowExecution implements WorkflowExecutionKey {
   @Field()
   WXID: string;
@@ -42,4 +51,22 @@ export class WorkflowExecution implements WorkflowExecutionKey {
 
   @Field((type) => [PARALLEL], { nullable: true })
   PARALLEL?: PARALLEL[];
+
+  @Field()
+  WLFN: string;
+
+  @Field({ nullable: true })
+  CRAT: string;
+}
+
+@ObjectType()
+export class QueryWorkflowExecution {
+  @Field((type) => [WorkflowExecution])
+  Executions: WorkflowExecution[];
+
+  @Field((type) => LastKey, { nullable: true })
+  lastKey?: LastKey;
+
+  @Field((type) => Int)
+  totalRecords: number;
 }
