@@ -46,6 +46,9 @@ sqs:
   endpoint: 'http://localhost:4566'
   queueName: 'WORKFLOW_QUEUE'
   queueUrl: 'http://localhost:4566/000000000000/WORKFLOW_QUEUE'
+  queueError:  'WORKFLOW_QUEUE_ERROR'
+  queueErrorUrl: 'http://localhost:4566/000000000000/WORKFLOW_QUEUE_ERROR'
+  maxRetriesLimit: 3
 
 eventBridge:
   endpoint: 'http://localhost:4566'

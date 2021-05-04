@@ -42,21 +42,35 @@ export async function getSQSQueueUrlDetail() {
   }
 }
 
+export async function getSQSQueueAttributes(QueueUrl: string) {
+  try {
+    logger.log('Getting SQS Queue Attributes');
+
+    const queue = await SQS.getQueueAttributes({ QueueUrl }).promise();
+
+    logger.log(queue);
+    return queue;
+  } catch (err) {
+    logger.error(`Error, ${err}`);
+  }
+}
+
 // tslint:disable-next-line: class-name
 interface CreateSQSQueueInput {
   QueueName: string;
-  Attributes: {
+  Attributes?: {
     DelaySeconds: string;
     MessageRetentionPeriod: string;
+    RedrivePolicy: string;
   };
   [key: string]: unknown;
 }
 
-export async function createSQSQueue(createParams?: CreateSQSQueueInput) {
+export async function createSQSQueue(createParams?: CreateSQSQueueInput, errorTargetArn?: string) {
   try {
     logger.log('Creating SQS Queue');
 
-    const queue = await SQS.createQueue(createParams || defaultCreateParams).promise();
+    const queue = await SQS.createQueue(createParams || defaultCreateParams(errorTargetArn)).promise();
 
     logger.log(queue);
     return queue;

@@ -11,17 +11,26 @@ export const SQS = new AWS.SQS(config);
 export const QUEUE_NAME = ConfigUtil.get('sqs.queueName');
 export const WORKFLOW_QUEUE_URL = ConfigUtil.get('sqs.queueUrl');
 
+export const QUEUE_ERROR = ConfigUtil.get('sqs.queueError');
+export const WORKFLOW_QUEUE_URL_ERROR = ConfigUtil.get('sqs.queueErrorUrl');
+
 export const defaultListParams = {};
 
-export const defaultCreateParams = {
-  QueueName: QUEUE_NAME,
-  Attributes: {
-    DelaySeconds: '0',
-    MessageRetentionPeriod: '86400',
-  },
+export const defaultCreateParams = (errorTargetArn: string): AWS.SQS.Types.CreateQueueRequest => {
+  return {
+    QueueName: QUEUE_NAME,
+    Attributes: {
+      DelaySeconds: '0',
+      MessageRetentionPeriod: '86400',
+      RedrivePolicy: JSON.stringify({
+        deadLetterTargetArn: errorTargetArn,
+        maxReceiveCount: ConfigUtil.get('sqs.maxRetriesLimit'),
+      }),
+    },
+  };
 };
 
-export const defaultSendMessageParams = (msg: string = '') => {
+export const defaultSendMessageParams = (msg: string = ''): AWS.SQS.Types.SendMessageRequest => {
   return {
     // Remove DelaySeconds parameter and value for FIFO queues
     DelaySeconds: 0,

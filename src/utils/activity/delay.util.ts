@@ -1,8 +1,9 @@
 import { Logger } from '@nestjs/common';
 import { startCase } from 'lodash';
 import * as moment from 'moment';
-import { ConfigUtil } from '../config.util';
 import { putRuleEB, putTargetsEB } from '../event-bridge/event-bridge.util';
+import { WORKFLOW_QUEUE_URL } from '../sqs/sqs-config.util';
+import { getSQSQueueAttributes } from '../sqs/sqs.util';
 
 const logger = new Logger('delay');
 
@@ -42,7 +43,10 @@ export default async function delay(payload: any, state?: any) {
 
     const executeDelayEB = async (delayedDetail: any) => {
       const Id = '1';
-      const Arn = `arn:aws:sqs:us-east-1:000000000000:${ConfigUtil.get('sqs.queueName')}`;
+      const {
+        Attributes: { QueueArn: queueArn },
+      } = await getSQSQueueAttributes(WORKFLOW_QUEUE_URL);
+      const Arn = queueArn;
       const Input = JSON.stringify({
         delayedDetail,
       });
