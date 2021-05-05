@@ -49,6 +49,10 @@ sqs:
   queueError:  'WORKFLOW_QUEUE_ERROR'
   queueErrorUrl: 'http://localhost:4566/000000000000/WORKFLOW_QUEUE_ERROR'
   maxRetriesLimit: 3
+  maxRetriesIntervalSeconds:
+    - 5
+    - 15
+    - 30
 
 eventBridge:
   endpoint: 'http://localhost:4566'

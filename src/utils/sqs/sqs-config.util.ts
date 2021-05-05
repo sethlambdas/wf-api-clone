@@ -24,7 +24,7 @@ export const defaultCreateParams = (errorTargetArn: string): AWS.SQS.Types.Creat
       MessageRetentionPeriod: '86400',
       RedrivePolicy: JSON.stringify({
         deadLetterTargetArn: errorTargetArn,
-        maxReceiveCount: ConfigUtil.get('sqs.maxRetriesLimit'),
+        maxReceiveCount: +ConfigUtil.get('sqs.maxRetriesLimit') + 1,
       }),
     },
   };

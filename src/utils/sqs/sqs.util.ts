@@ -56,6 +56,26 @@ export async function getSQSQueueAttributes(QueueUrl: string) {
 }
 
 // tslint:disable-next-line: class-name
+interface ChangeSQSMessageVisibilityInput {
+  QueueUrl: string;
+  ReceiptHandle: string;
+  VisibilityTimeout: number;
+}
+
+export async function changeSQSMessageVisibility(visibilityParams: ChangeSQSMessageVisibilityInput) {
+  try {
+    logger.log('Change SQS Message Visibility');
+
+    const data = await SQS.changeMessageVisibility(visibilityParams).promise();
+
+    logger.log(data);
+    return data;
+  } catch (err) {
+    logger.error(`Error, ${err}`);
+  }
+}
+
+// tslint:disable-next-line: class-name
 interface CreateSQSQueueInput {
   QueueName: string;
   Attributes?: {

@@ -16,6 +16,7 @@ import { ConfigUtil } from './utils/config.util';
 import { putEventsEB } from './utils/event-bridge/event-bridge.util';
 import localStackInit from './utils/localstack-init.util';
 import { WORKFLOW_QUEUE_URL } from './utils/sqs/sqs-config.util';
+import { changeSQSMessageVisibility } from './utils/sqs/sqs.util';
 
 AWS.config.update({ region: ConfigUtil.get('aws.region') });
 
@@ -53,6 +54,7 @@ async function bootstrap() {
 
   const workflowSQSQueue = Consumer.create({
     queueUrl: WORKFLOW_QUEUE_URL,
+    attributeNames: ['ApproximateReceiveCount'],
     handleMessage: async (message) => {
       try {
         const msgPayload = JSON.parse(message.Body);
@@ -264,6 +266,22 @@ async function bootstrap() {
           throw err;
         }
       } catch (err) {
+        const {
+          Attributes: { ApproximateReceiveCount },
+        } = message;
+        const receiveCount = +ApproximateReceiveCount - 1;
+        const maxRetriesLimit = +ConfigUtil.get('sqs.maxRetriesLimit');
+        if (receiveCount < maxRetriesLimit) {
+          const maxRetriesIntervalSeconds = ConfigUtil.get('sqs.maxRetriesIntervalSeconds');
+          const defaultIntervalSecond = find(maxRetriesIntervalSeconds, null, 0);
+          const maxRetriesIntervalSecond = find(maxRetriesIntervalSeconds, null, receiveCount) || defaultIntervalSecond;
+          const visibilityParams = {
+            QueueUrl: WORKFLOW_QUEUE_URL,
+            ReceiptHandle: message.ReceiptHandle,
+            VisibilityTimeout: maxRetriesIntervalSecond,
+          };
+          await changeSQSMessageVisibility(visibilityParams);
+        }
         logger.error(err);
         throw err;
       }
