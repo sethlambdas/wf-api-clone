@@ -2,7 +2,7 @@ import assignData from './assign-data.util';
 import condition from './condition.util';
 import delay from './delay.util';
 import email from './email.util';
-import manualInput from './manual-input.util';
+import manualApproval from './manual-approval.util';
 import mergeData from './merge-data.util';
 import webService from './web-service.util';
 
@@ -38,7 +38,7 @@ const activityRegistry = {
   },
   [ActivityTypes.ManualApproval]: {
     label: ActivityTypes.ManualApproval,
-    processActivity: (payload?: any, state?: any) => manualInput(payload),
+    processActivity: (payload?: any, state?: any) => manualApproval(payload),
   },
   [ActivityTypes.WebService]: {
     label: ActivityTypes.WebService,

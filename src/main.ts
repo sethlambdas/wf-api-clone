@@ -203,8 +203,12 @@ async function bootstrap() {
               }
 
               logger.log(params);
-              if (act.T === ActivityTypes.ManualApproval && !act.MD.Completed) {
-                logger.log('Waiting for Manual Approval');
+              if (act.T === ActivityTypes.ManualApproval) {
+                if (typeof actResult === 'function') {
+                  const executeManualApprovalEB = actResult as (WLFN: string, WSID: string) => any;
+                  await executeManualApprovalEB(workflowVersion.WLFN, currentWfStepId);
+                  logger.log('Waiting for Manual Approval');
+                }
               } else if (act.T === ActivityTypes.Delay) {
                 if (typeof actResult === 'function') {
                   const executeDelayEB = actResult as (delayedDetail: any) => any;

@@ -88,7 +88,7 @@ const createWorkflowStepInput: CreateWorkflowStepInput = {
   AID: 'AID123',
   NAID: [],
   ACT: {
-    T: 'Manual Input',
+    T: 'Manual Approval',
     NM: 'node_0',
     MD: {
       Completed: false,
@@ -100,7 +100,7 @@ const createWorkflowStepInput: CreateWorkflowStepInput = {
 
 const initiateCurrentStepInput: InitiateCurrentStepInput = {
   WSID: '',
-  ActivityType: 'Manual Input',
+  ActivityType: 'Manual Approval',
   Approve: true,
 };
 
@@ -235,7 +235,7 @@ const createWorkflowInput: CreateWorkflowInput = {
     },
     {
       ActivityId: 'step_9',
-      ActivityType: 'Manual Input',
+      ActivityType: 'Manual Approval',
       Variables: { Completed: false },
       End: true,
     },

@@ -34,7 +34,7 @@ export class VariableWorkflowInput {
   @Field({ nullable: true })
   DefaultNext?: string;
 
-  // ManualInput
+  // ManualApproval
   @Field((type) => Boolean, { nullable: true })
   Completed?: boolean;
 
@@ -57,11 +57,11 @@ export class VariableWorkflowInput {
   @Field({ nullable: true })
   Name?: string;
 
-  // WebService
+  // ManualApproval
   @Field({ nullable: true })
   ApproveStep?: string;
 
-  // WebService
+  // ManualApproval
   @Field({ nullable: true })
   RejectStep?: string;
 }

@@ -110,7 +110,7 @@ const MDSchema = new Schema({
   DefaultNext: {
     type: String,
   },
-  // ManualInput
+  // ManualApproval
   Completed: {
     type: Boolean,
   },

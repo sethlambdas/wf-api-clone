@@ -106,7 +106,7 @@ export class MD {
   @Field({ nullable: true })
   DefaultNext?: string;
 
-  // ManualInput
+  // ManualApproval
   @Field((type) => Boolean, { nullable: true })
   Completed?: boolean;
 
