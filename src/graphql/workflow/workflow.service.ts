@@ -70,7 +70,7 @@ export class WorkflowService {
         NM: state.ActivityId,
         MD: state.Variables,
         END: state.End,
-        DESIGN: await this.getDesign(Design, state),
+        DESIGN: (await this.getDesign(Design, state)) as any,
       };
 
       const createWorkflowStepInput: CreateWorkflowStepInput = {
@@ -295,7 +295,7 @@ export class WorkflowService {
 
     if (!queryWorkflowSteps.length) return;
 
-    if (ActivityType === ActivityTypes.ManualInput && Approve) queryWorkflowSteps[0].ACT.MD.Completed = true;
+    if (ActivityType === ActivityTypes.ManualApproval && Approve) queryWorkflowSteps[0].ACT.MD.Completed = true;
 
     const params = {
       Entries: [

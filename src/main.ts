@@ -203,8 +203,8 @@ async function bootstrap() {
               }
 
               logger.log(params);
-              if (act.T === ActivityTypes.ManualInput && !act.MD.Completed) {
-                logger.log('Waiting for Manual Input');
+              if (act.T === ActivityTypes.ManualApproval && !act.MD.Completed) {
+                logger.log('Waiting for Manual Approval');
               } else if (act.T === ActivityTypes.Delay) {
                 if (typeof actResult === 'function') {
                   const executeDelayEB = actResult as (delayedDetail: any) => any;

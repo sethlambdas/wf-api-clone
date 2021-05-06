@@ -56,4 +56,12 @@ export class VariableWorkflowInput {
   // WebService
   @Field({ nullable: true })
   Name?: string;
+
+  // WebService
+  @Field({ nullable: true })
+  ApproveStep?: string;
+
+  // WebService
+  @Field({ nullable: true })
+  RejectStep?: string;
 }

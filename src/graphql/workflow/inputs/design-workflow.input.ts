@@ -1,5 +1,6 @@
 /* tslint:disable:max-classes-per-file */
 import { Field, InputType, Int } from '@nestjs/graphql';
+import { VariableWorkflowInput } from './variable-workflow.input';
 
 @InputType()
 class LabelInput {
@@ -18,11 +19,14 @@ class DataInput {
   @Field()
   nodeType: string;
 
-  @Field()
+  @Field({ nullable: true })
   labelIconName: string;
 
   @Field()
   state: string;
+
+  @Field((type) => VariableWorkflowInput, { nullable: true })
+  variables?: VariableWorkflowInput;
 }
 
 @InputType()

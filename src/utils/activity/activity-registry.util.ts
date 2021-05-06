@@ -22,7 +22,7 @@ export enum ActivityTypes {
   Condition = 'Condition',
   AssignData = 'Assign Data',
   MergeData = 'Merge Data',
-  ManualInput = 'Manual Input',
+  ManualApproval = 'Manual Approval',
   ParallelStart = 'Parallel Start',
   ParallelEnd = 'Parallel End',
 }
@@ -36,8 +36,8 @@ const activityRegistry = {
     label: ActivityTypes.ParallelEnd,
     processActivity: () => null,
   },
-  [ActivityTypes.ManualInput]: {
-    label: ActivityTypes.ManualInput,
+  [ActivityTypes.ManualApproval]: {
+    label: ActivityTypes.ManualApproval,
     processActivity: (payload?: any, state?: any) => manualInput(payload),
   },
   [ActivityTypes.WebService]: {
