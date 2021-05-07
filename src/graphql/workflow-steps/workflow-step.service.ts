@@ -1,8 +1,9 @@
 import { Inject, Injectable } from '@nestjs/common';
 import { v4 } from 'uuid';
+import { WorkflowKeysInput } from '../common/inputs/workflow-key.input';
 import { CreateWorkflowStepInput } from './inputs/create-workflow-step.input';
 import { SaveWorkflowStepInput } from './inputs/save-workflow-step.input';
-import { WorkflowStep, WorkflowStepKey } from './workflow-step.entity';
+import { WorkflowStep } from './workflow-step.entity';
 import { WorkflowStepRepository } from './workflow-step.repository';
 
 @Injectable()
@@ -13,39 +14,71 @@ export class WorkflowStepService {
   ) {}
 
   async createWorkflowStep(createWorkflowStepInput: CreateWorkflowStepInput) {
+    const { PK, WVID, NAID, AID, ACT } = createWorkflowStepInput;
+    const WSID = `${WVID}|WS#${v4()}`;
+    const transformedAID = `AID#${AID}`;
     const workflowStep = {
-      ...createWorkflowStepInput,
-      WSID: v4(),
+      PK,
+      SK: WSID,
+      AID: transformedAID,
+      DATA: transformedAID,
+      WSID,
+      WVID,
+      NAID,
+      ACT,
     } as WorkflowStep;
     return this.workflowStepRepository.createWorkflowStep(workflowStep);
   }
 
-  async saveWorkflowStep(id: string, saveWorkflowStepInput: SaveWorkflowStepInput) {
-    const workflowStepKey = {
-      WSID: id,
-    } as WorkflowStepKey;
+  async batchCreateWorkflowStep(createWorkflowStepInputs: CreateWorkflowStepInput[]) {
+    const workflowSteps: WorkflowStep[] = [];
+    for (const input of createWorkflowStepInputs) {
+      const { PK, WVID, NAID, AID, ACT } = input;
+      const WSID = `${WVID}|WS#${v4()}`;
+      const transformedAID = `AID#${AID}`;
+      const workflowStep = {
+        PK,
+        SK: WSID,
+        AID: transformedAID,
+        DATA: transformedAID,
+        WSID,
+        WVID,
+        NAID,
+        ACT,
+      } as WorkflowStep;
+      workflowSteps.push(workflowStep);
+    }
+
+    const { unprocessedItems } = await this.workflowStepRepository.batchCreateWorkflowStep(workflowSteps);
+    if (unprocessedItems.length > 0) return false;
+    else return workflowSteps;
+  }
+
+  async saveWorkflowStep(workflowKeysInput: WorkflowKeysInput, saveWorkflowStepInput: SaveWorkflowStepInput) {
     const workflowStep = {
       ...saveWorkflowStepInput,
     } as WorkflowStep;
-    return this.workflowStepRepository.saveWorkflowStep(workflowStepKey, workflowStep);
+    return this.workflowStepRepository.saveWorkflowStep(workflowKeysInput, workflowStep);
   }
 
-  async getWorkflowStep(id: string) {
-    const workflowStepKey = {
-      WSID: id,
-    } as WorkflowStepKey;
-    return this.workflowStepRepository.getWorkflowStep(workflowStepKey);
+  async getWorkflowStep(workflowKeysInput: WorkflowKeysInput) {
+    return this.workflowStepRepository.getWorkflowStep(workflowKeysInput);
+  }
+
+  async getWorkflowStepByAid(AID: string, OrgId: string) {
+    return this.workflowStepRepository.getWorkflowStepByAid(AID, OrgId);
+  }
+
+  async getWorkflowStepWithinAVersion(OrgId: string, WorkflowVersionSK: string) {
+    return this.workflowStepRepository.getWorkflowStepWithinAVersion(OrgId, WorkflowVersionSK);
   }
 
   async queryWorkflowStep(filter: { [key: string]: any }) {
     return this.workflowStepRepository.queryWorkflowStep(filter);
   }
 
-  async deleteWorkflowStep(id: string) {
-    const workflowStepKey = {
-      WSID: id,
-    } as WorkflowStepKey;
-    return this.workflowStepRepository.deleteWorkflowStep(workflowStepKey);
+  async deleteWorkflowStep(workflowKeysInput: WorkflowKeysInput) {
+    return this.workflowStepRepository.deleteWorkflowStep(workflowKeysInput);
   }
 
   async listWorkflowSteps() {

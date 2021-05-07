@@ -24,6 +24,9 @@ export class ACTInput extends OmitType(ACT, ['DESIGN', 'MD'] as const, InputType
 @InputType()
 export class CreateWorkflowStepInput {
   @Field()
+  PK: string;
+
+  @Field()
   WVID: string;
 
   @Field((type) => [String])
@@ -32,6 +35,6 @@ export class CreateWorkflowStepInput {
   @Field()
   AID: string;
 
-  @Field((type) => ACTInput)
-  ACT: ACTInput;
+  @Field((type) => ACTInput, { nullable: true })
+  ACT?: ACTInput;
 }

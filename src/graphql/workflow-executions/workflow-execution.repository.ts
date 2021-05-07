@@ -1,29 +1,32 @@
 import { Injectable } from '@nestjs/common';
 import { InjectModel, Model } from 'nestjs-dynamoose';
 import { ConfigUtil } from '../../utils/config.util';
-import { QueryIndexWorkflowExecutionInput } from './inputs/queryIndex-workflow-execution.input';
-import { QueryWorkflowExecution, WorkflowExecution, WorkflowExecutionKey } from './workflow-execution.entity';
+import { WorkflowKeysInput } from '../common/inputs/workflow-key.input';
+import { WorkflowKeys } from '../common/interfaces/workflow-key.interface';
+import { QueryListWFExecutionsInput } from './inputs/query-list-workflow-execution.input';
+import { QueryWorkflowExecutionsInput } from './inputs/query-workflow-execution.input';
+import { QueryListWFExecutions, WorkflowExecution } from './workflow-execution.entity';
 
 @Injectable()
 export class WorkflowExecutionRepository {
   constructor(
-    @InjectModel(ConfigUtil.get('dynamodb.schema.workflowExecutions'))
-    private workflowExecutionModel: Model<WorkflowExecution, WorkflowExecutionKey>,
+    @InjectModel(ConfigUtil.get('dynamodb.schema.workflow'))
+    private workflowExecutionModel: Model<WorkflowExecution, WorkflowKeys>,
   ) {}
 
   async createWorkflowExecution(workflowExecution: WorkflowExecution) {
     return this.workflowExecutionModel.create(workflowExecution);
   }
 
-  async saveWorkflowExecution(key: WorkflowExecutionKey, workflowExecution: Partial<WorkflowExecution>) {
+  async saveWorkflowExecution(key: WorkflowKeysInput, workflowExecution: Partial<WorkflowExecution>) {
     return this.workflowExecutionModel.update(key, workflowExecution);
   }
 
-  async deleteWorkflowExecution(key: WorkflowExecutionKey) {
+  async deleteWorkflowExecution(key: WorkflowKeysInput) {
     return this.workflowExecutionModel.delete(key);
   }
 
-  async getWorkflowExecution(key: WorkflowExecutionKey) {
+  async getWorkflowExecution(key: WorkflowKeysInput) {
     return this.workflowExecutionModel.get(key);
   }
 
@@ -32,15 +35,29 @@ export class WorkflowExecutionRepository {
     return workflowExecutions.toJSON();
   }
 
+  async queryWorkflowExecution(queryWorkflowExecutionsInput: QueryWorkflowExecutionsInput) {
+    const {
+      indexName,
+      primaryKey: { PK, PKValue, SK, SKValue },
+    } = queryWorkflowExecutionsInput;
+
+    const keyExpressionConditions = { [`${PK}`]: PKValue };
+    if (SK) keyExpressionConditions[`${SK}`] = SKValue;
+
+    const workflowExecutions = this.workflowExecutionModel.query(keyExpressionConditions);
+
+    if (indexName) workflowExecutions.using(indexName);
+    const result: any = await workflowExecutions.exec();
+    return result.toJSON();
+  }
+
   async listWorkflowExecutions(): Promise<WorkflowExecution[]> {
     const workflowExecutions: any = await this.workflowExecutionModel.scan().exec();
     return workflowExecutions.toJSON();
   }
 
-  async queryIndexWorkflowExecution(
-    queryIndexWorkflowExecutionInput: QueryIndexWorkflowExecutionInput,
-  ): Promise<QueryWorkflowExecution> {
-    const { IndexName, PK, Value, pageSize, LastKey, page } = queryIndexWorkflowExecutionInput;
+  async queryListWFExecutions(queryListWFExecutionsInput: QueryListWFExecutionsInput): Promise<QueryListWFExecutions> {
+    const { IndexName, PK, Value, pageSize, LastKey, page } = queryListWFExecutionsInput;
     let results: any;
     let workflowExecutions: any;
     let total: any;

@@ -1,8 +1,8 @@
-import { Injectable, Logger } from '@nestjs/common';
+import { Inject, Injectable, Logger } from '@nestjs/common';
 import { v4 } from 'uuid';
 import { ActivityTypes } from '../../utils/activity/activity-registry.util';
 import { putEventsEB } from '../../utils/event-bridge/event-bridge.util';
-import { QueryWorkflowExecution, WorkflowExecution } from '../workflow-executions/workflow-execution.entity';
+import { QueryListWFExecutions, WorkflowExecution } from '../workflow-executions/workflow-execution.entity';
 import { WorkflowExecutionService } from '../workflow-executions/workflow-execution.service';
 import { CreateWorkflowStepInput } from '../workflow-steps/inputs/create-workflow-step.input';
 import { SaveWorkflowStepInput } from '../workflow-steps/inputs/save-workflow-step.input';
@@ -17,32 +17,39 @@ import { GetWorkflowDetailsInput } from './inputs/get-workflow.input';
 import { InitiateCurrentStepInput } from './inputs/initiate-step.input';
 import { ListWorkflowInput } from './inputs/list-workflow.input';
 import { StateWorkflowInput } from './inputs/state-workflow.input';
-import { ListWorkflows, WorkflowDetails } from './workflow.entity';
+import { CreateWorkflowResponse, ListWorkflows, WorkflowDetails } from './workflow.entity';
+import { WorkflowRepository } from './workflow.repository';
 
 @Injectable()
 export class WorkflowService {
   private logger = new Logger('WorkflowService');
 
   constructor(
+    @Inject(WorkflowRepository)
+    private workflowRepository: WorkflowRepository,
     private workflowStepService: WorkflowStepService,
     private workflowVersionService: WorkflowVersionService,
     private workflowExecutionService: WorkflowExecutionService,
   ) {}
 
-  async createWorkflow(createWorkflowInput: CreateWorkflowInput) {
-    const { WorkflowId, Design, StartAt, States, WLFN } = createWorkflowInput;
+  async createWorkflow(createWorkflowInput: CreateWorkflowInput): Promise<CreateWorkflowResponse> {
+    const { WorkflowId, Design, StartAt, States, WLFN, OrgId } = createWorkflowInput;
     let WV = 1;
-    let WID = v4();
+    let WLFID = '';
+    let FAID = '';
+    const workflowStepInputs: CreateWorkflowStepInput[] = [];
+    let executeWorkflowStepKey: { PK: string; SK: string };
 
-    if (WorkflowId) {
-      WID = WorkflowId;
-      const queryWorkflowVersions = await this.workflowVersionService.queryWorkflowVersion({
-        WID: { eq: WorkflowId },
-      });
-      const length = queryWorkflowVersions.length;
-      if (length > 0) {
-        WV = +queryWorkflowVersions[length - 1].WV + 1;
-      }
+    if (!WorkflowId) {
+      const getWorkflowName = await this.workflowRepository.getWorkflowByName(WLFN, OrgId);
+      if (getWorkflowName.count > 0) return { IsWorkflowNameExist: true };
+
+      const workflow = await this.workflowRepository.createWorkflow({ OrgId, WLFN });
+      WLFID = workflow.SK;
+    } else {
+      WLFID = WorkflowId;
+      const workflowVersions = await this.workflowVersionService.getAllWorkflowVersionsOfWorkflow({ PK: OrgId, WLFID });
+      WV = workflowVersions.count + 1;
     }
 
     const activityTypesExists = States.every((state) => {
@@ -54,74 +61,85 @@ export class WorkflowService {
     }
 
     const createWorkflowVersionInput: CreateWorkflowVersionInput = {
+      PK: OrgId,
+      WLFID,
       CID: v4(),
-      WID,
       WV: JSON.stringify(WV),
       FAID: '',
-      WLFN,
     };
 
     const workflowVersion = await this.workflowVersionService.createWorkflowVersion(createWorkflowVersionInput);
-    const workflowSteps: WorkflowStep[] = [];
 
     for (const state of States) {
+      const AID = v4();
+
+      if (state.ActivityId === StartAt) FAID = `AID#${AID}`;
+
       const ACT: TypeACT = {
         T: state.ActivityType,
         NM: state.ActivityId,
         MD: state.Variables,
-        END: state.End,
-        DESIGN: (await this.getDesign(Design, state)) as any,
+        DESIGN: await this.getDesign(Design, state),
       };
 
+      if (state.End) ACT.END = state.End;
+
       const createWorkflowStepInput: CreateWorkflowStepInput = {
-        WVID: workflowVersion.WVID,
+        PK: OrgId,
+        WVID: workflowVersion.SK,
         NAID: [],
-        AID: v4(),
+        AID,
         ACT,
       };
 
-      const workflowStep = await this.workflowStepService.createWorkflowStep(createWorkflowStepInput);
-      workflowSteps.push(workflowStep);
+      workflowStepInputs.push(createWorkflowStepInput);
     }
+
+    const results = await this.workflowStepService.batchCreateWorkflowStep(workflowStepInputs);
+
+    if (!results) throw new Error('Not all workflow steps inserted in DynamoDB');
+
+    const workflowSteps = results;
 
     const nextStates = States.filter((state) => state.NextActivities?.length > 0);
 
     for (const state of nextStates) {
-      const NAID = state.NextActivities.map((nextActivityId) => {
-        return workflowSteps.find((workflowStep) => {
-          const ACT = workflowStep.ACT;
-          return ACT.NM === nextActivityId;
-        })?.AID;
-      });
+      const NAID: string[] = [];
+      let getWorkflowStep: WorkflowStep;
 
-      const getWorkflowStep = workflowSteps.find((workflowStep) => {
-        const ACT = workflowStep.ACT;
-        return ACT.NM === state.ActivityId;
-      });
+      for (const step of workflowSteps) {
+        if (state.NextActivities.includes(step.ACT.NM)) {
+          NAID.push(step.AID);
+          step.NAID = NAID;
+        }
+        if (step.ACT.NM === state.ActivityId) getWorkflowStep = step;
+        if (step.AID === FAID) executeWorkflowStepKey = { PK: step.PK, SK: step.SK };
+      }
 
-      const saveWorkflowStepInput: SaveWorkflowStepInput = {
-        NAID,
-      };
+      const saveWorkflowStepInput: SaveWorkflowStepInput = { NAID };
 
-      await this.workflowStepService.saveWorkflowStep(getWorkflowStep.WSID, saveWorkflowStepInput);
+      await this.workflowStepService.saveWorkflowStep(
+        { PK: getWorkflowStep.PK, SK: getWorkflowStep.SK },
+        saveWorkflowStepInput,
+      );
     }
 
     await this.updateWorkflowStepsConditional(workflowSteps, States);
 
-    const FAID = workflowSteps.find((workflowStep) => {
-      const ACT = workflowStep.ACT;
-      return ACT.NM === StartAt;
-    })?.AID;
+    const saveWorkflowVersionInput: SaveWorkflowVersionInput = { FAID };
 
-    const saveWorkflowVersionInput: SaveWorkflowVersionInput = {
-      FAID,
+    await this.workflowVersionService.saveWorkflowVersion(
+      { PK: OrgId, SK: workflowVersion.SK },
+      saveWorkflowVersionInput,
+    );
+
+    await this.executeWorkflowEB(WLFN, executeWorkflowStepKey);
+
+    return {
+      PK: OrgId,
+      SK: WLFID,
+      IsWorkflowNameExist: false,
     };
-
-    await this.workflowVersionService.saveWorkflowVersion(workflowVersion.WVID, saveWorkflowVersionInput);
-
-    await this.executeWorkflowEB(FAID, workflowSteps);
-
-    return workflowVersion.WID;
   }
 
   async updateWorkflowStepsConditional(workflowSteps: WorkflowStep[], States: StateWorkflowInput[]) {
@@ -149,11 +167,12 @@ export class WorkflowService {
         });
       }
 
-      const saveWorkflowStepInput: SaveWorkflowStepInput = {
-        ACT,
-      };
+      const saveWorkflowStepInput: SaveWorkflowStepInput = { ACT };
 
-      await this.workflowStepService.saveWorkflowStep(getWorkflowStep.WSID, saveWorkflowStepInput);
+      await this.workflowStepService.saveWorkflowStep(
+        { PK: getWorkflowStep.PK, SK: getWorkflowStep.SK },
+        saveWorkflowStepInput,
+      );
     }
   }
 
@@ -208,23 +227,16 @@ export class WorkflowService {
     return design;
   }
 
-  async executeWorkflowEB(FAID: string, workflowSteps: WorkflowStep[]) {
-    if (!workflowSteps.length) {
-      return;
-    }
-
-    const queryWorkflowSteps = await this.workflowStepService.queryWorkflowStep({
-      AID: { eq: FAID },
-    });
-
-    if (!queryWorkflowSteps.length) {
-      return;
-    }
+  async executeWorkflowEB(WLFN: string, executeWorkflowStepKey: { PK: string; SK: string }) {
+    const workflowStep = await this.workflowStepService.getWorkflowStep(executeWorkflowStepKey);
 
     const params = {
       Entries: [
         {
-          Detail: JSON.stringify(queryWorkflowSteps[0]),
+          Detail: JSON.stringify({
+            ...workflowStep,
+            WLFN,
+          }),
           DetailType: `workflowStep`,
           Source: 'workflow.initiate',
         },
@@ -235,67 +247,34 @@ export class WorkflowService {
   }
 
   async getWorkflowDetails(getWorkflowDetailsInput: GetWorkflowDetailsInput): Promise<WorkflowDetails> {
-    const { WID, WVID } = getWorkflowDetailsInput;
-    let workflowVersionID = WVID;
-    let workflowExecution: WorkflowExecution[];
+    const { OrgId, WorkflowVersionSK } = getWorkflowDetailsInput;
+    const Activities: TypeACT[] = [];
+    const Design: DesignWorkflow[] = [];
 
-    if (WVID) {
-      workflowExecution = await this.workflowExecutionService.scanWorkflowExecution({
-        WVID: workflowVersionID,
+    const workflowSteps = await this.workflowStepService.getWorkflowStepWithinAVersion(OrgId, WorkflowVersionSK);
+
+    for (const step of workflowSteps) {
+      Activities.push(step.ACT);
+
+      step.ACT.DESIGN.forEach((element) => {
+        Design.push(element);
       });
-    } else {
-      try {
-        let i = 0;
-
-        const workflowVersions = await this.workflowVersionService.queryWorkflowVersion({
-          WID,
-        });
-
-        workflowVersions.forEach((workflow) => {
-          if (i > +workflow.WV) return;
-          i = +workflow.WV;
-          workflowVersionID = workflow.WVID;
-        });
-
-        workflowExecution = await this.workflowExecutionService.scanWorkflowExecution({
-          WVID: workflowVersionID,
-        });
-      } catch (err) {
-        this.logger.log('Something went wrong with query');
-        this.logger.log('Query filters may not match anythin from database');
-        return {};
-      }
     }
 
-    if (workflowExecution.length > 0) {
-      const designs: DesignWorkflow[] = [];
-      for (const activity of workflowExecution[0].CAT) {
-        activity.DESIGN.forEach((element) => {
-          designs.push(element);
-        });
-      }
-
-      return {
-        WID,
-        WVID: workflowVersionID,
-        ACTIVITIES: workflowExecution[0].CAT,
-        DESIGN: designs,
-      };
-    }
-
-    return {};
+    return {
+      PK: OrgId,
+      WorkflowVersionSK,
+      Activities,
+      Design,
+    };
   }
 
   async initiateCurrentStep(initiateCurrentStepInput: InitiateCurrentStepInput) {
-    const { WSID, ActivityType, Approve } = initiateCurrentStepInput;
+    const { Key, ActivityType, Approve } = initiateCurrentStepInput;
 
-    const queryWorkflowSteps = await this.workflowStepService.queryWorkflowStep({
-      WSID: { eq: WSID },
-    });
+    const queryWorkflowSteps = await this.workflowStepService.getWorkflowStep(Key);
 
-    if (!queryWorkflowSteps.length) return;
-
-    if (ActivityType === ActivityTypes.ManualApproval && Approve) queryWorkflowSteps[0].ACT.MD.Completed = true;
+    if (ActivityType === ActivityTypes.ManualApproval && Approve) queryWorkflowSteps.ACT.MD.Completed = true;
 
     const params = {
       Entries: [
@@ -314,12 +293,12 @@ export class WorkflowService {
 
   async listWorkflows(listWorkflowsInput: ListWorkflowInput): Promise<ListWorkflows> {
     const { CRAT, pageSize, LastKey, page } = listWorkflowsInput;
-    let workflowExecutions: QueryWorkflowExecution = {
+    let workflowExecutions: QueryListWFExecutions = {
       Executions: [],
       totalRecords: 0,
     };
 
-    workflowExecutions = await this.workflowExecutionService.queryIndexWorkflowExecution({
+    workflowExecutions = await this.workflowExecutionService.queryListWFExecutions({
       IndexName: 'GetCRAT',
       PK: 'CRAT',
       Value: CRAT,
@@ -337,7 +316,7 @@ export class WorkflowService {
     result.Workflows = workflowExecutions.Executions.map((e) => {
       return {
         WXID: e.WXID,
-        WLFN: e.WLFN,
+        WLFN: 'hey',
         CRAT: e.CRAT,
       };
     });

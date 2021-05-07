@@ -1,10 +1,10 @@
 import { Field, InputType } from '@nestjs/graphql';
 
 @InputType()
-export class GetWorkflowDetailsInput {
+export class GetAllWorkflowVersionsOfWorkflowInput {
   @Field()
-  OrgId: string;
+  PK: string;
 
   @Field()
-  WorkflowVersionSK: string;
+  WLFID: string;
 }

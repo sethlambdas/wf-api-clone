@@ -1,17 +1,17 @@
-import { Field, Int, ObjectType, PartialType } from '@nestjs/graphql';
+import { Field, Int, ObjectType, OmitType } from '@nestjs/graphql';
+import { WorkflowKeys } from '../common/interfaces/workflow-key.interface';
 import { ACT } from '../workflow-steps/workflow-step.entity';
 
-export interface WorkflowExecutionKey {
-  WXID: string;
-}
-
 @ObjectType()
-export class CAT extends PartialType(ACT) {
+export class CAT extends OmitType(ACT, ['DESIGN', 'END'] as const) {
   @Field()
   WSID: string;
 
   @Field()
   Status: string;
+
+  @Field((type) => Boolean, { defaultValue: false })
+  END?: boolean;
 }
 
 @ObjectType()
@@ -27,21 +27,15 @@ export class PARALLEL {
 }
 
 @ObjectType()
-export class LastKey {
+export class WorkflowExecution implements WorkflowKeys {
+  @Field()
+  PK: string;
+
+  @Field()
+  SK: string;
+
   @Field()
   WXID: string;
-
-  @Field({ nullable: true })
-  CRAT: string;
-}
-
-@ObjectType()
-export class WorkflowExecution implements WorkflowExecutionKey {
-  @Field()
-  WXID: string;
-
-  @Field()
-  WVID: string;
 
   @Field((type) => [CAT])
   CAT: CAT[];
@@ -53,14 +47,20 @@ export class WorkflowExecution implements WorkflowExecutionKey {
   PARALLEL?: PARALLEL[];
 
   @Field()
-  WLFN: string;
-
-  @Field({ nullable: true })
   CRAT: string;
 }
 
 @ObjectType()
-export class QueryWorkflowExecution {
+export class LastKey {
+  @Field()
+  WXID: string;
+
+  @Field()
+  CRAT: string;
+}
+
+@ObjectType()
+export class QueryListWFExecutions {
   @Field((type) => [WorkflowExecution])
   Executions: WorkflowExecution[];
 

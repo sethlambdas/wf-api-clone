@@ -6,7 +6,7 @@ import { LastKey } from '../workflow-execution.entity';
 export class LastKeyInput extends PartialType(LastKey, InputType) {}
 
 @InputType()
-export class QueryIndexWorkflowExecutionInput extends PartialType(PaginationInput) {
+export class QueryListWFExecutionsInput extends PartialType(PaginationInput) {
   @Field()
   IndexName: string;
 

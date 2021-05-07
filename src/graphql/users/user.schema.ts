@@ -1,6 +1,6 @@
 import { Schema } from 'dynamoose';
 
-export const WorkflowVersionSchema = new Schema(
+export const UserSchema = new Schema(
   {
     PK: {
       type: String,
@@ -10,17 +10,9 @@ export const WorkflowVersionSchema = new Schema(
       type: String,
       rangeKey: true,
     },
-    WVID: {
+    NAME: {
       type: String,
-    },
-    CID: {
-      type: String,
-    },
-    WV: {
-      type: String,
-    },
-    FAID: {
-      type: String,
+      required: true,
     },
   },
   {

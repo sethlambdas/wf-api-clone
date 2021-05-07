@@ -1,9 +1,9 @@
-import { Field, InputType, PartialType } from '@nestjs/graphql';
+import { Field, InputType, OmitType, PartialType } from '@nestjs/graphql';
 import { PARALLEL } from '../../workflow-executions/workflow-execution.entity';
 import { ACTInput } from '../../workflow-steps/inputs/create-workflow-step.input';
 
 @InputType()
-class CATInput extends PartialType(ACTInput) {
+class CATInput extends OmitType(ACTInput, ['DESIGN'] as const) {
   @Field()
   Status: string;
 }
@@ -13,11 +13,14 @@ class PARALLELInput extends PartialType(PARALLEL, InputType) {}
 
 @InputType()
 export class CreateWorkflowExecutionInput {
-  @Field({ nullable: true })
-  WVID?: string;
+  @Field()
+  PK: string;
+
+  @Field()
+  WVID: string;
 
   @Field({ nullable: true })
-  WSID?: string;
+  CRAT: string;
 
   @Field((type) => [CATInput], { nullable: true })
   CAT?: CATInput[];
@@ -27,10 +30,4 @@ export class CreateWorkflowExecutionInput {
 
   @Field((type) => [PARALLELInput], { nullable: true })
   PARALLEL?: PARALLELInput[];
-
-  @Field()
-  WLFN: string;
-
-  @Field({ nullable: true })
-  CRAT: string;
 }

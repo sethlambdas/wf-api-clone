@@ -1,4 +1,5 @@
 import { Args, Mutation, Query, Resolver } from '@nestjs/graphql';
+import { WorkflowKeysInput } from '../common/inputs/workflow-key.input';
 import { CreateWorkflowStepInput } from './inputs/create-workflow-step.input';
 import { SaveWorkflowStepInput } from './inputs/save-workflow-step.input';
 import { WorkflowStep } from './workflow-step.entity';
@@ -15,20 +16,20 @@ export class WorkflowStepResolver {
 
   @Mutation((returns) => WorkflowStep)
   async SaveWorkflowStep(
-    @Args('id', { type: () => String }) id: string,
+    @Args('workflowKeysInput') workflowKeysInput: WorkflowKeysInput,
     @Args('saveWorkflowStepInput') saveWorkflowStepInput: SaveWorkflowStepInput,
   ) {
-    return this.workflowStepService.saveWorkflowStep(id, saveWorkflowStepInput);
+    return this.workflowStepService.saveWorkflowStep(workflowKeysInput, saveWorkflowStepInput);
   }
 
   @Mutation((returns) => Boolean, { nullable: true })
-  async DeleteWorkflowStep(@Args('id', { type: () => String }) id: string) {
-    return this.workflowStepService.deleteWorkflowStep(id);
+  async DeleteWorkflowStep(@Args('workflowKeysInput') workflowKeysInput: WorkflowKeysInput) {
+    return this.workflowStepService.deleteWorkflowStep(workflowKeysInput);
   }
 
   @Query((returns) => WorkflowStep)
-  async GetWorkflowStep(@Args('id', { type: () => String }) id: string) {
-    return this.workflowStepService.getWorkflowStep(id);
+  async GetWorkflowStep(@Args('workflowKeysInput') workflowKeysInput: WorkflowKeysInput) {
+    return this.workflowStepService.getWorkflowStep(workflowKeysInput);
   }
 
   @Query((returns) => [WorkflowStep])

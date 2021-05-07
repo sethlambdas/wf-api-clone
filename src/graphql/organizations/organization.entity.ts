@@ -2,7 +2,7 @@ import { Field, ObjectType } from '@nestjs/graphql';
 import { WorkflowKeys } from '../common/interfaces/workflow-key.interface';
 
 @ObjectType()
-export class WorkflowVersion implements WorkflowKeys {
+export class Organization implements WorkflowKeys {
   @Field()
   PK: string;
 
@@ -10,14 +10,5 @@ export class WorkflowVersion implements WorkflowKeys {
   SK: string;
 
   @Field()
-  WVID: string;
-
-  @Field()
-  CID: string;
-
-  @Field()
-  WV: string;
-
-  @Field()
-  FAID: string;
+  ORGNAME: string;
 }

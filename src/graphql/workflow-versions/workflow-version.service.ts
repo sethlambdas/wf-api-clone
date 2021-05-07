@@ -1,8 +1,10 @@
 import { Inject, Injectable } from '@nestjs/common';
 import { v4 } from 'uuid';
+import { WorkflowKeys } from '../common/interfaces/workflow-key.interface';
 import { CreateWorkflowVersionInput } from './inputs/create-workflow-version.input';
+import { GetAllWorkflowVersionsOfWorkflowInput } from './inputs/read-queries.inputs';
 import { SaveWorkflowVersionInput } from './inputs/save-workflow-version.input';
-import { WorkflowVersion, WorkflowVersionKey } from './workflow-version.entity';
+import { WorkflowVersion } from './workflow-version.entity';
 import { WorkflowVersionRepository } from './workflow-version.repository';
 
 @Injectable()
@@ -13,39 +15,40 @@ export class WorkflowVersionService {
   ) {}
 
   async createWorkflowVersion(createWorkflowVersionInput: CreateWorkflowVersionInput) {
+    const { PK, WLFID, CID, WV, FAID } = createWorkflowVersionInput;
+    const WVID = v4();
     const workflowVersion = {
-      ...createWorkflowVersionInput,
-      WVID: v4(),
+      PK,
+      SK: `${WLFID}|WV#${WVID}`,
+      WVID: `${WLFID}|WV#${WVID}`,
+      CID,
+      WV,
+      FAID,
     } as WorkflowVersion;
     return this.workflowVersionRepository.createWorkflowVersion(workflowVersion);
   }
 
-  async saveWorkflowVersion(id: string, saveWorkflowVersionInput: SaveWorkflowVersionInput) {
-    const workflowVersionKey = {
-      WVID: id,
-    } as WorkflowVersionKey;
+  async saveWorkflowVersion(workflowKeys: WorkflowKeys, saveWorkflowVersionInput: SaveWorkflowVersionInput) {
     const workflowVersion = {
       ...saveWorkflowVersionInput,
     } as WorkflowVersion;
-    return this.workflowVersionRepository.saveWorkflowVersion(workflowVersionKey, workflowVersion);
+    return this.workflowVersionRepository.saveWorkflowVersion(workflowKeys, workflowVersion);
   }
 
-  async getWorkflowVersion(id: string) {
-    const workflowVersionKey = {
-      WVID: id,
-    } as WorkflowVersionKey;
-    return this.workflowVersionRepository.getWorkflowVersion(workflowVersionKey);
+  async getAllWorkflowVersionsOfWorkflow(getAllWorkflowVersionsOfWorkflowInput: GetAllWorkflowVersionsOfWorkflowInput) {
+    return await this.workflowVersionRepository.getAllWorkflowVersionsOfWorkflow(getAllWorkflowVersionsOfWorkflowInput);
+  }
+
+  async getWorkflowVersion(workflowKeys: WorkflowKeys) {
+    return this.workflowVersionRepository.getWorkflowVersion(workflowKeys);
   }
 
   async queryWorkflowVersion(filter: { [key: string]: any }) {
     return this.workflowVersionRepository.queryWorkflowVersion(filter);
   }
 
-  async deleteWorkflowVersion(id: string) {
-    const workflowVersionKey = {
-      WVID: id,
-    } as WorkflowVersionKey;
-    return this.workflowVersionRepository.deleteWorkflowVersion(workflowVersionKey);
+  async deleteWorkflowVersion(workflowKeys: WorkflowKeys) {
+    return this.workflowVersionRepository.deleteWorkflowVersion(workflowKeys);
   }
 
   async listWorkflowVersions() {

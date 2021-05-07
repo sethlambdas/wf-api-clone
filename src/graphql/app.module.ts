@@ -6,6 +6,7 @@ import { DynamooseModule } from 'nestjs-dynamoose';
 import { ConfigUtil } from '../utils/config.util';
 import * as typeOrmConfig from './../config/typeorm.config';
 import { FileModule } from './files/file.module';
+import { OrganizationModule } from './organizations/organization.module';
 import { TaskModule } from './tasks/task.module';
 import { UserModule } from './users/user.module';
 import { WorkflowExecutionModule } from './workflow-executions/workflow-execution.module';
@@ -56,6 +57,7 @@ import { WorkflowModule } from './workflow/workflow.module';
     WorkflowExecutionModule,
     WorkflowVersionModule,
     WorkflowStepModule,
+    OrganizationModule,
   ],
 })
 export class AppModule {}

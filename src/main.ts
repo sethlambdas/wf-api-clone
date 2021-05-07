@@ -10,7 +10,6 @@ import { CAT, WorkflowExecution } from './graphql/workflow-executions/workflow-e
 import { WorkflowExecutionService } from './graphql/workflow-executions/workflow-execution.service';
 import { WorkflowStepStatus } from './graphql/workflow-steps/enums/workflow-step-status.enum';
 import { WorkflowStepService } from './graphql/workflow-steps/workflow-step.service';
-import { WorkflowVersionService } from './graphql/workflow-versions/workflow-version.service';
 import activityRegistry, { ActivityTypes } from './utils/activity/activity-registry.util';
 import { ConfigUtil } from './utils/config.util';
 import { putEventsEB } from './utils/event-bridge/event-bridge.util';
@@ -28,7 +27,6 @@ async function bootstrap() {
   });
   const workflowStepService = app.get(WorkflowStepService);
   const workflowExecutionService = app.get(WorkflowExecutionService);
-  const workflowVersionService = app.get(WorkflowVersionService);
 
   if (process.env.NODE_ENV === 'development') {
     logger.log('Setting up local stack');
@@ -60,33 +58,45 @@ async function bootstrap() {
         const msgPayload = JSON.parse(message.Body);
         const delayedDetail = msgPayload.delayedDetail && JSON.parse(msgPayload.delayedDetail);
         const detail = delayedDetail || msgPayload.detail;
-        const { WVID: wfVersionId, WSID: currentWfStepId, parallelIndex, parallelIndexes } = detail;
-        const act: CAT = detail?.ACT;
-        if (act) act.WSID = currentWfStepId;
+        const {
+          PK,
+          WVID: wfVersionId,
+          WSID: currentWfStepId,
+          parallelIndex,
+          parallelIndexes,
+          wfExecKeys,
+          WLFN,
+        } = detail;
+        const act: CAT = {
+          T: detail?.ACT.T,
+          NM: detail?.ACT.NM,
+          MD: detail?.ACT.MD,
+          WSID: currentWfStepId,
+          Status: '',
+        };
 
-        const workflowVersion = await workflowVersionService.getWorkflowVersion(wfVersionId);
-
-        const wfExecs = await workflowExecutionService.scanWorkflowExecution({
-          WVID: { eq: wfVersionId },
-        });
+        if (detail && detail.ACT.END) act.END = detail.ACT.END;
 
         let wfExec: WorkflowExecution;
-        if (wfExecs.length === 1) {
-          wfExec = wfExecs[0];
+        if (wfExecKeys) {
+          wfExec = await workflowExecutionService.getWorkflowExecution(wfExecKeys);
           const createCAT = wfExec.CAT;
-          createCAT.push({ ...act, Status: WorkflowStepStatus.Started });
-          wfExec = await workflowExecutionService.saveWorkflowExecution(wfExec.WXID, {
-            WSID: currentWfStepId,
-            CAT: createCAT,
-            CRAT: act.T,
-          });
-        } else if (!wfExecs.length) {
+          act.Status = WorkflowStepStatus.Started;
+          createCAT.push({ ...act });
+          wfExec = await workflowExecutionService.saveWorkflowExecution(
+            { PK: wfExec.PK, SK: wfExec.SK },
+            {
+              CAT: createCAT,
+              CRAT: act.T,
+            },
+          );
+        } else if (!wfExecKeys) {
+          act.Status = WorkflowStepStatus.Started;
           wfExec = await workflowExecutionService.createWorkflowExecution({
+            PK,
             WVID: wfVersionId,
-            CAT: [{ ...act, Status: WorkflowStepStatus.Started }],
+            CAT: [{ ...act }],
             STE: '{}',
-            WSID: currentWfStepId,
-            WLFN: workflowVersion.WLFN,
             CRAT: act.T,
           });
         }
@@ -110,9 +120,12 @@ async function bootstrap() {
                   totalParallelCount: nextActIds.length,
                   finishedParallelCount: 0,
                 });
-                wfExec = await workflowExecutionService.saveWorkflowExecution(wfExec.WXID, {
-                  PARALLEL,
-                });
+                wfExec = await workflowExecutionService.saveWorkflowExecution(
+                  { PK: wfExec.PK, SK: wfExec.SK },
+                  {
+                    PARALLEL,
+                  },
+                );
                 currentParallelIndex = PARALLEL.length - 1;
                 currentParallelIndexes.push(currentParallelIndex);
               }
@@ -123,9 +136,12 @@ async function bootstrap() {
                   }
                   return updateParallel;
                 });
-                wfExec = await workflowExecutionService.saveWorkflowExecution(wfExec.WXID, {
-                  PARALLEL: updatedPARALLEL,
-                });
+                wfExec = await workflowExecutionService.saveWorkflowExecution(
+                  { PK: wfExec.PK, SK: wfExec.SK },
+                  {
+                    PARALLEL: updatedPARALLEL,
+                  },
+                );
               }
 
               const state = JSON.parse(wfExec.STE);
@@ -155,17 +171,18 @@ async function bootstrap() {
 
               const source = 'workflow.initiate';
 
-              await workflowExecutionService.saveWorkflowExecution(wfExec.WXID, {
-                STE: JSON.stringify(STE),
-              });
+              await workflowExecutionService.saveWorkflowExecution(
+                { PK: wfExec.PK, SK: wfExec.SK },
+                {
+                  STE: JSON.stringify(STE),
+                },
+              );
               logger.log('Successfully saved workflow execution');
 
               let workflowStep;
               if (act.T === ActivityTypes.Condition) {
                 if (actResult) {
-                  workflowStep = await workflowStepService.queryWorkflowStep({
-                    AID: { eq: actResult },
-                  });
+                  workflowStep = await workflowStepService.getWorkflowStepByAid(actResult as string, PK);
 
                   workflowStep = workflowStep[0];
                   logger.log(workflowStep);
@@ -176,6 +193,8 @@ async function bootstrap() {
                     ...workflowStep,
                     parallelIndex: currentParallelIndex,
                     parallelIndexes: currentParallelIndexes,
+                    wfExecKeys: { PK: wfExec.PK, SK: wfExec.SK },
+                    WLFN,
                   }),
                   DetailType: `workflowStep`,
                   Source: source,
@@ -183,9 +202,7 @@ async function bootstrap() {
               } else {
                 for (const nextActId of nextActIds) {
                   logger.log('Next Activity ID: ', nextActId);
-                  workflowStep = await workflowStepService.queryWorkflowStep({
-                    AID: { eq: nextActId },
-                  });
+                  workflowStep = await workflowStepService.getWorkflowStepByAid(nextActId, PK);
 
                   workflowStep = workflowStep[0];
                   logger.log(workflowStep);
@@ -195,6 +212,8 @@ async function bootstrap() {
                       ...workflowStep,
                       parallelIndex: currentParallelIndex,
                       parallelIndexes: currentParallelIndexes,
+                      wfExecKeys: { PK: wfExec.PK, SK: wfExec.SK },
+                      WLFN,
                     }),
                     DetailType: `workflowStep`,
                     Source: source,
@@ -206,7 +225,7 @@ async function bootstrap() {
               if (act.T === ActivityTypes.ManualApproval) {
                 if (typeof actResult === 'function') {
                   const executeManualApprovalEB = actResult as (WLFN: string, WSID: string) => any;
-                  await executeManualApprovalEB(workflowVersion.WLFN, currentWfStepId);
+                  await executeManualApprovalEB(WLFN, currentWfStepId);
                   logger.log('Waiting for Manual Approval');
                 }
               } else if (act.T === ActivityTypes.Delay) {
@@ -229,9 +248,12 @@ async function bootstrap() {
                     }
                     return updateParallel;
                   });
-                  await workflowExecutionService.saveWorkflowExecution(wfExec.WXID, {
-                    PARALLEL: updatedPARALLEL,
-                  });
+                  await workflowExecutionService.saveWorkflowExecution(
+                    { PK: wfExec.PK, SK: wfExec.SK },
+                    {
+                      PARALLEL: updatedPARALLEL,
+                    },
+                  );
                   const updatedParallelIndexes = currentParallelIndexes.filter((filterParallelIndex) => {
                     return filterParallelIndex !== currentParallelIndex;
                   });
@@ -255,18 +277,24 @@ async function bootstrap() {
               const updateCAT = wfExec.CAT;
               const getCurrentActivity = updateCAT.pop();
               updateCAT.push({ ...getCurrentActivity, Status: WorkflowStepStatus.Finished });
-              await workflowExecutionService.saveWorkflowExecution(wfExec.WXID, {
-                CAT: updateCAT,
-              });
+              await workflowExecutionService.saveWorkflowExecution(
+                { PK: wfExec.PK, SK: wfExec.SK },
+                {
+                  CAT: updateCAT,
+                },
+              );
             }
           }
         } catch (err) {
           const catchUpdateCAT = wfExec.CAT;
           const getCurrentActivity = catchUpdateCAT.pop();
           catchUpdateCAT.push({ ...getCurrentActivity, Status: WorkflowStepStatus.Error });
-          await workflowExecutionService.saveWorkflowExecution(wfExec.WXID, {
-            CAT: catchUpdateCAT,
-          });
+          await workflowExecutionService.saveWorkflowExecution(
+            { PK: wfExec.PK, SK: wfExec.SK },
+            {
+              CAT: catchUpdateCAT,
+            },
+          );
           throw err;
         }
       } catch (err) {

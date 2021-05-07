@@ -2,10 +2,12 @@ import { Module } from '@nestjs/common';
 import { JwtModule } from '@nestjs/jwt';
 import { PassportModule } from '@nestjs/passport';
 import { TypeOrmModule } from '@nestjs/typeorm';
+import { DynamooseModule } from 'nestjs-dynamoose';
 import { ConfigUtil } from '../../utils/config.util';
 import { JwtStrategy } from './auth/jwt.strategy';
 import { UserRepository } from './user.repository';
 import { UserResolver } from './user.resolver';
+import { UserSchema } from './user.schema';
 import { UserService } from './user.service';
 
 @Module({

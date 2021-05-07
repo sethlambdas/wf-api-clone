@@ -1,9 +1,10 @@
 import { Field, InputType } from '@nestjs/graphql';
+import { WorkflowKeysInput } from '../../common/inputs/workflow-key.input';
 
 @InputType()
 export class InitiateCurrentStepInput {
   @Field()
-  WSID: string;
+  Key: WorkflowKeysInput;
 
   @Field()
   ActivityType: string;

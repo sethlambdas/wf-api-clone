@@ -1,20 +1,11 @@
 import { Module } from '@nestjs/common';
-import { DynamooseModule } from 'nestjs-dynamoose';
-import { ConfigUtil } from '../../utils/config.util';
+import { DynamoDBModule } from '../dynamodb/dynamodb.module';
 import { WorkflowExecutionRepository } from './workflow-execution.repository';
 import { WorkflowExecutionResolver } from './workflow-execution.resolver';
-import { WorkflowExecutionSchema } from './workflow-execution.schema';
 import { WorkflowExecutionService } from './workflow-execution.service';
 
 @Module({
-  imports: [
-    DynamooseModule.forFeature([
-      {
-        name: ConfigUtil.get('dynamodb.schema.workflowExecutions'),
-        schema: WorkflowExecutionSchema,
-      },
-    ]),
-  ],
+  imports: [DynamoDBModule],
   providers: [WorkflowExecutionResolver, WorkflowExecutionService, WorkflowExecutionRepository],
   exports: [WorkflowExecutionService],
 })

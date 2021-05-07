@@ -1,6 +1,6 @@
 import { Schema } from 'dynamoose';
 
-export const WorkflowVersionSchema = new Schema(
+export const OrganizationSchema = new Schema(
   {
     PK: {
       type: String,
@@ -10,16 +10,7 @@ export const WorkflowVersionSchema = new Schema(
       type: String,
       rangeKey: true,
     },
-    WVID: {
-      type: String,
-    },
-    CID: {
-      type: String,
-    },
-    WV: {
-      type: String,
-    },
-    FAID: {
+    ORGNAME: {
       type: String,
     },
   },

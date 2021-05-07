@@ -61,7 +61,6 @@ export class VariableWorkflowInput {
   @Field({ nullable: true })
   ApproveStep?: string;
 
-  // ManualApproval
   @Field({ nullable: true })
   RejectStep?: string;
 }

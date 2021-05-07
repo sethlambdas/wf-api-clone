@@ -1,5 +1,27 @@
 import { Schema } from 'dynamoose';
-import { ACTSchema } from '../workflow-steps/workflow-step.schema';
+import { MDSchema } from '../dynamodb/schemas/act.schema';
+
+const CATSChema = new Schema({
+  T: {
+    type: String,
+  },
+  NM: {
+    type: String,
+  },
+  MD: {
+    type: Object,
+    schema: MDSchema,
+  },
+  END: {
+    type: Boolean,
+  },
+  WSID: {
+    type: String,
+  },
+  Status: {
+    type: String,
+  },
+});
 
 const ParallelSchema = new Schema({
   isParallelActive: {
@@ -15,26 +37,28 @@ const ParallelSchema = new Schema({
 
 export const WorkflowExecutionSchema = new Schema(
   {
-    WXID: {
+    PK: {
       type: String,
       hashKey: true,
     },
-    WVID: {
+    SK: {
+      type: String,
+      rangeKey: true,
+    },
+    WXID: {
       type: String,
     },
     CAT: {
       type: Array,
-      schema: [ACTSchema],
+      schema: [CATSChema],
     },
     STE: {
       type: String,
     },
     PARALLEL: {
       type: Array,
+      required: false,
       schema: [ParallelSchema],
-    },
-    WLFN: {
-      type: String,
     },
     CRAT: {
       type: String,

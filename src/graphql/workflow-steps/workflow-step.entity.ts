@@ -1,62 +1,6 @@
 /* tslint:disable:max-classes-per-file */
 import { Field, Int, ObjectType } from '@nestjs/graphql';
-
-@ObjectType()
-export class Label {
-  @Field()
-  iconName: string;
-
-  @Field()
-  name: string;
-}
-
-@ObjectType()
-export class Data {
-  @Field((type) => Label, { nullable: true })
-  label?: Label;
-
-  @Field()
-  nodeType: string;
-
-  @Field()
-  labelIconName: string;
-
-  @Field()
-  state: string;
-}
-
-@ObjectType()
-export class Position {
-  @Field((type) => Int)
-  x: number;
-
-  @Field((type) => Int)
-  y: number;
-}
-
-@ObjectType()
-export class DesignWorkflow {
-  @Field()
-  id: string;
-
-  @Field({ nullable: true })
-  source?: string;
-
-  @Field({ nullable: true })
-  target?: string;
-
-  @Field({ nullable: true })
-  type?: string;
-
-  @Field({ nullable: true })
-  style?: string;
-
-  @Field((type) => Data, { nullable: true })
-  data?: Data;
-
-  @Field((type) => Position, { nullable: true })
-  position?: Position;
-}
+import { WorkflowKeys } from '../common/interfaces/workflow-key.interface';
 
 @ObjectType()
 export class ChoiceWorkflow {
@@ -128,6 +72,73 @@ export class MD {
   // WebService
   @Field({ nullable: true })
   Name?: string;
+
+  // ManualApproval
+  @Field({ nullable: true })
+  ApproveStep?: string;
+
+  @Field({ nullable: true })
+  RejectStep?: string;
+}
+
+@ObjectType()
+export class Label {
+  @Field()
+  iconName: string;
+
+  @Field()
+  name: string;
+}
+
+@ObjectType()
+export class Data {
+  @Field((type) => Label, { nullable: true })
+  label?: Label;
+
+  @Field()
+  nodeType: string;
+
+  @Field()
+  labelIconName: string;
+
+  @Field()
+  state: string;
+
+  @Field((type) => MD, { nullable: true })
+  variables?: MD;
+}
+
+@ObjectType()
+export class Position {
+  @Field((type) => Int)
+  x: number;
+
+  @Field((type) => Int)
+  y: number;
+}
+
+@ObjectType()
+export class DesignWorkflow {
+  @Field()
+  id: string;
+
+  @Field({ nullable: true })
+  source?: string;
+
+  @Field({ nullable: true })
+  target?: string;
+
+  @Field({ nullable: true })
+  type?: string;
+
+  @Field({ nullable: true })
+  style?: string;
+
+  @Field((type) => Data, { nullable: true })
+  data?: Data;
+
+  @Field((type) => Position, { nullable: true })
+  position?: Position;
 }
 
 @ObjectType()
@@ -141,19 +152,21 @@ export class ACT {
   @Field((type) => MD)
   MD: MD;
 
-  @Field((type) => Boolean, { nullable: true })
+  @Field((type) => Boolean, { defaultValue: false })
   END?: boolean;
 
   @Field((type) => [DesignWorkflow])
   DESIGN: DesignWorkflow[];
 }
 
-export interface WorkflowStepKey {
-  WSID: string;
-}
-
 @ObjectType()
-export class WorkflowStep implements WorkflowStepKey {
+export class WorkflowStep implements WorkflowKeys {
+  @Field()
+  PK: string;
+
+  @Field()
+  SK: string;
+
   @Field()
   WSID: string;
 
@@ -168,4 +181,7 @@ export class WorkflowStep implements WorkflowStepKey {
 
   @Field((type) => ACT)
   ACT: ACT;
+
+  @Field()
+  DATA: string;
 }

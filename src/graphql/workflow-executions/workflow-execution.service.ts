@@ -1,9 +1,11 @@
 import { Inject, Injectable } from '@nestjs/common';
 import { v4 } from 'uuid';
+import { WorkflowKeysInput } from '../common/inputs/workflow-key.input';
 import { CreateWorkflowExecutionInput } from './inputs/create-workflow-execution.input';
-import { QueryIndexWorkflowExecutionInput } from './inputs/queryIndex-workflow-execution.input';
+import { QueryListWFExecutionsInput } from './inputs/query-list-workflow-execution.input';
+import { QueryWorkflowExecutionsInput } from './inputs/query-workflow-execution.input';
 import { SaveWorkflowExecutionInput } from './inputs/save-workflow-execution.input';
-import { WorkflowExecution, WorkflowExecutionKey } from './workflow-execution.entity';
+import { WorkflowExecution } from './workflow-execution.entity';
 import { WorkflowExecutionRepository } from './workflow-execution.repository';
 
 @Injectable()
@@ -14,46 +16,52 @@ export class WorkflowExecutionService {
   ) {}
 
   async createWorkflowExecution(createWorkflowExecutionInput: CreateWorkflowExecutionInput) {
+    const { WVID } = createWorkflowExecutionInput;
+
+    const inputs = { ...createWorkflowExecutionInput };
+
+    delete inputs.WVID;
+
+    const WXID = `${WVID}|WX#${v4()}`;
+
     const workflowExecution = ({
-      ...createWorkflowExecutionInput,
-      WXID: v4(),
+      SK: WXID,
+      ...inputs,
     } as unknown) as WorkflowExecution;
     return this.workflowExecutionRepository.createWorkflowExecution(workflowExecution);
   }
 
-  async saveWorkflowExecution(id: string, saveWorkflowExecutionInput: SaveWorkflowExecutionInput) {
-    const workflowExecutionKey = {
-      WXID: id,
-    } as WorkflowExecutionKey;
+  async saveWorkflowExecution(
+    workflowKeysInput: WorkflowKeysInput,
+    saveWorkflowExecutionInput: SaveWorkflowExecutionInput,
+  ) {
     const workflowExecution = {
       ...saveWorkflowExecutionInput,
     } as WorkflowExecution;
-    return this.workflowExecutionRepository.saveWorkflowExecution(workflowExecutionKey, workflowExecution);
+    return this.workflowExecutionRepository.saveWorkflowExecution(workflowKeysInput, workflowExecution);
   }
 
-  async getWorkflowExecution(id: string) {
-    const workflowExecutionKey = {
-      WXID: id,
-    } as WorkflowExecutionKey;
-    return this.workflowExecutionRepository.getWorkflowExecution(workflowExecutionKey);
+  async getWorkflowExecution(workflowKeysInput: WorkflowKeysInput) {
+    return this.workflowExecutionRepository.getWorkflowExecution(workflowKeysInput);
   }
 
-  async deleteWorkflowExecution(id: string) {
-    const workflowExecutionKey = {
-      WXID: id,
-    } as WorkflowExecutionKey;
-    return this.workflowExecutionRepository.deleteWorkflowExecution(workflowExecutionKey);
+  async deleteWorkflowExecution(workflowKeysInput: WorkflowKeysInput) {
+    return this.workflowExecutionRepository.deleteWorkflowExecution(workflowKeysInput);
   }
 
   async scanWorkflowExecution(filter: { [key: string]: any }) {
     return this.workflowExecutionRepository.scanWorkflowExecution(filter);
   }
 
+  async queryWorkflowExecution(queryWorkflowExecutionsInput: QueryWorkflowExecutionsInput) {
+    return this.workflowExecutionRepository.queryWorkflowExecution(queryWorkflowExecutionsInput);
+  }
+
   async listWorkflowExecutions() {
     return this.workflowExecutionRepository.listWorkflowExecutions();
   }
 
-  async queryIndexWorkflowExecution(queryIndexWorkflowExecutionInput: QueryIndexWorkflowExecutionInput) {
-    return this.workflowExecutionRepository.queryIndexWorkflowExecution(queryIndexWorkflowExecutionInput);
+  async queryListWFExecutions(queryListWFExecutionsInput: QueryListWFExecutionsInput) {
+    return this.workflowExecutionRepository.queryListWFExecutions(queryListWFExecutionsInput);
   }
 }

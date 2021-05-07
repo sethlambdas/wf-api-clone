@@ -1,21 +1,34 @@
 import { Field, Int, ObjectType } from '@nestjs/graphql';
-import { CAT } from '../workflow-executions/workflow-execution.entity';
+import { WorkflowKeys } from '../common/interfaces/workflow-key.interface';
 import { LastKey } from '../workflow-executions/workflow-execution.entity';
+import { ACT } from '../workflow-steps/workflow-step.entity';
 import { DesignWorkflow } from '../workflow-steps/workflow-step.entity';
 
 @ObjectType()
+export class CreateWorkflowResponse {
+  @Field({ nullable: true })
+  PK?: string;
+
+  @Field({ nullable: true })
+  SK?: string;
+
+  @Field({ nullable: true })
+  IsWorkflowNameExist?: boolean;
+}
+
+@ObjectType()
 export class WorkflowDetails {
-  @Field({ nullable: true })
-  WID?: string;
+  @Field()
+  PK: string;
 
-  @Field({ nullable: true })
-  WVID?: string;
+  @Field()
+  WorkflowVersionSK: string;
 
-  @Field((type) => [CAT], { nullable: true })
-  ACTIVITIES?: CAT[];
+  @Field((type) => [ACT], { nullable: true })
+  Activities?: ACT[];
 
   @Field((type) => [DesignWorkflow], { nullable: true })
-  DESIGN?: DesignWorkflow[];
+  Design?: DesignWorkflow[];
 }
 
 @ObjectType()
@@ -40,4 +53,19 @@ export class ListWorkflows {
 
   @Field((type) => Int)
   TotalRecords: number;
+}
+
+@ObjectType()
+export class WorkflowModelRepository implements WorkflowKeys {
+  @Field()
+  PK: string;
+
+  @Field()
+  SK: string;
+
+  @Field()
+  WLFN: string;
+
+  @Field()
+  DATA: string;
 }
