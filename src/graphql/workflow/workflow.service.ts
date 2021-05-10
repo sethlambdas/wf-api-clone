@@ -2,6 +2,7 @@ import { Inject, Injectable, Logger } from '@nestjs/common';
 import { v4 } from 'uuid';
 import { ActivityTypes } from '../../utils/activity/activity-registry.util';
 import { putEventsEB } from '../../utils/event-bridge/event-bridge.util';
+import Workflow from '../../workflow';
 import { QueryListWFExecutions, WorkflowExecution } from '../workflow-executions/workflow-execution.entity';
 import { WorkflowExecutionService } from '../workflow-executions/workflow-execution.service';
 import { CreateWorkflowStepInput } from '../workflow-steps/inputs/create-workflow-step.input';
@@ -237,8 +238,8 @@ export class WorkflowService {
             ...workflowStep,
             WLFN,
           }),
-          DetailType: `workflowStep`,
-          Source: 'workflow.initiate',
+          DetailType: Workflow.getDetailType(),
+          Source: Workflow.getSource(),
         },
       ],
     };
@@ -280,8 +281,8 @@ export class WorkflowService {
       Entries: [
         {
           Detail: JSON.stringify(queryWorkflowSteps[0]),
-          DetailType: `workflowStep`,
-          Source: 'workflow.initiate',
+          DetailType: Workflow.getDetailType(),
+          Source: Workflow.getSource(),
         },
       ],
     };

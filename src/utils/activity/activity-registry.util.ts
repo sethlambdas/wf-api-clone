@@ -27,7 +27,7 @@ export enum ActivityTypes {
   ParallelEnd = 'Parallel End',
 }
 
-const activityRegistry = {
+const activityRegistry: ActivityRegistry = {
   [ActivityTypes.ParallelStart]: {
     label: ActivityTypes.ParallelStart,
     processActivity: () => null,
@@ -64,6 +64,6 @@ const activityRegistry = {
     label: ActivityTypes.MergeData,
     processActivity: (payload?: any, state?: any) => mergeData(payload, state),
   },
-} as ActivityRegistry;
+};
 
 export default activityRegistry;
