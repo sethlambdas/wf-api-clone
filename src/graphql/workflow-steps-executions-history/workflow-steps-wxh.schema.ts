@@ -1,7 +1,7 @@
 import { Schema } from 'dynamoose';
-import { ACTSchema } from '../dynamodb/schemas/act.schema';
+import { MDSchema } from '../dynamodb/schemas/act.schema';
 
-export const WorkflowStepSchema = new Schema(
+export const WorkflowStepExecutionHistorySchema = new Schema(
   {
     PK: {
       type: String,
@@ -11,18 +11,23 @@ export const WorkflowStepSchema = new Schema(
       type: String,
       rangeKey: true,
     },
-    NAID: {
-      type: Array,
-      schema: [String],
-    },
-    AID: {
+    T: {
       type: String,
     },
-    ACT: {
-      type: Object,
-      schema: ACTSchema,
+    WLFN: {
+      type: String,
     },
-    DATA: {
+    MD: {
+      type: Object,
+      schema: MDSchema,
+    },
+    END: {
+      type: Boolean,
+    },
+    WSID: {
+      type: String,
+    },
+    Status: {
       type: String,
     },
   },

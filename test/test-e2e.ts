@@ -9,6 +9,7 @@ import { AppModule } from './../src/graphql/app.module';
 import { UserService } from './../src/graphql/users/user.service';
 import { WorkflowStepService } from './../src/graphql/workflow-steps/workflow-step.service';
 import { WorkflowVersionService } from './../src/graphql/workflow-versions/workflow-version.service';
+import { WorkflowService } from './../src/graphql/workflow/workflow.service';
 import { ConfigUtil } from './../src/utils/config.util';
 
 let app: INestApplication;
@@ -16,6 +17,7 @@ let userService: UserService;
 
 export let workflowStepService: WorkflowStepService;
 export let workflowVersionService: WorkflowVersionService;
+export let workflowService: WorkflowService;
 
 export const setUpTesting = async () => {
   const module: TestingModule = await Test.createTestingModule({
@@ -30,6 +32,7 @@ export const setUpTesting = async () => {
   userService = await module.get(UserService);
   workflowStepService = await module.get(WorkflowStepService);
   workflowVersionService = await module.get(WorkflowVersionService);
+  workflowService = await module.get(WorkflowService);
 
   await app.init();
 };

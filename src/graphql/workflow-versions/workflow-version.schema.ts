@@ -10,9 +10,6 @@ export const WorkflowVersionSchema = new Schema(
       type: String,
       rangeKey: true,
     },
-    WVID: {
-      type: String,
-    },
     CID: {
       type: String,
     },
@@ -21,6 +18,9 @@ export const WorkflowVersionSchema = new Schema(
     },
     FAID: {
       type: String,
+    },
+    TotalEXC: {
+      type: Number,
     },
   },
   {

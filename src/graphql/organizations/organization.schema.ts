@@ -6,12 +6,14 @@ export const OrganizationSchema = new Schema(
       type: String,
       hashKey: true,
     },
-    SK: {
-      type: String,
-      rangeKey: true,
-    },
     ORGNAME: {
       type: String,
+    },
+    TotalWLF: {
+      type: Number,
+    },
+    TotalUSR: {
+      type: Number,
     },
   },
   {

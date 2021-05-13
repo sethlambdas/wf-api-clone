@@ -16,7 +16,7 @@ export const ChoiceWorkflowSchema = new Schema({
 });
 
 export const MDSchema = new Schema({
-  // Email
+  // Email or ManualApproval
   Email: {
     type: String,
   },
@@ -48,10 +48,6 @@ export const MDSchema = new Schema({
   DefaultNext: {
     type: String,
   },
-  // ManualInput
-  Completed: {
-    type: Boolean,
-  },
   // AssignData
   FieldValues: {
     type: String,
@@ -70,13 +66,18 @@ export const MDSchema = new Schema({
   Name: {
     type: String,
   },
+  // ManualApproval
+  Completed: {
+    type: Boolean,
+  },
   ApproveStep: {
     type: String,
-    required: false,
   },
   RejectStep: {
     type: String,
-    required: false,
+  },
+  Purpose: {
+    type: String,
   },
 });
 
@@ -99,6 +100,7 @@ export const DataSchema = new Schema({
   },
   labelIconName: {
     type: String,
+    required: false,
   },
   state: {
     type: String,
@@ -154,6 +156,7 @@ export const ACTSchema = new Schema({
   MD: {
     type: Object,
     schema: MDSchema,
+    required: false,
   },
   END: {
     type: Boolean,

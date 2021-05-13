@@ -1,9 +1,8 @@
 import { Inject, Injectable } from '@nestjs/common';
-import { v4 } from 'uuid';
-import { WorkflowKeysInput } from '../common/inputs/workflow-key.input';
+import { CompositePrimaryKeyInput } from '../common/inputs/workflow-key.input';
+import { WorkflowVersionService } from '../workflow-versions/workflow-version.service';
 import { CreateWorkflowExecutionInput } from './inputs/create-workflow-execution.input';
-import { QueryListWFExecutionsInput } from './inputs/query-list-workflow-execution.input';
-import { QueryWorkflowExecutionsInput } from './inputs/query-workflow-execution.input';
+import { ListWorkflowExecutionsOfAVersionInput } from './inputs/get-workflow-executions-of-version.input';
 import { SaveWorkflowExecutionInput } from './inputs/save-workflow-execution.input';
 import { WorkflowExecution } from './workflow-execution.entity';
 import { WorkflowExecutionRepository } from './workflow-execution.repository';
@@ -13,55 +12,52 @@ export class WorkflowExecutionService {
   constructor(
     @Inject(WorkflowExecutionRepository)
     private workflowExecutionRepository: WorkflowExecutionRepository,
+    private workflowVersionService: WorkflowVersionService,
   ) {}
 
   async createWorkflowExecution(createWorkflowExecutionInput: CreateWorkflowExecutionInput) {
-    const { WVID } = createWorkflowExecutionInput;
-
+    const { WorkflowVersionKeys } = createWorkflowExecutionInput;
     const inputs = { ...createWorkflowExecutionInput };
 
-    delete inputs.WVID;
+    // clean inputs
+    delete inputs.WorkflowVersionKeys;
 
-    const WXID = `${WVID}|WX#${v4()}`;
+    const parentWorklowVersion = await this.workflowVersionService.getWorkflowVersionByKey(WorkflowVersionKeys);
+    const newTotalEXC = parentWorklowVersion.TotalEXC + 1;
 
-    const workflowExecution = ({
-      SK: WXID,
+    await this.workflowVersionService.saveWorkflowVersion(WorkflowVersionKeys, { TotalEXC: newTotalEXC });
+
+    const PK = `${WorkflowVersionKeys.SK}|WX#${newTotalEXC}`;
+    const SK = `WX#${newTotalEXC}`;
+
+    const workflowExecution = {
+      PK,
+      SK,
       ...inputs,
-    } as unknown) as WorkflowExecution;
+    } as WorkflowExecution;
+
     return this.workflowExecutionRepository.createWorkflowExecution(workflowExecution);
   }
 
   async saveWorkflowExecution(
-    workflowKeysInput: WorkflowKeysInput,
+    workflowExecutionKeysInput: CompositePrimaryKeyInput,
     saveWorkflowExecutionInput: SaveWorkflowExecutionInput,
   ) {
     const workflowExecution = {
       ...saveWorkflowExecutionInput,
     } as WorkflowExecution;
-    return this.workflowExecutionRepository.saveWorkflowExecution(workflowKeysInput, workflowExecution);
+    return this.workflowExecutionRepository.saveWorkflowExecution(workflowExecutionKeysInput, workflowExecution);
   }
 
-  async getWorkflowExecution(workflowKeysInput: WorkflowKeysInput) {
-    return this.workflowExecutionRepository.getWorkflowExecution(workflowKeysInput);
+  async getWorkflowExecutionByKey(workflowExecutionKeysInput: CompositePrimaryKeyInput) {
+    return this.workflowExecutionRepository.getWorkflowExecutionByKey(workflowExecutionKeysInput);
   }
 
-  async deleteWorkflowExecution(workflowKeysInput: WorkflowKeysInput) {
-    return this.workflowExecutionRepository.deleteWorkflowExecution(workflowKeysInput);
+  async deleteWorkflowExecution(workflowExecutionKeysInput: CompositePrimaryKeyInput) {
+    return this.workflowExecutionRepository.deleteWorkflowExecution(workflowExecutionKeysInput);
   }
 
-  async scanWorkflowExecution(filter: { [key: string]: any }) {
-    return this.workflowExecutionRepository.scanWorkflowExecution(filter);
-  }
-
-  async queryWorkflowExecution(queryWorkflowExecutionsInput: QueryWorkflowExecutionsInput) {
-    return this.workflowExecutionRepository.queryWorkflowExecution(queryWorkflowExecutionsInput);
-  }
-
-  async listWorkflowExecutions() {
-    return this.workflowExecutionRepository.listWorkflowExecutions();
-  }
-
-  async queryListWFExecutions(queryListWFExecutionsInput: QueryListWFExecutionsInput) {
-    return this.workflowExecutionRepository.queryListWFExecutions(queryListWFExecutionsInput);
+  async listWorkflowExecutionsOfAVersion(listWorkflowExecutionsOfAVersionInput: ListWorkflowExecutionsOfAVersionInput) {
+    return this.workflowExecutionRepository.listWorkflowExecutionsOfAVersion(listWorkflowExecutionsOfAVersionInput);
   }
 }

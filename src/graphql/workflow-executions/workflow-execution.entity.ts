@@ -1,6 +1,6 @@
 import { Field, Int, ObjectType, OmitType } from '@nestjs/graphql';
-import { WorkflowKeys } from '../common/interfaces/workflow-key.interface';
-import { ACT } from '../workflow-steps/workflow-step.entity';
+import { ACT } from '../common/entities/workflow-step.entity';
+import { CompositePrimaryKey } from '../common/interfaces/workflow-key.interface';
 
 @ObjectType()
 export class CAT extends OmitType(ACT, ['DESIGN', 'END'] as const) {
@@ -27,46 +27,19 @@ export class PARALLEL {
 }
 
 @ObjectType()
-export class WorkflowExecution implements WorkflowKeys {
+export class WorkflowExecution implements CompositePrimaryKey {
   @Field()
   PK: string;
 
   @Field()
   SK: string;
 
-  @Field()
-  WXID: string;
+  @Field((type) => [String])
+  WSXH_IDS: string[];
 
-  @Field((type) => [CAT])
-  CAT: CAT[];
-
-  @Field()
-  STE: string;
+  @Field({ nullable: true })
+  STE?: string;
 
   @Field((type) => [PARALLEL], { nullable: true })
   PARALLEL?: PARALLEL[];
-
-  @Field()
-  CRAT: string;
-}
-
-@ObjectType()
-export class LastKey {
-  @Field()
-  WXID: string;
-
-  @Field()
-  CRAT: string;
-}
-
-@ObjectType()
-export class QueryListWFExecutions {
-  @Field((type) => [WorkflowExecution])
-  Executions: WorkflowExecution[];
-
-  @Field((type) => LastKey, { nullable: true })
-  lastKey?: LastKey;
-
-  @Field((type) => Int)
-  totalRecords: number;
 }

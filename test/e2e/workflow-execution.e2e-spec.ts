@@ -1,104 +1,101 @@
-import * as request from 'supertest';
+import { CompositePrimaryKeyInput } from 'src/graphql/common/inputs/workflow-key.input';
+import { CreateWorkflowExecutionInput } from 'src/graphql/workflow-executions/inputs/create-workflow-execution.input';
+import { CreateWorkflowVersionInput } from 'src/graphql/workflow-versions/inputs/create-workflow-version.input';
 import { v4 } from 'uuid';
 import { SaveWorkflowExecutionInput } from '../../src/graphql/workflow-executions/inputs/save-workflow-execution.input';
-import { getHttpServerTesting, setUpTesting, tearDownTesting } from '../test-e2e';
+import { initiateGraphqlRequest, setUpTesting, tearDownTesting } from '../test-e2e';
 
 const gql = {
+  createWorkflowVersionMutation: `
+    mutation CreateWorkflowVersion($createWorkflowVersionInput: CreateWorkflowVersionInput!){
+      CreateWorkflowVersion(createWorkflowVersionInput: $createWorkflowVersionInput) {
+        PK
+        SK
+        WV
+        CID
+        FAID
+        TotalEXC
+      }
+    }
+  `,
   createWorkflowExecutionMutation: `
-    mutation CreateWorkflowExecution($createWorkflowExecutionInput: CreateWorkflowExecutionInput!) {
+    mutation CreateWorkflowExecution($createWorkflowExecutionInput:  CreateWorkflowExecutionInput!) {
       CreateWorkflowExecution(createWorkflowExecutionInput: $createWorkflowExecutionInput) {
-        WXID
-        CAT {
-          T
-          NM
-          Status
-          MD {
-            Email
-            Subject
-            Body
-            Name
-            Endpoint
-          }
-        }
+        PK
+        SK
+        STE
+        WSXH_IDS
       }
     }
   `,
-  listWorkflowExecutionsQuery: `
-    query ListWorkflowExecutions {
-      ListWorkflowExecutions {
-        WXID
-        CAT {
-          T
-          NM
-          Status
-          MD {
-            Email
-            Subject
-            Body
-            Name
-            Endpoint
-          }
-        }
-      }
-    }
-  `,
-  getWorkflowExecutionQuery: `
-    query GetWorkflowExecution($id: String!) {
-      GetWorkflowExecution(id: $id) {
-        WXID
-        CAT {
-          T
-          NM
-          Status
-          MD {
-            Email
-            Subject
-            Body
-            Name
-            Endpoint
-          }
-        }
-      }
-    }
-  `,
-  saveWorkflowExecutionMutation: `
-    mutation SaveWorkflowExecution($id: String!, $saveWorkflowExecutionInput: SaveWorkflowExecutionInput!) {
-      SaveWorkflowExecution(id: $id, saveWorkflowExecutionInput: $saveWorkflowExecutionInput) {
-        WXID
-        CAT {
-          T
-          Status
-        }
+  getWorkflowExecutionBykey: `
+    query GetWorkflowExecutionByKey($workflowExecutionKeysInput: CompositePrimaryKeyInput!) {
+      GetWorkflowExecutionByKey(workflowExecutionKeysInput: $workflowExecutionKeysInput) {
+        PK
+        SK
+        WSXH_IDS
         STE
       }
     }
   `,
+  saveWorkflowExecutionMutation: `
+    mutation SavekflowExecution(
+      $saveWorkflowExecutionInput: SaveWorkflowExecutionInput!
+      $workflowExecutionKeysInput: CompositePrimaryKeyInput!
+    ) {
+      SaveWorkflowExecution(
+        saveWorkflowExecutionInput: $saveWorkflowExecutionInput,
+        workflowExecutionKeysInput: $workflowExecutionKeysInput
+      ) {
+        PK
+        SK
+        STE
+        WSXH_IDS
+      }
+    }
+  `,
   deleteWorkflowExecutionMutation: `
-    mutation DeleteWorkflowExecution($id: String!) {
-      DeleteWorkflowExecution(id: $id)
+    mutation DeleteWorkflowExecution($workflowExecutionKeysInput: CompositePrimaryKeyInput!){
+      DeleteWorkflowExecution(workflowExecutionKeysInput: $workflowExecutionKeysInput)
     }
   `,
 };
 
-const createWorkflowExecutionInput = {
-  WVID: 'WVID123',
-  WSID: ' WSID123',
-  WLFN: 'SampleWorkflow100',
-  CRAT: 'Email',
-  CAT: [],
+const OrgId = 'ORG#1234';
+
+const createWorkflowVersionInput: CreateWorkflowVersionInput = {
+  WLFID: `${OrgId}|WLF#1`,
+  WV: '1',
+  FAID: '[1, 2, 3]',
+  CID: v4(),
+};
+
+const createWorkflowExecutionInput: CreateWorkflowExecutionInput = {
+  WorkflowVersionKeys: { PK: '', SK: '' },
+  WSXH_IDS: ['WSXH#1'],
   STE: '{}',
+  PARALLEL: [],
+};
+
+const workflowExecutionKeysInput: CompositePrimaryKeyInput = {
+  PK: '',
+  SK: '',
 };
 
 const saveWorkflowExecutionInput: SaveWorkflowExecutionInput = {
-  CAT: [{ T: 'WebSrv', Status: 'Finished' }],
-  STE: '{ data: [] }',
+  STE: '{ result: good }',
 };
 
-let getWorkflowExecutionData: any = {};
-
 describe('WorkflowExecutionResolver (e2e)', () => {
+  let workflowVersion: any;
+
   beforeAll(async () => {
     await setUpTesting();
+    const data = await initiateGraphqlRequest(gql.createWorkflowVersionMutation, { createWorkflowVersionInput });
+    workflowVersion = data.CreateWorkflowVersion;
+
+    createWorkflowExecutionInput.WorkflowVersionKeys.PK = workflowVersion.PK;
+    createWorkflowExecutionInput.WorkflowVersionKeys.SK = workflowVersion.SK;
   });
 
   afterAll(async () => {
@@ -106,104 +103,52 @@ describe('WorkflowExecutionResolver (e2e)', () => {
   });
 
   describe('createWorkflowExecution', () => {
-    it('should create the workflow execution', () => {
-      return request(getHttpServerTesting())
-        .post('/api/graphql')
-        .send({
-          query: gql.createWorkflowExecutionMutation,
-          variables: {
-            createWorkflowExecutionInput,
-          },
-        })
-        .expect(({ body: { data } }) => {
-          const createWorkflowExecution = data.CreateWorkflowExecution;
-          expect(createWorkflowExecution.CAT).toStrictEqual(createWorkflowExecutionInput.CAT);
-        })
-        .expect(200);
+    it('should create the workflow execution', async () => {
+      const data = await initiateGraphqlRequest(gql.createWorkflowExecutionMutation, { createWorkflowExecutionInput });
+      const workflowExec = data.CreateWorkflowExecution;
+
+      expect(workflowExec.PK).toEqual(`${workflowVersion.SK}|WX#1`);
+      expect(workflowExec.SK).toEqual('WX#1');
+      expect(workflowExec.STE).toEqual(createWorkflowExecutionInput.STE);
+      expect(workflowExec.WSXH_IDS).toEqual(createWorkflowExecutionInput.WSXH_IDS);
+
+      workflowExecutionKeysInput.PK = workflowExec.PK;
+      workflowExecutionKeysInput.SK = workflowExec.SK;
     });
   });
 
-  describe('listWorkflowExecutions', () => {
-    it('should list the workflow executions', () => {
-      return request(getHttpServerTesting())
-        .post('/api/graphql')
-        .send({
-          query: gql.listWorkflowExecutionsQuery,
-        })
-        .expect(({ body: { data } }) => {
-          const listWorkflowExecutions = data.ListWorkflowExecutions;
-          getWorkflowExecutionData = listWorkflowExecutions[0];
-          expect(
-            listWorkflowExecutions.some((workflowExecution) => {
-              let isSameCAT = true;
-              for (const id of createWorkflowExecutionInput.CAT) {
-                if (workflowExecution.CAT.includes(id)) continue;
-                isSameCAT = false;
-              }
+  describe('GetWorkflowExecutionByKey', () => {
+    it('should get the specific workflow execution', async () => {
+      const data = await initiateGraphqlRequest(gql.getWorkflowExecutionBykey, { workflowExecutionKeysInput });
+      const workflowExec = data.GetWorkflowExecutionByKey;
 
-              return isSameCAT;
-            }),
-          ).toBe(true);
-        })
-        .expect(200);
-    });
-  });
-
-  describe('getWorkflowExecution', () => {
-    it('should get the executionific workflow execution', () => {
-      return request(getHttpServerTesting())
-        .post('/api/graphql')
-        .send({
-          query: gql.getWorkflowExecutionQuery,
-          variables: {
-            id: getWorkflowExecutionData.WXID,
-          },
-        })
-        .expect(({ body: { data } }) => {
-          const getWorkflowExecution = data.GetWorkflowExecution;
-          expect(getWorkflowExecution.WXID).toBe(getWorkflowExecutionData.WXID);
-          expect(getWorkflowExecution.CAT).not.toBe('');
-        })
-        .expect(200);
+      expect(workflowExec.PK).toEqual(`${workflowVersion.SK}|WX#1`);
+      expect(workflowExec.SK).toEqual('WX#1');
+      expect(workflowExec.STE).toEqual(createWorkflowExecutionInput.STE);
+      expect(workflowExec.WSXH_IDS).toEqual(createWorkflowExecutionInput.WSXH_IDS);
     });
   });
 
   describe('saveWorkflowExecution', () => {
-    it('should save the workflow execution', () => {
-      return request(getHttpServerTesting())
-        .post('/api/graphql')
-        .send({
-          query: gql.saveWorkflowExecutionMutation,
-          variables: {
-            id: getWorkflowExecutionData.WXID,
-            saveWorkflowExecutionInput,
-          },
-        })
-        .expect(({ body: { data } }) => {
-          const saveWorkflowExecution = data.SaveWorkflowExecution;
-          expect(saveWorkflowExecution.WXID).toBe(getWorkflowExecutionData.WXID);
-          expect(saveWorkflowExecution.STE).toBe(saveWorkflowExecutionInput.STE);
-          for (const cat of saveWorkflowExecutionInput.CAT) expect(saveWorkflowExecution.CAT[0]).toEqual(cat);
-        })
-        .expect(200);
+    it('should save the workflow execution', async () => {
+      const data = await initiateGraphqlRequest(gql.saveWorkflowExecutionMutation, {
+        workflowExecutionKeysInput,
+        saveWorkflowExecutionInput,
+      });
+      const workflowExec = data.SaveWorkflowExecution;
+
+      expect(workflowExec.STE).not.toEqual(createWorkflowExecutionInput.STE);
+      expect(workflowExec.STE).toEqual(saveWorkflowExecutionInput.STE);
     });
   });
 
   describe('deleteWorkflowExecution', () => {
-    it('should delete the workflow execution', () => {
-      return request(getHttpServerTesting())
-        .post('/api/graphql')
-        .send({
-          query: gql.deleteWorkflowExecutionMutation,
-          variables: {
-            id: getWorkflowExecutionData.WXID,
-          },
-        })
-        .expect(({ body: { data } }) => {
-          const deleteWorkflowExecution = data.DeleteWorkflowExecution;
-          expect(deleteWorkflowExecution).toBeNull();
-        })
-        .expect(200);
+    it('should delete the workflow execution', async () => {
+      const data1 = await initiateGraphqlRequest(gql.deleteWorkflowExecutionMutation, { workflowExecutionKeysInput });
+      expect(data1.DeleteWorkflowExecution).toBeNull();
+
+      const data2 = await initiateGraphqlRequest(gql.getWorkflowExecutionBykey, { workflowExecutionKeysInput });
+      expect(data2.GetWorkflowExecutionByKey).toBeNull();
     });
   });
 });

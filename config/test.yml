@@ -8,9 +8,8 @@ db:
 
 dynamodb:
   schema:
-    workflowExecutions: 'workflow_executions_test'
-    workflowVersions: 'workflow_versions_test'
-    workflowSteps: 'workflow_steps_test'
+    workflow: 'workflow_test'
+    workflowOrganization: 'workflow_organizations_test'
 
 jwt:
   secret: 'topSecretTest51'

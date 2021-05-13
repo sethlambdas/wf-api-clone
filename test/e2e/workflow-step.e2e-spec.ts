@@ -1,94 +1,126 @@
-import * as request from 'supertest';
-import { v4 } from 'uuid';
+import { CompositePrimaryKeyInput } from 'src/graphql/common/inputs/workflow-key.input';
+import { GetWorkflowStepByAidInput } from 'src/graphql/workflow-steps/inputs/get-workflow-step-by-aid.input';
 import { CreateWorkflowStepInput } from '../../src/graphql/workflow-steps/inputs/create-workflow-step.input';
 import { SaveWorkflowStepInput } from '../../src/graphql/workflow-steps/inputs/save-workflow-step.input';
-import { getHttpServerTesting, setUpTesting, tearDownTesting } from '../test-e2e';
+import { initiateGraphqlRequest, setUpTesting, tearDownTesting } from '../test-e2e';
 
 const gql = {
   createWorkflowStepMutation: `
     mutation CreateWorkflowStep($createWorkflowStepInput: CreateWorkflowStepInput!) {
       CreateWorkflowStep(createWorkflowStepInput: $createWorkflowStepInput) {
-        WSID
-        WVID
+        PK
+        SK
+        AID
         NAID
+        ACT {
+          T
+        }
       }
     }
   `,
-  listWorkflowStepsQuery: `
-    query ListWorkflowSteps {
-      ListWorkflowSteps {
-        WSID
-        WVID
+  getWorkflowStepBykey: `
+    query GetWorkflowStepByKey($workflowStepKeysInput: CompositePrimaryKeyInput!) {
+      GetWorkflowStepByKey(workflowStepKeysInput: $workflowStepKeysInput) {
+        PK
+        SK
+        AID
         NAID
-      }
-    }
-  `,
-  getWorkflowStepQuery: `
-    query GetWorkflowStep($id: String!) {
-      GetWorkflowStep(id: $id) {
-        WSID
-        WVID
-        NAID
+        DATA
+        ACT {
+          T
+          NM
+        }
       }
     }
   `,
   saveWorkflowStepMutation: `
-    mutation SaveWorkflowStep($id: String!, $saveWorkflowStepInput: SaveWorkflowStepInput!) {
-      SaveWorkflowStep(id: $id, saveWorkflowStepInput: $saveWorkflowStepInput) {
-        WSID
-        WVID
-        NAID
+    mutation CreateWorkflowStep(
+      $saveWorkflowStepInput: SaveWorkflowStepInput!
+      $workflowStepKeysInput: CompositePrimaryKeyInput!
+    ) {
+      SaveWorkflowStep(
+        saveWorkflowStepInput: $saveWorkflowStepInput,
+        workflowStepKeysInput: $workflowStepKeysInput
+      ) {
+        PK
+        SK
         AID
+        NAID
+        DATA
         ACT {
           T
           NM
           MD {
-            Name
-            Endpoint
-          }
-          DESIGN {
-            id
+            Email
           }
         }
       }
     }
   `,
+  getWorkflowStepByAid: `
+    query GetWorkflowStepByAid($getWorkflowStepByAidInput: GetWorkflowStepByAidInput!) {
+      GetWorkflowStepByAid(getWorkflowStepByAidInput: $getWorkflowStepByAidInput) {
+        PK
+        SK
+        AID
+        NAID
+        ACT {
+          T
+          NM
+        }
+      }
+    }
+  `,
   deleteWorkflowStepMutation: `
-    mutation DeleteWorkflowStep($id: String!) {
-      DeleteWorkflowStep(id: $id)
+    mutation DeleteWorkflowVersion($workflowStepKeysInput: CompositePrimaryKeyInput!) {
+      DeleteWorkflowStep(workflowStepKeysInput: $workflowStepKeysInput)
+    }
+  `,
+  getWorkflowStepsWithinAVersion: `
+    query GetWorkflowStepsWithinAVersion($workflowVersionSK: String!) {
+      GetWorkflowStepsWithinAVersion(workflowVersionSK: $workflowVersionSK) {
+        PK
+        SK
+        AID
+        DATA
+        NAID
+        ACT {
+          T
+          NM
+        }
+      }
     }
   `,
 };
 
 const createWorkflowStepInput: CreateWorkflowStepInput = {
-  WVID: v4(),
-  NAID: ['1', '2', '3'],
-  AID: v4(),
+  WorkflowVersionSK: 'WV#1234',
+  AID: '1234',
+  NAID: ['AID#567'],
   ACT: {
-    T: 'Web Service',
+    T: 'Email',
     NM: 'node_1',
     MD: {
-      Endpoint: 'https://google.com',
-      Name: 'countries',
+      Email: 'test@lambdas.io',
     },
     DESIGN: [],
   },
+};
+
+const workflowStepKeysInput: CompositePrimaryKeyInput = {
+  PK: '',
+  SK: '',
 };
 
 const saveWorkflowStepInput: SaveWorkflowStepInput = {
-  AID: v4(),
-  ACT: {
-    T: 'Web Service',
-    NM: 'node_1',
-    MD: {
-      Endpoint: 'https://google.com',
-      Name: 'countries',
-    },
-    DESIGN: [],
-  },
+  AID: 'AID#NEW123',
+  DATA: 'AID#NEW123',
 };
 
-let getWorkflowStepData: any = {};
+const getWorkflowStepByAidInput: GetWorkflowStepByAidInput = {
+  WorkflowStepPK: createWorkflowStepInput.WorkflowVersionSK,
+  AID: 'AID#NEW123',
+};
 
 describe('WorkflowStepResolver (e2e)', () => {
   beforeAll(async () => {
@@ -100,106 +132,87 @@ describe('WorkflowStepResolver (e2e)', () => {
   });
 
   describe('createWorkflowStep', () => {
-    it('should create the workflow step', () => {
-      return request(getHttpServerTesting())
-        .post('/api/graphql')
-        .send({
-          query: gql.createWorkflowStepMutation,
-          variables: {
-            createWorkflowStepInput,
-          },
-        })
-        .expect(({ body: { data } }) => {
-          const createWorkflowStep = data.CreateWorkflowStep;
-          expect(createWorkflowStep.WVID).toBe(createWorkflowStepInput.WVID);
-          expect(createWorkflowStep.NAID).toEqual(createWorkflowStepInput.NAID);
-        })
-        .expect(200);
+    it('should create the workflow step', async () => {
+      const data = await initiateGraphqlRequest(gql.createWorkflowStepMutation, { createWorkflowStepInput });
+      const workflowStep = data.CreateWorkflowStep;
+
+      expect(workflowStep.PK).toEqual(createWorkflowStepInput.WorkflowVersionSK);
+      expect(workflowStep.AID).toEqual(`AID#${createWorkflowStepInput.AID}`);
+      expect(workflowStep.NAID).toEqual(createWorkflowStepInput.NAID);
+      expect(workflowStep.ACT.T).toEqual(createWorkflowStepInput.ACT.T);
+
+      workflowStepKeysInput.PK = workflowStep.PK;
+      workflowStepKeysInput.SK = workflowStep.SK;
     });
   });
 
-  describe('listWorkflowSteps', () => {
-    it('should list the workflow steps', () => {
-      return request(getHttpServerTesting())
-        .post('/api/graphql')
-        .send({
-          query: gql.listWorkflowStepsQuery,
-        })
-        .expect(({ body: { data } }) => {
-          const listWorkflowSteps = data.ListWorkflowSteps;
-          getWorkflowStepData = listWorkflowSteps[0];
-          expect(
-            listWorkflowSteps.some((workflowStep) => {
-              let isSameNAID = true;
-              for (const id of createWorkflowStepInput.NAID) {
-                if (workflowStep.NAID.includes(id)) continue;
-                isSameNAID = false;
-              }
+  describe('getWorkflowStepByKey', () => {
+    it('should get the specific workflow step', async () => {
+      const data = await initiateGraphqlRequest(gql.getWorkflowStepBykey, { workflowStepKeysInput });
+      const workflowStep = data.GetWorkflowStepByKey;
 
-              return workflowStep.WVID === createWorkflowStepInput.WVID && isSameNAID;
-            }),
-          ).toBe(true);
-        })
-        .expect(200);
-    });
-  });
-
-  describe('getWorkflowStep', () => {
-    it('should get the stepific workflow step', () => {
-      return request(getHttpServerTesting())
-        .post('/api/graphql')
-        .send({
-          query: gql.getWorkflowStepQuery,
-          variables: {
-            id: getWorkflowStepData.WSID,
-          },
-        })
-        .expect(({ body: { data } }) => {
-          const getWorkflowStep = data.GetWorkflowStep;
-          expect(getWorkflowStep.WSID).toBe(getWorkflowStepData.WSID);
-          expect(getWorkflowStep.WVID).not.toBe('');
-          expect(getWorkflowStep.NAID).not.toBe('');
-        })
-        .expect(200);
+      expect(workflowStep.PK).toEqual(createWorkflowStepInput.WorkflowVersionSK);
+      expect(workflowStep.AID).toEqual(`AID#${createWorkflowStepInput.AID}`);
+      expect(workflowStep.ACT.T).toEqual(createWorkflowStepInput.ACT.T);
     });
   });
 
   describe('saveWorkflowStep', () => {
-    it('should save the workflow step', () => {
-      return request(getHttpServerTesting())
-        .post('/api/graphql')
-        .send({
-          query: gql.saveWorkflowStepMutation,
-          variables: {
-            id: getWorkflowStepData.WSID,
-            saveWorkflowStepInput,
-          },
-        })
-        .expect(({ body: { data } }) => {
-          const saveWorkflowStep = data.SaveWorkflowStep;
-          expect(saveWorkflowStep.WSID).toBe(getWorkflowStepData.WSID);
-          expect(saveWorkflowStep.AID).toBe(saveWorkflowStepInput.AID);
-          expect(saveWorkflowStep.ACT).toEqual(saveWorkflowStepInput.ACT);
-        })
-        .expect(200);
+    it('should save the workflow step', async () => {
+      const data = await initiateGraphqlRequest(gql.saveWorkflowStepMutation, {
+        workflowStepKeysInput,
+        saveWorkflowStepInput,
+      });
+      const workflowStep = data.SaveWorkflowStep;
+
+      expect(workflowStep.AID).toEqual(saveWorkflowStepInput.AID);
+      expect(workflowStep.DATA).toEqual(saveWorkflowStepInput.DATA);
+    });
+  });
+
+  describe('getWorkflowStepByAid', () => {
+    it('should get the specific workflow step by AID', async () => {
+      const data = await initiateGraphqlRequest(gql.getWorkflowStepByAid, { getWorkflowStepByAidInput });
+      const workflowStep = data.GetWorkflowStepByAid;
+
+      expect(workflowStep.PK).toEqual(createWorkflowStepInput.WorkflowVersionSK);
+      expect(workflowStep.ACT.T).toEqual(createWorkflowStepInput.ACT.T);
+      expect(workflowStep.AID).toEqual(saveWorkflowStepInput.AID);
     });
   });
 
   describe('deleteWorkflowStep', () => {
-    it('should delete the workflow step', () => {
-      return request(getHttpServerTesting())
-        .post('/api/graphql')
-        .send({
-          query: gql.deleteWorkflowStepMutation,
-          variables: {
-            id: getWorkflowStepData.WSID,
-          },
-        })
-        .expect(({ body: { data } }) => {
-          const deleteWorkflowStep = data.DeleteWorkflowStep;
-          expect(deleteWorkflowStep).toBeNull();
-        })
-        .expect(200);
+    it('should delete the workflow step', async () => {
+      const data1 = await initiateGraphqlRequest(gql.deleteWorkflowStepMutation, { workflowStepKeysInput });
+      expect(data1.DeleteWorkflowStep).toBeNull();
+
+      const data2 = await initiateGraphqlRequest(gql.getWorkflowStepBykey, { workflowStepKeysInput });
+      expect(data2.GetWorkflowStepByKey).toBeNull();
+    });
+  });
+
+  describe('getWorkflowStepsWithinAVersion', () => {
+    const steps = [
+      { ...createWorkflowStepInput, AID: '11' },
+      { ...createWorkflowStepInput, AID: '12' },
+    ];
+
+    beforeAll(async () => {
+      for (const step of steps)
+        await initiateGraphqlRequest(gql.createWorkflowStepMutation, { createWorkflowStepInput: step });
+    });
+
+    it('should get the workflow steps within a workflow version', async () => {
+      const data = await initiateGraphqlRequest(gql.getWorkflowStepsWithinAVersion, {
+        workflowVersionSK: createWorkflowStepInput.WorkflowVersionSK,
+      });
+      const workflowSteps = data.GetWorkflowStepsWithinAVersion;
+
+      const workflowStep1 = workflowSteps.find((step: any) => step.AID === `AID#${steps[0].AID}`);
+      const workflowStep2 = workflowSteps.find((step: any) => step.AID === `AID#${steps[1].AID}`);
+
+      expect(workflowStep1).not.toBeUndefined();
+      expect(workflowStep2).not.toBeUndefined();
     });
   });
 });

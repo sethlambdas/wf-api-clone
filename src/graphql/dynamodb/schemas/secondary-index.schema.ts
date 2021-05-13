@@ -21,6 +21,16 @@ export const SecondaryIndexes = new Schema(
         throughput: 5,
       },
     },
+    Status: {
+      type: String,
+      index: {
+        global: true,
+        rangeKey: 'SK',
+        name: `${GSI.GetActivityTypeAccordingToStatus}`,
+        project: true,
+        throughput: 5,
+      },
+    },
   },
   {
     timestamps: {

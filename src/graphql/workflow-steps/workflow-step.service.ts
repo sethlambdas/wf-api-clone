@@ -1,7 +1,8 @@
 import { Inject, Injectable } from '@nestjs/common';
 import { v4 } from 'uuid';
-import { WorkflowKeysInput } from '../common/inputs/workflow-key.input';
+import { CompositePrimaryKeyInput } from '../common/inputs/workflow-key.input';
 import { CreateWorkflowStepInput } from './inputs/create-workflow-step.input';
+import { GetWorkflowStepByAidInput } from './inputs/get-workflow-step-by-aid.input';
 import { SaveWorkflowStepInput } from './inputs/save-workflow-step.input';
 import { WorkflowStep } from './workflow-step.entity';
 import { WorkflowStepRepository } from './workflow-step.repository';
@@ -14,16 +15,14 @@ export class WorkflowStepService {
   ) {}
 
   async createWorkflowStep(createWorkflowStepInput: CreateWorkflowStepInput) {
-    const { PK, WVID, NAID, AID, ACT } = createWorkflowStepInput;
-    const WSID = `${WVID}|WS#${v4()}`;
+    const { WorkflowVersionSK, NAID, AID, ACT } = createWorkflowStepInput;
+    const WSID = `WS#${v4()}`;
     const transformedAID = `AID#${AID}`;
     const workflowStep = {
-      PK,
+      PK: WorkflowVersionSK,
       SK: WSID,
       AID: transformedAID,
       DATA: transformedAID,
-      WSID,
-      WVID,
       NAID,
       ACT,
     } as WorkflowStep;
@@ -33,16 +32,14 @@ export class WorkflowStepService {
   async batchCreateWorkflowStep(createWorkflowStepInputs: CreateWorkflowStepInput[]) {
     const workflowSteps: WorkflowStep[] = [];
     for (const input of createWorkflowStepInputs) {
-      const { PK, WVID, NAID, AID, ACT } = input;
-      const WSID = `${WVID}|WS#${v4()}`;
+      const { WorkflowVersionSK, NAID, AID, ACT } = input;
+      const workflowStepSK = `WS#${v4()}`;
       const transformedAID = `AID#${AID}`;
       const workflowStep = {
-        PK,
-        SK: WSID,
+        PK: WorkflowVersionSK,
+        SK: workflowStepSK,
         AID: transformedAID,
         DATA: transformedAID,
-        WSID,
-        WVID,
         NAID,
         ACT,
       } as WorkflowStep;
@@ -54,34 +51,30 @@ export class WorkflowStepService {
     else return workflowSteps;
   }
 
-  async saveWorkflowStep(workflowKeysInput: WorkflowKeysInput, saveWorkflowStepInput: SaveWorkflowStepInput) {
+  async saveWorkflowStep(
+    workflowStepsKeysInput: CompositePrimaryKeyInput,
+    saveWorkflowStepInput: SaveWorkflowStepInput,
+  ) {
     const workflowStep = {
       ...saveWorkflowStepInput,
     } as WorkflowStep;
-    return this.workflowStepRepository.saveWorkflowStep(workflowKeysInput, workflowStep);
+    return this.workflowStepRepository.saveWorkflowStep(workflowStepsKeysInput, workflowStep);
   }
 
-  async getWorkflowStep(workflowKeysInput: WorkflowKeysInput) {
-    return this.workflowStepRepository.getWorkflowStep(workflowKeysInput);
+  async getWorkflowStepByKey(workflowStepsKeysInput: CompositePrimaryKeyInput) {
+    return this.workflowStepRepository.getWorkflowStepByKey(workflowStepsKeysInput);
   }
 
-  async getWorkflowStepByAid(AID: string, OrgId: string) {
-    return this.workflowStepRepository.getWorkflowStepByAid(AID, OrgId);
+  async getWorkflowStepByAid(getWorkflowStepByAidInput: GetWorkflowStepByAidInput): Promise<WorkflowStep> {
+    const result = await this.workflowStepRepository.getWorkflowStepByAid(getWorkflowStepByAidInput);
+    return result[0];
   }
 
-  async getWorkflowStepWithinAVersion(OrgId: string, WorkflowVersionSK: string) {
-    return this.workflowStepRepository.getWorkflowStepWithinAVersion(OrgId, WorkflowVersionSK);
+  async getWorkflowStepWithinAVersion(WorkflowVersionSK: string) {
+    return this.workflowStepRepository.getWorkflowStepWithinAVersion(WorkflowVersionSK);
   }
 
-  async queryWorkflowStep(filter: { [key: string]: any }) {
-    return this.workflowStepRepository.queryWorkflowStep(filter);
-  }
-
-  async deleteWorkflowStep(workflowKeysInput: WorkflowKeysInput) {
-    return this.workflowStepRepository.deleteWorkflowStep(workflowKeysInput);
-  }
-
-  async listWorkflowSteps() {
-    return this.workflowStepRepository.listWorkflowSteps();
+  async deleteWorkflowStep(workflowStepsKeysInput: CompositePrimaryKeyInput) {
+    return this.workflowStepRepository.deleteWorkflowStep(workflowStepsKeysInput);
   }
 }

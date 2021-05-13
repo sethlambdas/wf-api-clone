@@ -4,7 +4,9 @@ import * as AWS from 'aws-sdk';
 import * as bodyParser from 'body-parser';
 import * as cookieParser from 'cookie-parser';
 import { AppModule } from './graphql/app.module';
+import { OrganizationService } from './graphql/organizations/organization.service';
 import { WorkflowExecutionService } from './graphql/workflow-executions/workflow-execution.service';
+import { WorkflowStepExecutionHistoryService } from './graphql/workflow-steps-executions-history/workflow-steps-wxh.service';
 import { WorkflowStepService } from './graphql/workflow-steps/workflow-step.service';
 import { ConfigUtil } from './utils/config.util';
 import localStackInit from './utils/localstack-init.util';
@@ -20,6 +22,8 @@ async function bootstrap() {
   });
   const workflowStepService = app.get(WorkflowStepService);
   const workflowExecutionService = app.get(WorkflowExecutionService);
+  const workflowStepExecutionHistoryService = app.get(WorkflowStepExecutionHistoryService);
+  const organizationService = app.get(OrganizationService);
 
   if (process.env.NODE_ENV === 'development') {
     logger.log('Setting up local stack');
@@ -43,7 +47,15 @@ async function bootstrap() {
   await app.listen(port);
   logger.log(`Application listening on port ${port}`);
 
-  const workflow = new Workflow(logger, workflowStepService, workflowExecutionService);
+  // Create Organization for Testing
+  await organizationService.createOrganization({ orgName: 'TestOrgName', orgId: '1234' });
+
+  const workflow = new Workflow(
+    logger,
+    workflowStepService,
+    workflowExecutionService,
+    workflowStepExecutionHistoryService,
+  );
   await workflow.run();
   logger.log('Workflow has started running...');
 }

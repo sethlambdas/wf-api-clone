@@ -1,29 +1,17 @@
-import { Field, InputType, OmitType, PartialType } from '@nestjs/graphql';
+import { Field, InputType, PartialType } from '@nestjs/graphql';
+import { CompositePrimaryKeyInput } from '../../common/inputs/workflow-key.input';
 import { PARALLEL } from '../../workflow-executions/workflow-execution.entity';
-import { ACTInput } from '../../workflow-steps/inputs/create-workflow-step.input';
-
-@InputType()
-class CATInput extends OmitType(ACTInput, ['DESIGN'] as const) {
-  @Field()
-  Status: string;
-}
 
 @InputType()
 class PARALLELInput extends PartialType(PARALLEL, InputType) {}
 
 @InputType()
 export class CreateWorkflowExecutionInput {
-  @Field()
-  PK: string;
+  @Field((type) => CompositePrimaryKeyInput)
+  WorkflowVersionKeys: CompositePrimaryKeyInput;
 
-  @Field()
-  WVID: string;
-
-  @Field({ nullable: true })
-  CRAT: string;
-
-  @Field((type) => [CATInput], { nullable: true })
-  CAT?: CATInput[];
+  @Field((type) => [String])
+  WSXH_IDS: string[];
 
   @Field({ nullable: true })
   STE?: string;

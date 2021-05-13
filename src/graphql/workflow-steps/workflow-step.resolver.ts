@@ -1,6 +1,7 @@
 import { Args, Mutation, Query, Resolver } from '@nestjs/graphql';
-import { WorkflowKeysInput } from '../common/inputs/workflow-key.input';
+import { CompositePrimaryKeyInput } from '../common/inputs/workflow-key.input';
 import { CreateWorkflowStepInput } from './inputs/create-workflow-step.input';
+import { GetWorkflowStepByAidInput } from './inputs/get-workflow-step-by-aid.input';
 import { SaveWorkflowStepInput } from './inputs/save-workflow-step.input';
 import { WorkflowStep } from './workflow-step.entity';
 import { WorkflowStepService } from './workflow-step.service';
@@ -16,24 +17,29 @@ export class WorkflowStepResolver {
 
   @Mutation((returns) => WorkflowStep)
   async SaveWorkflowStep(
-    @Args('workflowKeysInput') workflowKeysInput: WorkflowKeysInput,
+    @Args('workflowStepKeysInput') workflowStepKeysInput: CompositePrimaryKeyInput,
     @Args('saveWorkflowStepInput') saveWorkflowStepInput: SaveWorkflowStepInput,
   ) {
-    return this.workflowStepService.saveWorkflowStep(workflowKeysInput, saveWorkflowStepInput);
+    return this.workflowStepService.saveWorkflowStep(workflowStepKeysInput, saveWorkflowStepInput);
   }
 
   @Mutation((returns) => Boolean, { nullable: true })
-  async DeleteWorkflowStep(@Args('workflowKeysInput') workflowKeysInput: WorkflowKeysInput) {
-    return this.workflowStepService.deleteWorkflowStep(workflowKeysInput);
+  async DeleteWorkflowStep(@Args('workflowStepKeysInput') workflowStepKeysInput: CompositePrimaryKeyInput) {
+    return this.workflowStepService.deleteWorkflowStep(workflowStepKeysInput);
   }
 
-  @Query((returns) => WorkflowStep)
-  async GetWorkflowStep(@Args('workflowKeysInput') workflowKeysInput: WorkflowKeysInput) {
-    return this.workflowStepService.getWorkflowStep(workflowKeysInput);
+  @Query((returns) => WorkflowStep, { nullable: true })
+  async GetWorkflowStepByKey(@Args('workflowStepKeysInput') workflowStepKeysInput: CompositePrimaryKeyInput) {
+    return this.workflowStepService.getWorkflowStepByKey(workflowStepKeysInput);
+  }
+
+  @Query((returns) => WorkflowStep, { nullable: true })
+  async GetWorkflowStepByAid(@Args('getWorkflowStepByAidInput') getWorkflowStepByAidInput: GetWorkflowStepByAidInput) {
+    return this.workflowStepService.getWorkflowStepByAid(getWorkflowStepByAidInput);
   }
 
   @Query((returns) => [WorkflowStep])
-  async ListWorkflowSteps() {
-    return this.workflowStepService.listWorkflowSteps();
+  async GetWorkflowStepsWithinAVersion(@Args('workflowVersionSK') workflowVersionSK: string) {
+    return this.workflowStepService.getWorkflowStepWithinAVersion(workflowVersionSK);
   }
 }

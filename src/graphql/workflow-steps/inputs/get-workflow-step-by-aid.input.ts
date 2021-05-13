@@ -1,10 +1,10 @@
 import { Field, InputType } from '@nestjs/graphql';
 
 @InputType()
-export class CompositePrimaryKeyInput {
+export class GetWorkflowStepByAidInput {
   @Field()
-  PK: string;
+  AID: string;
 
   @Field()
-  SK: string;
+  WorkflowStepPK: string;
 }

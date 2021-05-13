@@ -3,22 +3,21 @@ import { v4 } from 'uuid';
 import { ActivityTypes } from '../../utils/activity/activity-registry.util';
 import { putEventsEB } from '../../utils/event-bridge/event-bridge.util';
 import Workflow from '../../workflow';
-import { QueryListWFExecutions, WorkflowExecution } from '../workflow-executions/workflow-execution.entity';
-import { WorkflowExecutionService } from '../workflow-executions/workflow-execution.service';
+import { ACT as TypeACT, DesignWorkflowInput } from '../common/entities/workflow-step.entity';
+import { CompositePrimaryKeyInput } from '../common/inputs/workflow-key.input';
+import { OrganizationService } from '../organizations/organization.service';
 import { CreateWorkflowStepInput } from '../workflow-steps/inputs/create-workflow-step.input';
 import { SaveWorkflowStepInput } from '../workflow-steps/inputs/save-workflow-step.input';
-import { ACT as TypeACT, DesignWorkflow, WorkflowStep } from '../workflow-steps/workflow-step.entity';
+import { WorkflowStep } from '../workflow-steps/workflow-step.entity';
 import { WorkflowStepService } from '../workflow-steps/workflow-step.service';
 import { CreateWorkflowVersionInput } from '../workflow-versions/inputs/create-workflow-version.input';
 import { SaveWorkflowVersionInput } from '../workflow-versions/inputs/save-workflow-version.input';
 import { WorkflowVersionService } from '../workflow-versions/workflow-version.service';
 import { CreateWorkflowInput } from './inputs/create-workflow.input';
-import { DesignWorkflowInput } from './inputs/design-workflow.input';
-import { GetWorkflowDetailsInput } from './inputs/get-workflow.input';
-import { InitiateCurrentStepInput } from './inputs/initiate-step.input';
-import { ListWorkflowInput } from './inputs/list-workflow.input';
+import { GetWorkflowByNameInput } from './inputs/get-workflow-by-name.input';
+import { InitiateAWorkflowStepInput } from './inputs/initiate-step.input';
 import { StateWorkflowInput } from './inputs/state-workflow.input';
-import { CreateWorkflowResponse, ListWorkflows, WorkflowDetails } from './workflow.entity';
+import { CreateWorkflowResponse } from './workflow.entity';
 import { WorkflowRepository } from './workflow.repository';
 
 @Injectable()
@@ -30,11 +29,11 @@ export class WorkflowService {
     private workflowRepository: WorkflowRepository,
     private workflowStepService: WorkflowStepService,
     private workflowVersionService: WorkflowVersionService,
-    private workflowExecutionService: WorkflowExecutionService,
+    private organizationService: OrganizationService,
   ) {}
 
   async createWorkflow(createWorkflowInput: CreateWorkflowInput): Promise<CreateWorkflowResponse> {
-    const { WorkflowId, Design, StartAt, States, WLFN, OrgId } = createWorkflowInput;
+    const { WorkflowId, Design, StartAt, States, WorkflowName, OrgId } = createWorkflowInput;
     let WV = 1;
     let WLFID = '';
     let FAID = '';
@@ -42,14 +41,24 @@ export class WorkflowService {
     let executeWorkflowStepKey: { PK: string; SK: string };
 
     if (!WorkflowId) {
-      const getWorkflowName = await this.workflowRepository.getWorkflowByName(WLFN, OrgId);
-      if (getWorkflowName.count > 0) return { IsWorkflowNameExist: true };
+      const getWorkflowName = await this.getWorkflowByName({ WorkflowName, OrgId });
+      if (getWorkflowName) return { IsWorkflowNameExist: true };
 
-      const workflow = await this.workflowRepository.createWorkflow({ OrgId, WLFN });
-      WLFID = workflow.SK;
+      const organization = await this.organizationService.getOrganization({ PK: OrgId });
+      if (!organization) return { Error: 'Organization not existing' };
+      await this.organizationService.saveOrganization({ PK: OrgId }, { TotalWLF: organization.TotalWLF + 1 });
+
+      const workflow = await this.workflowRepository.createWorkflow({
+        OrgId,
+        WorkflowName,
+        WorkflowNumber: organization.TotalWLF,
+      });
+      WLFID = workflow.PK;
     } else {
       WLFID = WorkflowId;
-      const workflowVersions = await this.workflowVersionService.getAllWorkflowVersionsOfWorkflow({ PK: OrgId, WLFID });
+      const workflowVersions = await this.workflowVersionService.getAllWorkflowVersionsOfWorkflow({
+        WorkflowPK: WLFID,
+      });
       WV = workflowVersions.count + 1;
     }
 
@@ -62,7 +71,6 @@ export class WorkflowService {
     }
 
     const createWorkflowVersionInput: CreateWorkflowVersionInput = {
-      PK: OrgId,
       WLFID,
       CID: v4(),
       WV: JSON.stringify(WV),
@@ -79,17 +87,16 @@ export class WorkflowService {
       const ACT: TypeACT = {
         T: state.ActivityType,
         NM: state.ActivityId,
-        MD: state.Variables,
         DESIGN: await this.getDesign(Design, state),
       };
 
+      if (state.Variables) ACT.MD = state.Variables;
       if (state.End) ACT.END = state.End;
 
       const createWorkflowStepInput: CreateWorkflowStepInput = {
-        PK: OrgId,
-        WVID: workflowVersion.SK,
-        NAID: [],
+        WorkflowVersionSK: workflowVersion.SK,
         AID,
+        NAID: [],
         ACT,
       };
 
@@ -113,34 +120,80 @@ export class WorkflowService {
           NAID.push(step.AID);
           step.NAID = NAID;
         }
+
         if (step.ACT.NM === state.ActivityId) getWorkflowStep = step;
         if (step.AID === FAID) executeWorkflowStepKey = { PK: step.PK, SK: step.SK };
       }
 
       const saveWorkflowStepInput: SaveWorkflowStepInput = { NAID };
-
       await this.workflowStepService.saveWorkflowStep(
         { PK: getWorkflowStep.PK, SK: getWorkflowStep.SK },
         saveWorkflowStepInput,
       );
     }
 
+    if (!executeWorkflowStepKey) {
+      for (const step of workflowSteps) if (step.AID === FAID) executeWorkflowStepKey = { PK: step.PK, SK: step.SK };
+    }
+
+    await this.updateManualApprovalNextSteps(workflowSteps, States);
     await this.updateWorkflowStepsConditional(workflowSteps, States);
 
     const saveWorkflowVersionInput: SaveWorkflowVersionInput = { FAID };
 
     await this.workflowVersionService.saveWorkflowVersion(
-      { PK: OrgId, SK: workflowVersion.SK },
+      { PK: workflowVersion.PK, SK: workflowVersion.SK },
       saveWorkflowVersionInput,
     );
 
-    await this.executeWorkflowEB(WLFN, executeWorkflowStepKey);
+    await this.executeWorkflowEB(
+      OrgId,
+      WorkflowName,
+      { PK: workflowVersion.PK, SK: workflowVersion.SK },
+      executeWorkflowStepKey,
+    );
 
     return {
-      PK: OrgId,
-      SK: WLFID,
+      WorkflowKeys: {
+        PK: WLFID,
+        SK: WLFID.split('|', 2)[1],
+      },
+      WorkflowVersionKeys: {
+        PK: workflowVersion.PK,
+        SK: workflowVersion.SK,
+      },
       IsWorkflowNameExist: false,
     };
+  }
+
+  async updateManualApprovalNextSteps(workflowSteps: WorkflowStep[], States: StateWorkflowInput[]) {
+    const manualApprovalStates = States.filter((state) => state.ActivityType === ActivityTypes.ManualApproval);
+
+    for (const state of manualApprovalStates) {
+      let ApproveStep = '';
+      let RejectStep = '';
+      let currentStep: WorkflowStep;
+
+      for (const step of workflowSteps) {
+        if (step.ACT.NM === state.ActivityId) currentStep = step;
+        if (step.ACT.NM === state.Variables.ApproveStep) ApproveStep = step.AID;
+        if (step.ACT.NM === state.Variables.RejectStep) RejectStep = step.AID;
+      }
+      const ACT = currentStep.ACT;
+      if (ACT.MD) {
+        if (ApproveStep !== '') ACT.MD.ApproveStep = ApproveStep;
+        if (RejectStep !== '') ACT.MD.RejectStep = RejectStep;
+
+        if (ApproveStep !== '' || RejectStep !== '') {
+          const saveWorkflowStepInput: SaveWorkflowStepInput = { ACT };
+
+          await this.workflowStepService.saveWorkflowStep(
+            { PK: currentStep.PK, SK: currentStep.SK },
+            saveWorkflowStepInput,
+          );
+        }
+      }
+    }
   }
 
   async updateWorkflowStepsConditional(workflowSteps: WorkflowStep[], States: StateWorkflowInput[]) {
@@ -228,15 +281,22 @@ export class WorkflowService {
     return design;
   }
 
-  async executeWorkflowEB(WLFN: string, executeWorkflowStepKey: { PK: string; SK: string }) {
-    const workflowStep = await this.workflowStepService.getWorkflowStep(executeWorkflowStepKey);
+  async executeWorkflowEB(
+    OrgId: string,
+    WorkflowName: string,
+    workflowVerionsKeys: { PK: string; SK: string },
+    executeWorkflowStepKey: { PK: string; SK: string },
+  ) {
+    const workflowStep = await this.workflowStepService.getWorkflowStepByKey(executeWorkflowStepKey);
 
     const params = {
       Entries: [
         {
           Detail: JSON.stringify({
             ...workflowStep,
-            WLFN,
+            WLFN: WorkflowName,
+            WorkflowVersionKeys: workflowVerionsKeys,
+            OrgId,
           }),
           DetailType: Workflow.getDetailType(),
           Source: Workflow.getSource(),
@@ -247,40 +307,37 @@ export class WorkflowService {
     await putEventsEB(params);
   }
 
-  async getWorkflowDetails(getWorkflowDetailsInput: GetWorkflowDetailsInput): Promise<WorkflowDetails> {
-    const { OrgId, WorkflowVersionSK } = getWorkflowDetailsInput;
-    const Activities: TypeACT[] = [];
-    const Design: DesignWorkflow[] = [];
+  async initiatAWorkflowStep(initiateAWorkflowStepInput: InitiateAWorkflowStepInput) {
+    const {
+      WorkflowExecutionKeys,
+      WorkflowStepExecutionHistorySK,
+      WorkflowStepKeys,
+      OrgId,
+      WorkflowName,
+      ActivityType,
+      Approve,
+    } = initiateAWorkflowStepInput;
 
-    const workflowSteps = await this.workflowStepService.getWorkflowStepWithinAVersion(OrgId, WorkflowVersionSK);
+    const workflowStep = await this.workflowStepService.getWorkflowStepByKey(WorkflowStepKeys);
 
-    for (const step of workflowSteps) {
-      Activities.push(step.ACT);
+    let ManualApproval: any;
 
-      step.ACT.DESIGN.forEach((element) => {
-        Design.push(element);
-      });
-    }
+    if (ActivityType === ActivityTypes.ManualApproval) ManualApproval = { IsApprove: Approve };
+    else ManualApproval = false;
 
-    return {
-      PK: OrgId,
-      WorkflowVersionSK,
-      Activities,
-      Design,
+    const detail = {
+      ...workflowStep,
+      wfExecKeys: WorkflowExecutionKeys,
+      WorkflowStepExecutionHistorySK,
+      WLFN: WorkflowName,
+      OrgId,
+      ManualApproval,
     };
-  }
-
-  async initiateCurrentStep(initiateCurrentStepInput: InitiateCurrentStepInput) {
-    const { Key, ActivityType, Approve } = initiateCurrentStepInput;
-
-    const queryWorkflowSteps = await this.workflowStepService.getWorkflowStep(Key);
-
-    if (ActivityType === ActivityTypes.ManualApproval && Approve) queryWorkflowSteps.ACT.MD.Completed = true;
 
     const params = {
       Entries: [
         {
-          Detail: JSON.stringify(queryWorkflowSteps[0]),
+          Detail: JSON.stringify(detail),
           DetailType: Workflow.getDetailType(),
           Source: Workflow.getSource(),
         },
@@ -292,36 +349,12 @@ export class WorkflowService {
     return 'Successfuly Initiated Event';
   }
 
-  async listWorkflows(listWorkflowsInput: ListWorkflowInput): Promise<ListWorkflows> {
-    const { CRAT, pageSize, LastKey, page } = listWorkflowsInput;
-    let workflowExecutions: QueryListWFExecutions = {
-      Executions: [],
-      totalRecords: 0,
-    };
+  async getWorkflowByKey(workflowKeysInput: CompositePrimaryKeyInput) {
+    return this.workflowRepository.getWorkflowByKey(workflowKeysInput);
+  }
 
-    workflowExecutions = await this.workflowExecutionService.queryListWFExecutions({
-      IndexName: 'GetCRAT',
-      PK: 'CRAT',
-      Value: CRAT,
-      pageSize,
-      page,
-      LastKey: LastKey || null,
-    });
-
-    const result: ListWorkflows = {
-      Workflows: [],
-      TotalRecords: workflowExecutions.totalRecords,
-      LastKey: workflowExecutions.lastKey,
-    };
-
-    result.Workflows = workflowExecutions.Executions.map((e) => {
-      return {
-        WXID: e.WXID,
-        WLFN: 'hey',
-        CRAT: e.CRAT,
-      };
-    });
-
-    return result;
+  async getWorkflowByName(getWorkflowByNameInput: GetWorkflowByNameInput) {
+    const result = await this.workflowRepository.getWorkflowByName(getWorkflowByNameInput);
+    return result[0];
   }
 }

@@ -1,27 +1,4 @@
 import { Schema } from 'dynamoose';
-import { MDSchema } from '../dynamodb/schemas/act.schema';
-
-const CATSChema = new Schema({
-  T: {
-    type: String,
-  },
-  NM: {
-    type: String,
-  },
-  MD: {
-    type: Object,
-    schema: MDSchema,
-  },
-  END: {
-    type: Boolean,
-  },
-  WSID: {
-    type: String,
-  },
-  Status: {
-    type: String,
-  },
-});
 
 const ParallelSchema = new Schema({
   isParallelActive: {
@@ -45,12 +22,9 @@ export const WorkflowExecutionSchema = new Schema(
       type: String,
       rangeKey: true,
     },
-    WXID: {
-      type: String,
-    },
-    CAT: {
+    WSXH_IDS: {
       type: Array,
-      schema: [CATSChema],
+      schema: [String],
     },
     STE: {
       type: String,
@@ -59,17 +33,6 @@ export const WorkflowExecutionSchema = new Schema(
       type: Array,
       required: false,
       schema: [ParallelSchema],
-    },
-    CRAT: {
-      type: String,
-      required: true,
-      index: {
-        global: true,
-        rangeKey: 'WXID',
-        name: 'GetCRAT',
-        project: true,
-        throughput: 5,
-      },
     },
   },
   {

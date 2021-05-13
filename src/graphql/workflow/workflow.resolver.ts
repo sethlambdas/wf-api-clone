@@ -1,9 +1,8 @@
 import { Args, Mutation, Query, Resolver } from '@nestjs/graphql';
 import { CreateWorkflowInput } from './inputs/create-workflow.input';
-import { GetWorkflowDetailsInput } from './inputs/get-workflow.input';
-import { InitiateCurrentStepInput } from './inputs/initiate-step.input';
-import { ListWorkflowInput } from './inputs/list-workflow.input';
-import { CreateWorkflowResponse, ListWorkflows, WorkflowDetails } from './workflow.entity';
+import { GetWorkflowByNameInput } from './inputs/get-workflow-by-name.input';
+import { InitiateAWorkflowStepInput } from './inputs/initiate-step.input';
+import { CreateWorkflowResponse, WorkflowModelRepository } from './workflow.entity';
 import { WorkflowService } from './workflow.service';
 
 @Resolver()
@@ -15,17 +14,15 @@ export class WorkflowResolver {
     return this.workflowService.createWorkflow(createWorkflowInput);
   }
 
-  @Query((returns) => WorkflowDetails)
-  async GetWorkflowDetails(@Args('getWorkflowDetailsInput') getWorkflowDetailsInput: GetWorkflowDetailsInput) {
-    return this.workflowService.getWorkflowDetails(getWorkflowDetailsInput);
-  }
-  @Query((returns) => String)
-  async InitiateCurrentStep(@Args('initiateCurrentStepInput') initiateCurrentStepInput: InitiateCurrentStepInput) {
-    return this.workflowService.initiateCurrentStep(initiateCurrentStepInput);
+  @Mutation((returns) => String)
+  async InitiateAWorkflowStep(
+    @Args('initiateAWorkflowStepInput') initiateAWorkflowStepInput: InitiateAWorkflowStepInput,
+  ) {
+    return this.workflowService.initiatAWorkflowStep(initiateAWorkflowStepInput);
   }
 
-  @Query((returns) => ListWorkflows)
-  async ListWorkflows(@Args('listWorkflowsInput') listWorkflowsInput: ListWorkflowInput) {
-    return this.workflowService.listWorkflows(listWorkflowsInput);
+  @Query((returns) => WorkflowModelRepository)
+  async GetWorkflowByName(@Args('getWorkflowByNameInput') getWorkflowByNameInput: GetWorkflowByNameInput) {
+    return this.workflowService.getWorkflowByName(getWorkflowByNameInput);
   }
 }

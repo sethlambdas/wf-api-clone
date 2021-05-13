@@ -1,6 +1,7 @@
 import { Args, Mutation, Query, Resolver } from '@nestjs/graphql';
-import { WorkflowKeysInput } from '../common/inputs/workflow-key.input';
+import { CompositePrimaryKeyInput } from '../common/inputs/workflow-key.input';
 import { CreateWorkflowExecutionInput } from './inputs/create-workflow-execution.input';
+import { ListWorkflowExecutionsOfAVersionInput } from './inputs/get-workflow-executions-of-version.input';
 import { SaveWorkflowExecutionInput } from './inputs/save-workflow-execution.input';
 import { WorkflowExecution } from './workflow-execution.entity';
 import { WorkflowExecutionService } from './workflow-execution.service';
@@ -18,24 +19,31 @@ export class WorkflowExecutionResolver {
 
   @Mutation((returns) => WorkflowExecution)
   async SaveWorkflowExecution(
-    @Args('workflowKeysInput') workflowKeysInput: WorkflowKeysInput,
+    @Args('workflowExecutionKeysInput') workflowExecutionKeysInput: CompositePrimaryKeyInput,
     @Args('saveWorkflowExecutionInput') saveWorkflowExecutionInput: SaveWorkflowExecutionInput,
   ) {
-    return this.workflowExecutionService.saveWorkflowExecution(workflowKeysInput, saveWorkflowExecutionInput);
+    return this.workflowExecutionService.saveWorkflowExecution(workflowExecutionKeysInput, saveWorkflowExecutionInput);
   }
 
   @Mutation((returns) => Boolean, { nullable: true })
-  async DeleteWorkflowExecution(@Args('workflowKeysInput') workflowKeysInput: WorkflowKeysInput) {
-    return this.workflowExecutionService.deleteWorkflowExecution(workflowKeysInput);
+  async DeleteWorkflowExecution(
+    @Args('workflowExecutionKeysInput') workflowExecutionKeysInput: CompositePrimaryKeyInput,
+  ) {
+    return this.workflowExecutionService.deleteWorkflowExecution(workflowExecutionKeysInput);
   }
 
-  @Query((returns) => WorkflowExecution)
-  async GetWorkflowExecution(@Args('workflowKeysInput') workflowKeysInput: WorkflowKeysInput) {
-    return this.workflowExecutionService.getWorkflowExecution(workflowKeysInput);
+  @Query((returns) => WorkflowExecution, { nullable: true })
+  async GetWorkflowExecutionByKey(
+    @Args('workflowExecutionKeysInput') workflowExecutionKeysInput: CompositePrimaryKeyInput,
+  ) {
+    return this.workflowExecutionService.getWorkflowExecutionByKey(workflowExecutionKeysInput);
   }
 
   @Query((returns) => [WorkflowExecution])
-  async ListWorkflowExecutions() {
-    return this.workflowExecutionService.listWorkflowExecutions();
+  async ListWorkflowExecutionsOfAVersion(
+    @Args('listWorkflowExecutionsOfAVersionInput')
+    listWorkflowExecutionsOfAVersionInput: ListWorkflowExecutionsOfAVersionInput,
+  ) {
+    return this.workflowExecutionService.listWorkflowExecutionsOfAVersion(listWorkflowExecutionsOfAVersionInput);
   }
 }

@@ -1,14 +1,17 @@
-import { Field, ObjectType } from '@nestjs/graphql';
-import { WorkflowKeys } from '../common/interfaces/workflow-key.interface';
+import { Field, Int, ObjectType } from '@nestjs/graphql';
+import { SimplePrimaryKey } from '../common/interfaces/workflow-key.interface';
 
 @ObjectType()
-export class Organization implements WorkflowKeys {
+export class Organization implements SimplePrimaryKey {
   @Field()
   PK: string;
 
   @Field()
-  SK: string;
-
-  @Field()
   ORGNAME: string;
+
+  @Field((type) => Int)
+  TotalWLF: number;
+
+  @Field((type) => Int)
+  TotalUSR: number;
 }

@@ -10,6 +10,7 @@ import { OrganizationModule } from './organizations/organization.module';
 import { TaskModule } from './tasks/task.module';
 import { UserModule } from './users/user.module';
 import { WorkflowExecutionModule } from './workflow-executions/workflow-execution.module';
+import { WorkflowStepExecutionHistoryModule } from './workflow-steps-executions-history/worflow-steps-wxh.module';
 import { WorkflowStepModule } from './workflow-steps/workflow-step.module';
 import { WorkflowVersionModule } from './workflow-versions/workflow-version.module';
 import { WorkflowModule } from './workflow/workflow.module';
@@ -58,6 +59,7 @@ import { WorkflowModule } from './workflow/workflow.module';
     WorkflowVersionModule,
     WorkflowStepModule,
     OrganizationModule,
+    WorkflowStepExecutionHistoryModule,
   ],
 })
 export class AppModule {}

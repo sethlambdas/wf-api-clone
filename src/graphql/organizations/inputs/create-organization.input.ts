@@ -4,4 +4,7 @@ import { Field, InputType } from '@nestjs/graphql';
 export class CreateOrganizationInput {
   @Field()
   orgName: string;
+
+  @Field({ nullable: true })
+  orgId?: string;
 }

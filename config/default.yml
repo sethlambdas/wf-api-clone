@@ -21,9 +21,7 @@ dynamodb:
   local: 'http://localhost:4566'
   schema:
     workflow: 'workflow'
-    workflowExecutions: 'workflow_executions'
-    workflowVersions: 'workflow_versions'
-    workflowSteps: 'workflow_steps'
+    workflowOrganization: 'workflow_organizations'
 
 jwt:
   secret: 'TokenSecret'

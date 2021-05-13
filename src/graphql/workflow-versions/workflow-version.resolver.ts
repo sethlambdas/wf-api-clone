@@ -1,8 +1,9 @@
 import { Args, Mutation, Query, Resolver } from '@nestjs/graphql';
-import { WorkflowKeysInput } from '../common/inputs/workflow-key.input';
+import { CompositePrimaryKeyInput } from '../common/inputs/workflow-key.input';
 import { CreateWorkflowVersionInput } from './inputs/create-workflow-version.input';
+import { GetWorkflowVersionDetailsInput } from './inputs/get-workflow-version-details.input';
 import { SaveWorkflowVersionInput } from './inputs/save-workflow-version.input';
-import { WorkflowVersion } from './workflow-version.entity';
+import { WorkflowVersion, WorkflowVersionDetails } from './workflow-version.entity';
 import { WorkflowVersionService } from './workflow-version.service';
 
 @Resolver((of) => WorkflowVersion)
@@ -18,24 +19,26 @@ export class WorkflowVersionResolver {
 
   @Mutation((returns) => WorkflowVersion)
   async SaveWorkflowVersion(
-    @Args('workflowKeysInput') workflowKeysInput: WorkflowKeysInput,
+    @Args('workflowVersionKeysInput') workflowVersionKeysInput: CompositePrimaryKeyInput,
     @Args('saveWorkflowVersionInput') saveWorkflowVersionInput: SaveWorkflowVersionInput,
   ) {
-    return this.workflowVersionService.saveWorkflowVersion(workflowKeysInput, saveWorkflowVersionInput);
+    return this.workflowVersionService.saveWorkflowVersion(workflowVersionKeysInput, saveWorkflowVersionInput);
+  }
+
+  @Query((returns) => WorkflowVersionDetails)
+  async GetWorkflowVersionDetails(
+    @Args('getWorkflowVersionDetailsInput') getWorkflowVersionDetailsInput: GetWorkflowVersionDetailsInput,
+  ) {
+    return this.workflowVersionService.getWorkflowVersionDetails(getWorkflowVersionDetailsInput);
+  }
+
+  @Query((returns) => WorkflowVersion, { nullable: true })
+  async GetWorkflowVersionByKey(@Args('workflowVersionKeysInput') workflowVersionKeysInput: CompositePrimaryKeyInput) {
+    return this.workflowVersionService.getWorkflowVersionByKey(workflowVersionKeysInput);
   }
 
   @Mutation((returns) => Boolean, { nullable: true })
-  async DeleteWorkflowVersion(@Args('workflowKeysInput') workflowKeysInput: WorkflowKeysInput) {
-    return this.workflowVersionService.deleteWorkflowVersion(workflowKeysInput);
-  }
-
-  @Query((returns) => WorkflowVersion)
-  async GetWorkflowVersion(@Args('workflowKeysInput') workflowKeysInput: WorkflowKeysInput) {
-    return this.workflowVersionService.getWorkflowVersion(workflowKeysInput);
-  }
-
-  @Query((returns) => [WorkflowVersion])
-  async ListWorkflowVersions() {
-    return this.workflowVersionService.listWorkflowVersions();
+  async DeleteWorkflowVersion(@Args('workflowVersionKeysInput') workflowVersionKeysInput: CompositePrimaryKeyInput) {
+    return this.workflowVersionService.deleteWorkflowVersion(workflowVersionKeysInput);
   }
 }

@@ -1,62 +1,32 @@
-import { Field, Int, ObjectType } from '@nestjs/graphql';
-import { WorkflowKeys } from '../common/interfaces/workflow-key.interface';
-import { LastKey } from '../workflow-executions/workflow-execution.entity';
-import { ACT } from '../workflow-steps/workflow-step.entity';
-import { DesignWorkflow } from '../workflow-steps/workflow-step.entity';
+import { Field, ObjectType } from '@nestjs/graphql';
+import { CompositePrimaryKey } from '../common/interfaces/workflow-key.interface';
 
 @ObjectType()
-export class CreateWorkflowResponse {
-  @Field({ nullable: true })
-  PK?: string;
-
-  @Field({ nullable: true })
-  SK?: string;
-
-  @Field({ nullable: true })
-  IsWorkflowNameExist?: boolean;
-}
-
-@ObjectType()
-export class WorkflowDetails {
+class PrimaryKey implements CompositePrimaryKey {
   @Field()
   PK: string;
 
   @Field()
-  WorkflowVersionSK: string;
-
-  @Field((type) => [ACT], { nullable: true })
-  Activities?: ACT[];
-
-  @Field((type) => [DesignWorkflow], { nullable: true })
-  Design?: DesignWorkflow[];
+  SK: string;
 }
 
 @ObjectType()
-class Workflow {
-  @Field()
-  WXID: string;
+export class CreateWorkflowResponse {
+  @Field((type) => PrimaryKey, { nullable: true })
+  WorkflowKeys?: PrimaryKey;
 
-  @Field()
-  WLFN: string;
+  @Field((type) => PrimaryKey, { nullable: true })
+  WorkflowVersionKeys?: PrimaryKey;
 
-  @Field()
-  CRAT: string;
+  @Field({ nullable: true })
+  IsWorkflowNameExist?: boolean;
+
+  @Field({ nullable: true })
+  Error?: string;
 }
 
 @ObjectType()
-export class ListWorkflows {
-  @Field((type) => [Workflow])
-  Workflows: Workflow[];
-
-  @Field((type) => LastKey, { nullable: true })
-  LastKey?: LastKey;
-
-  @Field((type) => Int)
-  TotalRecords: number;
-}
-
-@ObjectType()
-export class WorkflowModelRepository implements WorkflowKeys {
+export class WorkflowModelRepository implements CompositePrimaryKey {
   @Field()
   PK: string;
 

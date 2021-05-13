@@ -7,5 +7,6 @@ import { OrganizationService } from './organization.service';
 @Module({
   imports: [DynamoDBModule],
   providers: [OrganizationResolver, OrganizationService, OrganizationRepository],
+  exports: [OrganizationService],
 })
 export class OrganizationModule {}

@@ -1,5 +1,5 @@
-import { Field, InputType } from '@nestjs/graphql';
-import { DesignWorkflowInput } from './design-workflow.input';
+import { Field, InputType, Int } from '@nestjs/graphql';
+import { DesignWorkflowInput } from '../../common/entities/workflow-step.entity';
 import { StateWorkflowInput } from './state-workflow.input';
 
 @InputType()
@@ -8,7 +8,10 @@ export class CreateWorkflowInputRepository {
   OrgId: string;
 
   @Field()
-  WLFN: string;
+  WorkflowName: string;
+
+  @Field((type) => Int)
+  WorkflowNumber: number;
 }
 
 @InputType()
@@ -17,7 +20,7 @@ export class CreateWorkflowInput {
   OrgId: string;
 
   @Field()
-  WLFN: string;
+  WorkflowName: string;
 
   @Field({ nullable: true })
   WorkflowId?: string;

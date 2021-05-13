@@ -3,9 +3,6 @@ import { Field, InputType } from '@nestjs/graphql';
 @InputType()
 export class CreateWorkflowVersionInput {
   @Field()
-  PK: string;
-
-  @Field()
   WLFID: string;
 
   @Field()
