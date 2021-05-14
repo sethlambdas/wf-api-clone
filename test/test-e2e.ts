@@ -6,9 +6,11 @@ import * as faker from 'faker';
 import * as request from 'supertest';
 import * as typeOrmTestConfig from './../src/config/typeorm.test-config';
 import { AppModule } from './../src/graphql/app.module';
+import { OrganizationService } from './../src/graphql/organizations/organization.service';
 import { UserService } from './../src/graphql/users/user.service';
 import { WorkflowStepService } from './../src/graphql/workflow-steps/workflow-step.service';
 import { WorkflowVersionService } from './../src/graphql/workflow-versions/workflow-version.service';
+import { WorkflowRepository } from './../src/graphql/workflow/workflow.repository';
 import { WorkflowService } from './../src/graphql/workflow/workflow.service';
 import { ConfigUtil } from './../src/utils/config.util';
 
@@ -18,6 +20,8 @@ let userService: UserService;
 export let workflowStepService: WorkflowStepService;
 export let workflowVersionService: WorkflowVersionService;
 export let workflowService: WorkflowService;
+export let workflowRepository: WorkflowRepository;
+export let organizationService: OrganizationService;
 
 export const setUpTesting = async () => {
   const module: TestingModule = await Test.createTestingModule({
@@ -33,6 +37,8 @@ export const setUpTesting = async () => {
   workflowStepService = await module.get(WorkflowStepService);
   workflowVersionService = await module.get(WorkflowVersionService);
   workflowService = await module.get(WorkflowService);
+  workflowRepository = await module.get(WorkflowRepository);
+  organizationService = await module.get(OrganizationService);
 
   await app.init();
 };

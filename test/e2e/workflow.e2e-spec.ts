@@ -1,12 +1,15 @@
 import { CreateOrganizationInput } from 'src/graphql/organizations/inputs/create-organization.input';
 import { GetWorkflowByNameInput } from 'src/graphql/workflow/inputs/get-workflow-by-name.input';
+import { ListWorkflowsOfAnOrgInput } from 'src/graphql/workflow/inputs/list-workflows.input';
 import { CreateWorkflowStepInput } from '../../src/graphql/workflow-steps/inputs/create-workflow-step.input';
 import { CreateWorkflowInput } from '../../src/graphql/workflow/inputs/create-workflow.input';
 import { InitiateAWorkflowStepInput } from '../../src/graphql/workflow/inputs/initiate-step.input';
 import {
   initiateGraphqlRequest,
+  organizationService,
   setUpTesting,
   tearDownTesting,
+  workflowRepository,
   workflowService,
   workflowStepService,
   workflowVersionService,
@@ -64,6 +67,20 @@ const gql = {
   initiateAWorkflowStep: `
     mutation InitiateAWorkflowStep ($initiateAWorkflowStepInput: InitiateAWorkflowStepInput!) {
       InitiateAWorkflowStep (initiateAWorkflowStepInput: $initiateAWorkflowStepInput)
+    }
+  `,
+  listWorkflowsOfAnOrg: `
+    query ListWorkflowsOfAnOrg($listWorkflowsOfAnOrgInput: ListWorkflowsOfAnOrgInput!) {
+      ListWorkflowsOfAnOrg(listWorkflowsOfAnOrgInput: $listWorkflowsOfAnOrgInput) {
+        Workflows {
+          PK
+          SK
+          WLFN
+          DATA
+        }
+        TotalRecords
+        Error
+      }
     }
   `,
 };
@@ -135,6 +152,12 @@ const initiateAWorkflowStepInput: InitiateAWorkflowStepInput = {
   WorkflowName: 'Workflow1',
   ActivityType: 'Manual Approval',
   Approve: true,
+};
+
+const listWorkflowsOfAnOrgInput: ListWorkflowsOfAnOrgInput = {
+  OrgId: '',
+  page: 1,
+  pageSize: 2,
 };
 
 describe('WorkflowResolver (e2e)', () => {
@@ -216,6 +239,39 @@ describe('WorkflowResolver (e2e)', () => {
     it('should initiate workflow step', async () => {
       const data = await initiateGraphqlRequest(gql.initiateAWorkflowStep, { initiateAWorkflowStepInput });
       expect(data.InitiateAWorkflowStep).toEqual('Successfuly Initiated Event');
+    });
+  });
+
+  describe('listWorkflowsOfAnOrg', () => {
+    beforeAll(async () => {
+      const {
+        CreateOrganization: { PK },
+      } = await initiateGraphqlRequest(gql.CreateOrganization, {
+        createOrganizationInput: { orgName: 'TestOrgName2' },
+      });
+      await workflowRepository.createWorkflow({ WorkflowName: 'Workflow1', OrgId: PK, WorkflowNumber: 0 });
+      await workflowRepository.createWorkflow({ WorkflowName: 'Workflow2', OrgId: PK, WorkflowNumber: 1 });
+      await organizationService.saveOrganization({ PK }, { TotalWLF: 2 });
+      listWorkflowsOfAnOrgInput.OrgId = PK;
+    });
+
+    it('should list workflows of an organization', async () => {
+      const data = await initiateGraphqlRequest(gql.listWorkflowsOfAnOrg, { listWorkflowsOfAnOrgInput });
+
+      expect(data.ListWorkflowsOfAnOrg.Workflows.length).toEqual(2);
+      expect(data.ListWorkflowsOfAnOrg.TotalRecords).toEqual(2);
+      expect(data.ListWorkflowsOfAnOrg.Workflows[0]).toEqual({
+        PK: `${listWorkflowsOfAnOrgInput.OrgId}|WLF#1`,
+        SK: 'WLF#1',
+        WLFN: 'Workflow1',
+        DATA: 'WLF#Workflow1',
+      });
+      expect(data.ListWorkflowsOfAnOrg.Workflows[1]).toEqual({
+        PK: `${listWorkflowsOfAnOrgInput.OrgId}|WLF#2`,
+        SK: 'WLF#2',
+        WLFN: 'Workflow2',
+        DATA: 'WLF#Workflow2',
+      });
     });
   });
 });

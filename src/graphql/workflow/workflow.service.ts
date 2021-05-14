@@ -16,8 +16,9 @@ import { WorkflowVersionService } from '../workflow-versions/workflow-version.se
 import { CreateWorkflowInput } from './inputs/create-workflow.input';
 import { GetWorkflowByNameInput } from './inputs/get-workflow-by-name.input';
 import { InitiateAWorkflowStepInput } from './inputs/initiate-step.input';
+import { ListWorkflowsOfAnOrgInput } from './inputs/list-workflows.input';
 import { StateWorkflowInput } from './inputs/state-workflow.input';
-import { CreateWorkflowResponse } from './workflow.entity';
+import { CreateWorkflowResponse, ListWorkflowsOfAnOrg } from './workflow.entity';
 import { WorkflowRepository } from './workflow.repository';
 
 @Injectable()
@@ -356,5 +357,20 @@ export class WorkflowService {
   async getWorkflowByName(getWorkflowByNameInput: GetWorkflowByNameInput) {
     const result = await this.workflowRepository.getWorkflowByName(getWorkflowByNameInput);
     return result[0];
+  }
+
+  async listWorkflowsOfAnOrg(listWorkflowsOfAnOrgInput: ListWorkflowsOfAnOrgInput): Promise<ListWorkflowsOfAnOrg> {
+    const organization = await this.organizationService.getOrganization({ PK: listWorkflowsOfAnOrgInput.OrgId });
+
+    if (!organization) return { Error: 'Organization not existing' };
+
+    listWorkflowsOfAnOrgInput.TotalWLF = organization.TotalWLF;
+
+    const result: any = await this.workflowRepository.listWorkflowsOfAnOrg(listWorkflowsOfAnOrgInput);
+
+    return {
+      Workflows: result,
+      TotalRecords: organization.TotalWLF,
+    };
   }
 }

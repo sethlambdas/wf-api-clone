@@ -1,4 +1,4 @@
-import { Field, ObjectType } from '@nestjs/graphql';
+import { Field, Int, ObjectType } from '@nestjs/graphql';
 import { CompositePrimaryKey } from '../common/interfaces/workflow-key.interface';
 
 @ObjectType()
@@ -38,4 +38,16 @@ export class WorkflowModelRepository implements CompositePrimaryKey {
 
   @Field()
   DATA: string;
+}
+
+@ObjectType()
+export class ListWorkflowsOfAnOrg {
+  @Field((type) => [WorkflowModelRepository], { nullable: true })
+  Workflows?: WorkflowModelRepository[];
+
+  @Field((type) => Int, { nullable: true })
+  TotalRecords?: number;
+
+  @Field({ nullable: true })
+  Error?: string;
 }
