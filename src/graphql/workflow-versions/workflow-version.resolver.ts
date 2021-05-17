@@ -2,8 +2,9 @@ import { Args, Mutation, Query, Resolver } from '@nestjs/graphql';
 import { CompositePrimaryKeyInput } from '../common/inputs/workflow-key.input';
 import { CreateWorkflowVersionInput } from './inputs/create-workflow-version.input';
 import { GetWorkflowVersionDetailsInput } from './inputs/get-workflow-version-details.input';
+import { ListAllWorkflowVersionsOfWorkflowInput } from './inputs/read-queries.inputs';
 import { SaveWorkflowVersionInput } from './inputs/save-workflow-version.input';
-import { WorkflowVersion, WorkflowVersionDetails } from './workflow-version.entity';
+import { ListWorkflowVersions, WorkflowVersion, WorkflowVersionDetails } from './workflow-version.entity';
 import { WorkflowVersionService } from './workflow-version.service';
 
 @Resolver((of) => WorkflowVersion)
@@ -35,6 +36,14 @@ export class WorkflowVersionResolver {
   @Query((returns) => WorkflowVersion, { nullable: true })
   async GetWorkflowVersionByKey(@Args('workflowVersionKeysInput') workflowVersionKeysInput: CompositePrimaryKeyInput) {
     return this.workflowVersionService.getWorkflowVersionByKey(workflowVersionKeysInput);
+  }
+
+  @Query((returns) => ListWorkflowVersions)
+  async ListAllWorkflowVersionsOfWorkflow(
+    @Args('listAllWorkflowVersionsOfWorkflowInput')
+    listAllWorkflowVersionsOfWorkflowInput: ListAllWorkflowVersionsOfWorkflowInput,
+  ) {
+    return await this.workflowVersionService.listAllWorkflowVersionsOfWorkflow(listAllWorkflowVersionsOfWorkflowInput);
   }
 
   @Mutation((returns) => Boolean, { nullable: true })

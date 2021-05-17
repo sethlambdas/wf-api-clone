@@ -34,3 +34,15 @@ export class WorkflowVersionDetails {
   @Field((type) => [DesignWorkflow], { nullable: true })
   Design?: DesignWorkflow[];
 }
+
+@ObjectType()
+export class ListWorkflowVersions {
+  @Field((type) => [WorkflowVersion])
+  WorkflowVersions: WorkflowVersion[];
+
+  @Field((type) => Int)
+  TotalRecords: number;
+
+  @Field({ nullable: true })
+  LastKey?: string;
+}

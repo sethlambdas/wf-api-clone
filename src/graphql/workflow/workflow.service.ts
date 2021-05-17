@@ -57,10 +57,12 @@ export class WorkflowService {
       WLFID = workflow.PK;
     } else {
       WLFID = WorkflowId;
-      const workflowVersions = await this.workflowVersionService.getAllWorkflowVersionsOfWorkflow({
+      const { TotalRecords } = await this.workflowVersionService.listAllWorkflowVersionsOfWorkflow({
         WorkflowPK: WLFID,
+        page: 1,
+        pageSize: 10,
       });
-      WV = workflowVersions.count + 1;
+      WV = TotalRecords + 1;
     }
 
     const activityTypesExists = States.every((state) => {

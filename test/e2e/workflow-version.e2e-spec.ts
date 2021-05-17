@@ -2,6 +2,7 @@ import { CompositePrimaryKeyInput } from 'src/graphql/common/inputs/workflow-key
 import { CreateWorkflowStepInput } from 'src/graphql/workflow-steps/inputs/create-workflow-step.input';
 import { CreateWorkflowVersionInput } from 'src/graphql/workflow-versions/inputs/create-workflow-version.input';
 import { GetWorkflowVersionDetailsInput } from 'src/graphql/workflow-versions/inputs/get-workflow-version-details.input';
+import { ListAllWorkflowVersionsOfWorkflowInput } from 'src/graphql/workflow-versions/inputs/read-queries.inputs';
 import { SaveWorkflowVersionInput } from 'src/graphql/workflow-versions/inputs/save-workflow-version.input';
 import { v4 } from 'uuid';
 import { initiateGraphqlRequest, setUpTesting, tearDownTesting } from '../test-e2e';
@@ -86,6 +87,22 @@ const gql = {
         }
       }
     }
+  `,
+  listWorkflowVersions: `
+    query ListAllWorkflowVersionsOfWorkflow($listAllWorkflowVersionsOfWorkflowInput: ListAllWorkflowVersionsOfWorkflowInput!) {
+        ListAllWorkflowVersionsOfWorkflow(listAllWorkflowVersionsOfWorkflowInput: $listAllWorkflowVersionsOfWorkflowInput) {
+          WorkflowVersions {
+            PK
+            SK
+            CID
+            WV
+            FAID
+            TotalEXC
+          }
+          TotalRecords
+          LastKey
+        }
+      }
   `,
 };
 
@@ -260,6 +277,66 @@ describe('WorkflowVersionResolver (e2e)', () => {
         x: 250,
         y: 100,
       });
+    });
+  });
+
+  describe('listWorkflowVersions', () => {
+    let wlfVersion1: any;
+    let wlfVersion2: any;
+    const OrganizationId = 'ORG#6789';
+
+    const inputs1: CreateWorkflowVersionInput = {
+      WLFID: `${OrganizationId}|WLF#1`,
+      WV: '1',
+      FAID: '[1, 2, 3]',
+      CID: v4(),
+    };
+
+    const inputs2: CreateWorkflowVersionInput = {
+      WLFID: `${OrganizationId}|WLF#1`,
+      WV: '2',
+      FAID: '[1, 2, 3]',
+      CID: v4(),
+    };
+
+    const listAllWorkflowVersionsOfWorkflowInput: ListAllWorkflowVersionsOfWorkflowInput = {
+      WorkflowPK: inputs1.WLFID,
+      page: 1,
+      pageSize: 2,
+    };
+
+    beforeAll(async () => {
+      const data1 = await initiateGraphqlRequest(gql.createWorkflowVersionMutation, {
+        createWorkflowVersionInput: inputs1,
+      });
+      const data2 = await initiateGraphqlRequest(gql.createWorkflowVersionMutation, {
+        createWorkflowVersionInput: inputs2,
+      });
+
+      wlfVersion1 = data1.CreateWorkflowVersion;
+      wlfVersion2 = data2.CreateWorkflowVersion;
+    });
+
+    afterAll(async () => {
+      await initiateGraphqlRequest(gql.deleteWorkflowVersionMutation, {
+        workflowVersionKeysInput: { PK: wlfVersion1.PK, SK: wlfVersion1.SK },
+      });
+      await initiateGraphqlRequest(gql.deleteWorkflowVersionMutation, {
+        workflowVersionKeysInput: { PK: wlfVersion2.PK, SK: wlfVersion2.SK },
+      });
+    });
+
+    it('should list workflow versions of a workflow', async () => {
+      const data = await initiateGraphqlRequest(gql.listWorkflowVersions, { listAllWorkflowVersionsOfWorkflowInput });
+      const results = data.ListAllWorkflowVersionsOfWorkflow;
+      const workflowVersions = data.ListAllWorkflowVersionsOfWorkflow.WorkflowVersions;
+
+      const data1 = workflowVersions.find((version: any) => version.SK === wlfVersion1.SK);
+      const data2 = workflowVersions.find((version: any) => version.SK === wlfVersion2.SK);
+
+      expect(data1).not.toBeUndefined();
+      expect(data2).not.toBeUndefined();
+      expect(results.TotalRecords).toEqual(2);
     });
   });
 });

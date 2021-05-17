@@ -5,9 +5,9 @@ import { CompositePrimaryKey } from '../common/interfaces/workflow-key.interface
 import { WorkflowStepService } from '../workflow-steps/workflow-step.service';
 import { CreateWorkflowVersionInput } from './inputs/create-workflow-version.input';
 import { GetWorkflowVersionDetailsInput } from './inputs/get-workflow-version-details.input';
-import { GetAllWorkflowVersionsOfWorkflowInput } from './inputs/read-queries.inputs';
+import { ListAllWorkflowVersionsOfWorkflowInput } from './inputs/read-queries.inputs';
 import { SaveWorkflowVersionInput } from './inputs/save-workflow-version.input';
-import { WorkflowVersion, WorkflowVersionDetails } from './workflow-version.entity';
+import { ListWorkflowVersions, WorkflowVersion, WorkflowVersionDetails } from './workflow-version.entity';
 import { WorkflowVersionRepository } from './workflow-version.repository';
 
 @Injectable()
@@ -42,8 +42,18 @@ export class WorkflowVersionService {
     return this.workflowVersionRepository.saveWorkflowVersion(workflowVersionKeysInput, workflowVersion);
   }
 
-  async getAllWorkflowVersionsOfWorkflow(getAllWorkflowVersionsOfWorkflowInput: GetAllWorkflowVersionsOfWorkflowInput) {
-    return await this.workflowVersionRepository.getAllWorkflowVersionsOfWorkflow(getAllWorkflowVersionsOfWorkflowInput);
+  async listAllWorkflowVersionsOfWorkflow(
+    listAllWorkflowVersionsOfWorkflowInput: ListAllWorkflowVersionsOfWorkflowInput,
+  ): Promise<ListWorkflowVersions> {
+    const { workflowVersions, TotalRecords } = await this.workflowVersionRepository.listAllWorkflowVersionsOfWorkflow(
+      listAllWorkflowVersionsOfWorkflowInput,
+    );
+
+    return {
+      WorkflowVersions: workflowVersions,
+      TotalRecords,
+      LastKey: JSON.stringify(workflowVersions.lastKey),
+    };
   }
 
   async getWorkflowVersionByKey(workflowVersionKeysInput: CompositePrimaryKey) {
