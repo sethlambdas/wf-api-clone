@@ -37,7 +37,7 @@ export class WorkflowModelRepository implements CompositePrimaryKey {
   WLFN: string;
 
   @Field({ nullable: true })
-  R: string;
+  R?: string;
 
   @Field()
   DATA: string;

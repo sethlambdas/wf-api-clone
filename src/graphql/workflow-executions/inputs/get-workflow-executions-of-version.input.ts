@@ -1,10 +1,14 @@
-import { Field, InputType } from '@nestjs/graphql';
+import { Field, InputType, Int, PartialType } from '@nestjs/graphql';
+import { PaginationInput } from '../../common/inputs/pagination.input';
 
 @InputType()
-export class ListWorkflowExecutionsOfAVersionInput {
+export class ListWorkflowExecutionsOfAVersionInput extends PartialType(PaginationInput) {
   @Field()
-  OrgId: string;
+  WorkflowId: string;
 
   @Field()
   workflowVersionSK: string;
+
+  @Field((type) => Int, { nullable: true })
+  TotalEXC?: number;
 }

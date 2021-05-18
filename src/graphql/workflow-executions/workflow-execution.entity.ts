@@ -43,3 +43,15 @@ export class WorkflowExecution implements CompositePrimaryKey {
   @Field((type) => [PARALLEL], { nullable: true })
   PARALLEL?: PARALLEL[];
 }
+
+@ObjectType()
+export class ListWorkflowExecution {
+  @Field((type) => [WorkflowExecution], { nullable: true })
+  WorkflowExecution?: WorkflowExecution[];
+
+  @Field((type) => Int, { nullable: true })
+  TotalRecords?: number;
+
+  @Field({ nullable: true })
+  Error?: string;
+}

@@ -22,13 +22,17 @@ export class WorkflowRepository {
 
     const newWorkflowNumber = WorkflowNumber + 1;
 
-    const results = await this.workflowModel.create({
+    const data = {
       PK: `${OrgId}|WLF#${newWorkflowNumber}`,
       SK: `WLF#${newWorkflowNumber}`,
       DATA: `WLF#${WorkflowName}`,
       WLFN: WorkflowName,
       R: Repeat,
-    });
+    };
+
+    if (!Repeat) delete data.R;
+
+    const results = await this.workflowModel.create(data);
 
     return results;
   }

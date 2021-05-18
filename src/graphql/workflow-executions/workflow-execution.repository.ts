@@ -30,14 +30,35 @@ export class WorkflowExecutionRepository {
   }
 
   async listWorkflowExecutionsOfAVersion(listWorkflowExecutionsOfAVersionInput: ListWorkflowExecutionsOfAVersionInput) {
-    const { OrgId, workflowVersionSK } = listWorkflowExecutionsOfAVersionInput;
-    const allWorkflowExecutions = `${workflowVersionSK}|WX#`;
-    const results = await this.workflowExecutionModel
-      .query({ PK: OrgId })
-      .and()
-      .where('SK')
-      .beginsWith(allWorkflowExecutions)
-      .exec();
-    return results;
+    const { workflowVersionSK, TotalEXC, page, pageSize } = listWorkflowExecutionsOfAVersionInput;
+
+    let results: any;
+    const readItems = [];
+    let wlfExecNumber = pageSize * page - pageSize + 1;
+    let index = 1;
+
+    while (index <= pageSize && wlfExecNumber <= TotalEXC) {
+      readItems.push({
+        PK: `${workflowVersionSK}|WX#${wlfExecNumber}`,
+        SK: `WX#${wlfExecNumber}`,
+      });
+
+      ++wlfExecNumber;
+      ++index;
+    }
+
+    if (readItems.length > 0) results = await this.runBatchGetItems(readItems);
+
+    if (results) return results;
+    else return [];
+  }
+
+  async runBatchGetItems(readItems: any) {
+    const response1 = await this.workflowExecutionModel.batchGet(readItems);
+    if (response1.unprocessedKeys.length > 0) {
+      const response2 = await this.runBatchGetItems(response1.unprocessedKeys);
+      return [...response1, ...response2];
+    }
+    return [...response1];
   }
 }

@@ -1,9 +1,9 @@
 import { Inject, Injectable, Logger } from '@nestjs/common';
-import { WORKFLOW_QUEUE_URL } from '../../utils/sqs/sqs-config.util';
-import { getSQSQueueAttributes } from '../../utils/sqs/sqs.util';
 import { v4 } from 'uuid';
 import { ActivityTypes } from '../../utils/activity/activity-registry.util';
 import { putEventsEB, putRuleEB, putTargetsEB } from '../../utils/event-bridge/event-bridge.util';
+import { WORKFLOW_QUEUE_URL } from '../../utils/sqs/sqs-config.util';
+import { getSQSQueueAttributes } from '../../utils/sqs/sqs.util';
 import Workflow from '../../workflow';
 import { ACT as TypeACT, DesignWorkflowInput } from '../common/entities/workflow-step.entity';
 import { CompositePrimaryKeyInput } from '../common/inputs/workflow-key.input';

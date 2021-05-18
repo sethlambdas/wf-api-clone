@@ -4,7 +4,7 @@ import { WorkflowVersionService } from '../workflow-versions/workflow-version.se
 import { CreateWorkflowExecutionInput } from './inputs/create-workflow-execution.input';
 import { ListWorkflowExecutionsOfAVersionInput } from './inputs/get-workflow-executions-of-version.input';
 import { SaveWorkflowExecutionInput } from './inputs/save-workflow-execution.input';
-import { WorkflowExecution } from './workflow-execution.entity';
+import { ListWorkflowExecution, WorkflowExecution } from './workflow-execution.entity';
 import { WorkflowExecutionRepository } from './workflow-execution.repository';
 
 @Injectable()
@@ -57,7 +57,26 @@ export class WorkflowExecutionService {
     return this.workflowExecutionRepository.deleteWorkflowExecution(workflowExecutionKeysInput);
   }
 
-  async listWorkflowExecutionsOfAVersion(listWorkflowExecutionsOfAVersionInput: ListWorkflowExecutionsOfAVersionInput) {
-    return this.workflowExecutionRepository.listWorkflowExecutionsOfAVersion(listWorkflowExecutionsOfAVersionInput);
+  async listWorkflowExecutionsOfAVersion(
+    listWorkflowExecutionsOfAVersionInput: ListWorkflowExecutionsOfAVersionInput,
+  ): Promise<ListWorkflowExecution> {
+    const { WorkflowId, workflowVersionSK } = listWorkflowExecutionsOfAVersionInput;
+    const workflowVersion = await this.workflowVersionService.getWorkflowVersionByKey({
+      PK: WorkflowId,
+      SK: workflowVersionSK,
+    });
+
+    if (!workflowVersion) return { Error: 'workflowVersion not existing' };
+
+    listWorkflowExecutionsOfAVersionInput.TotalEXC = workflowVersion.TotalEXC;
+
+    const result: any = await this.workflowExecutionRepository.listWorkflowExecutionsOfAVersion(
+      listWorkflowExecutionsOfAVersionInput,
+    );
+
+    return {
+      WorkflowExecution: result,
+      TotalRecords: workflowVersion.TotalEXC,
+    };
   }
 }

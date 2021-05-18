@@ -3,7 +3,7 @@ import { CompositePrimaryKeyInput } from '../common/inputs/workflow-key.input';
 import { CreateWorkflowExecutionInput } from './inputs/create-workflow-execution.input';
 import { ListWorkflowExecutionsOfAVersionInput } from './inputs/get-workflow-executions-of-version.input';
 import { SaveWorkflowExecutionInput } from './inputs/save-workflow-execution.input';
-import { WorkflowExecution } from './workflow-execution.entity';
+import { ListWorkflowExecution, WorkflowExecution } from './workflow-execution.entity';
 import { WorkflowExecutionService } from './workflow-execution.service';
 
 @Resolver((of) => WorkflowExecution)
@@ -39,7 +39,7 @@ export class WorkflowExecutionResolver {
     return this.workflowExecutionService.getWorkflowExecutionByKey(workflowExecutionKeysInput);
   }
 
-  @Query((returns) => [WorkflowExecution])
+  @Query((returns) => ListWorkflowExecution)
   async ListWorkflowExecutionsOfAVersion(
     @Args('listWorkflowExecutionsOfAVersionInput')
     listWorkflowExecutionsOfAVersionInput: ListWorkflowExecutionsOfAVersionInput,
