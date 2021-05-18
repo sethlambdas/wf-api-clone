@@ -18,7 +18,7 @@ export class WorkflowRepository {
   ) {}
 
   async createWorkflow(createWorkflowInputRepository: CreateWorkflowInputRepository) {
-    const { WorkflowName, OrgId, WorkflowNumber } = createWorkflowInputRepository;
+    const { WorkflowName, OrgId, WorkflowNumber, Repeat } = createWorkflowInputRepository;
 
     const newWorkflowNumber = WorkflowNumber + 1;
 
@@ -27,6 +27,7 @@ export class WorkflowRepository {
       SK: `WLF#${newWorkflowNumber}`,
       DATA: `WLF#${WorkflowName}`,
       WLFN: WorkflowName,
+      R: Repeat,
     });
 
     return results;

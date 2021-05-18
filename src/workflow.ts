@@ -49,7 +49,13 @@ export default class Workflow {
 
   private getDetail(message: SQS.Message) {
     const msgPayload = JSON.parse(message.Body);
-    const delayedDetail = msgPayload.delayedDetail && JSON.parse(msgPayload.delayedDetail);
+    let delayedDetail;
+    if (msgPayload.delayedDetail && typeof msgPayload.delayedDetail === 'string') {
+      delayedDetail = JSON.parse(msgPayload.delayedDetail);
+    } else if (msgPayload.delayedDetail) {
+      delayedDetail = msgPayload.delayedDetail;
+    }
+
     const detail = delayedDetail || msgPayload.detail;
     this.logger.log(msgPayload);
     return detail;

@@ -13,6 +13,9 @@ export const WorkflowSchema = new Schema(
     WLFN: {
       type: String,
     },
+    R: {
+      type: String,
+    },
     DATA: {
       type: String,
     },

@@ -32,6 +32,10 @@ export class MD {
 
   // Delay
   @Field({ nullable: true })
+  Days?: string;
+
+  // Delay
+  @Field({ nullable: true })
   Hours?: string;
 
   @Field({ nullable: true })
@@ -66,7 +70,7 @@ export class MD {
   @Field({ nullable: true })
   Endpoint?: string;
 
-  // WebService
+  // WebService & Start
   @Field({ nullable: true })
   Name?: string;
 

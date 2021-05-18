@@ -1,7 +1,9 @@
 import { Inject, Injectable, Logger } from '@nestjs/common';
+import { WORKFLOW_QUEUE_URL } from '../../utils/sqs/sqs-config.util';
+import { getSQSQueueAttributes } from '../../utils/sqs/sqs.util';
 import { v4 } from 'uuid';
 import { ActivityTypes } from '../../utils/activity/activity-registry.util';
-import { putEventsEB } from '../../utils/event-bridge/event-bridge.util';
+import { putEventsEB, putRuleEB, putTargetsEB } from '../../utils/event-bridge/event-bridge.util';
 import Workflow from '../../workflow';
 import { ACT as TypeACT, DesignWorkflowInput } from '../common/entities/workflow-step.entity';
 import { CompositePrimaryKeyInput } from '../common/inputs/workflow-key.input';
@@ -34,7 +36,7 @@ export class WorkflowService {
   ) {}
 
   async createWorkflow(createWorkflowInput: CreateWorkflowInput): Promise<CreateWorkflowResponse> {
-    const { WorkflowId, Design, StartAt, States, WorkflowName, OrgId } = createWorkflowInput;
+    const { WorkflowId, Design, StartAt, States, WorkflowName, OrgId, Repeat } = createWorkflowInput;
     let WV = 1;
     let WLFID = '';
     let FAID = '';
@@ -52,6 +54,7 @@ export class WorkflowService {
       const workflow = await this.workflowRepository.createWorkflow({
         OrgId,
         WorkflowName,
+        Repeat,
         WorkflowNumber: organization.TotalWLF,
       });
       WLFID = workflow.PK;
@@ -152,6 +155,7 @@ export class WorkflowService {
     await this.executeWorkflowEB(
       OrgId,
       WorkflowName,
+      Repeat,
       { PK: workflowVersion.PK, SK: workflowVersion.SK },
       executeWorkflowStepKey,
     );
@@ -287,27 +291,67 @@ export class WorkflowService {
   async executeWorkflowEB(
     OrgId: string,
     WorkflowName: string,
+    Repeat: string | undefined,
     workflowVerionsKeys: { PK: string; SK: string },
     executeWorkflowStepKey: { PK: string; SK: string },
   ) {
     const workflowStep = await this.workflowStepService.getWorkflowStepByKey(executeWorkflowStepKey);
 
-    const params = {
-      Entries: [
-        {
-          Detail: JSON.stringify({
-            ...workflowStep,
-            WLFN: WorkflowName,
-            WorkflowVersionKeys: workflowVerionsKeys,
-            OrgId,
-          }),
-          DetailType: Workflow.getDetailType(),
-          Source: Workflow.getSource(),
-        },
-      ],
-    };
+    if (Repeat) {
+      const source = `Repeat[${Repeat}]`.replace(/\s/g, '').replace(/\*/g, '.').replace(/\//g, '_');
+      const Name = `Repeat[${Repeat}]Rule`.replace(/\s/g, '').replace(/\*/g, '.').replace(/\//g, '_');
+      const EventPattern = `{"source": ["${source}"]}`;
+      const ScheduleExpression = `cron(${Repeat})`;
 
-    await putEventsEB(params);
+      const putRuleParams = {
+        Name,
+        EventPattern,
+        ScheduleExpression,
+      };
+      await putRuleEB(putRuleParams);
+
+      const Id = '1';
+      const {
+        Attributes: { QueueArn: queueArn },
+      } = await getSQSQueueAttributes(WORKFLOW_QUEUE_URL);
+      const Arn = queueArn;
+      const Input = JSON.stringify({
+        delayedDetail: {
+          ...workflowStep,
+          WLFN: WorkflowName,
+          WorkflowVersionKeys: workflowVerionsKeys,
+          OrgId,
+        },
+      });
+      const putTargetsParams = {
+        Rule: Name,
+        Targets: [
+          {
+            Id,
+            Arn,
+            Input,
+          },
+        ],
+      };
+      await putTargetsEB(putTargetsParams);
+    } else {
+      const params = {
+        Entries: [
+          {
+            Detail: JSON.stringify({
+              ...workflowStep,
+              WLFN: WorkflowName,
+              WorkflowVersionKeys: workflowVerionsKeys,
+              OrgId,
+            }),
+            DetailType: Workflow.getDetailType(),
+            Source: Workflow.getSource(),
+          },
+        ],
+      };
+
+      await putEventsEB(params);
+    }
   }
 
   async initiatAWorkflowStep(initiateAWorkflowStepInput: InitiateAWorkflowStepInput) {
