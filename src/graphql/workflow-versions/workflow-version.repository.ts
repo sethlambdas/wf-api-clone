@@ -1,5 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { InjectModel, Model } from 'nestjs-dynamoose';
+import { getPaginatedData } from '../../utils/array-helpers.util';
 import { ConfigUtil } from '../../utils/config.util';
 import { CompositePrimaryKeyInput } from '../common/inputs/workflow-key.input';
 import { CompositePrimaryKey } from '../common/interfaces/workflow-key.interface';
@@ -24,39 +25,20 @@ export class WorkflowVersionRepository {
   async listAllWorkflowVersionsOfWorkflow(
     listAllWorkflowVersionsOfWorkflowInput: ListAllWorkflowVersionsOfWorkflowInput,
   ) {
-    const { WorkflowPK, LastKey, page, pageSize } = listAllWorkflowVersionsOfWorkflowInput;
+    const { WorkflowPK, page, pageSize, sortBy, sortDir } = listAllWorkflowVersionsOfWorkflowInput;
 
-    let workflowVersions: any;
-
-    const query = this.workflowVersionModel.query({ PK: WorkflowPK }).and().where('SK').beginsWith(`WV#`);
-
-    const { count } = await this.workflowVersionModel
+    const workflowVersions = await this.workflowVersionModel
       .query({ PK: WorkflowPK })
       .and()
       .where('SK')
       .beginsWith(`WV#`)
-      .count()
-      .all()
       .exec();
 
-    if (pageSize) query.limit(pageSize);
-
-    if (LastKey) {
-      const startAtKey = JSON.parse(LastKey);
-      query.startAt(startAtKey);
-      workflowVersions = await query.exec();
-    } else if (page) {
-      let lastEvaluatedKey: any = null;
-      for (let i = 0; i < page; i++) {
-        if (lastEvaluatedKey) query.startAt(lastEvaluatedKey);
-        workflowVersions = await query.exec();
-        lastEvaluatedKey = workflowVersions.lastKey;
-      }
-    }
+    const paginatedWorkflowVersions = getPaginatedData(workflowVersions, sortBy, sortDir, page, pageSize);
 
     return {
-      workflowVersions,
-      TotalRecords: count,
+      workflowVersions: paginatedWorkflowVersions,
+      TotalRecords: workflowVersions.length,
     };
   }
 

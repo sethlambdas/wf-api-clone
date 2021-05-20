@@ -79,7 +79,7 @@ export class WorkflowService {
     const createWorkflowVersionInput: CreateWorkflowVersionInput = {
       WLFID,
       CID: v4(),
-      WV: JSON.stringify(WV),
+      WV,
       FAID: '',
     };
 

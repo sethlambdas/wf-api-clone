@@ -1,9 +1,9 @@
-import { CompositePrimaryKeyInput } from 'src/graphql/common/inputs/workflow-key.input';
-import { CreateOrganizationInput } from 'src/graphql/organizations/inputs/create-organization.input';
-import { CreateWorkflowStepExecutionHistoryInput } from 'src/graphql/workflow-steps-executions-history/inputs/create.input';
-import { ListAllManualApprovalInput } from 'src/graphql/workflow-steps-executions-history/inputs/get-all-approval.input';
-import { SaveWorkflowStepExecutionHistoryInput } from 'src/graphql/workflow-steps-executions-history/inputs/save.input';
-import { CreateWorkflowInput } from 'src/graphql/workflow/inputs/create-workflow.input';
+import { CompositePrimaryKeyInput } from '../../src/graphql/common/inputs/workflow-key.input';
+import { CreateOrganizationInput } from '../../src/graphql/organizations/inputs/create-organization.input';
+import { CreateWorkflowStepExecutionHistoryInput } from '../../src/graphql/workflow-steps-executions-history/inputs/create.input';
+import { ListAllManualApprovalInput } from '../../src/graphql/workflow-steps-executions-history/inputs/get-all-approval.input';
+import { SaveWorkflowStepExecutionHistoryInput } from '../../src/graphql/workflow-steps-executions-history/inputs/save.input';
+import { CreateWorkflowInput } from '../../src/graphql/workflow/inputs/create-workflow.input';
 import { initiateGraphqlRequest, setUpTesting, tearDownTesting } from '../test-e2e';
 
 const gql = {

@@ -1,9 +1,9 @@
-import { CreateOrganizationInput } from 'src/graphql/organizations/inputs/create-organization.input';
-import { GetWorkflowByNameInput } from 'src/graphql/workflow/inputs/get-workflow-by-name.input';
-import { ListWorkflowsOfAnOrgInput } from 'src/graphql/workflow/inputs/list-workflows.input';
+import { CreateOrganizationInput } from '../../src/graphql/organizations/inputs/create-organization.input';
 import { CreateWorkflowStepInput } from '../../src/graphql/workflow-steps/inputs/create-workflow-step.input';
 import { CreateWorkflowInput } from '../../src/graphql/workflow/inputs/create-workflow.input';
+import { GetWorkflowByNameInput } from '../../src/graphql/workflow/inputs/get-workflow-by-name.input';
 import { InitiateAWorkflowStepInput } from '../../src/graphql/workflow/inputs/initiate-step.input';
+import { ListWorkflowsOfAnOrgInput } from '../../src/graphql/workflow/inputs/list-workflows.input';
 import {
   initiateGraphqlRequest,
   organizationService,

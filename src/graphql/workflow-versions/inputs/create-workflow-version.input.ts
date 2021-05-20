@@ -1,4 +1,4 @@
-import { Field, InputType } from '@nestjs/graphql';
+import { Field, InputType, Int } from '@nestjs/graphql';
 
 @InputType()
 export class CreateWorkflowVersionInput {
@@ -8,8 +8,8 @@ export class CreateWorkflowVersionInput {
   @Field()
   CID: string;
 
-  @Field()
-  WV: string;
+  @Field((type) => Int)
+  WV: number;
 
   @Field()
   FAID: string;

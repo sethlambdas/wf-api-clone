@@ -1,6 +1,6 @@
 /* tslint:disable:max-classes-per-file */
 import { Field, Int, ObjectType, OmitType } from '@nestjs/graphql';
-import { ACT, MD } from '../common/entities/workflow-step.entity';
+import { ACT } from '../common/entities/workflow-step.entity';
 import { CompositePrimaryKey } from '../common/interfaces/workflow-key.interface';
 
 @ObjectType()
@@ -61,8 +61,8 @@ export class GetAllManualApproval {
   @Field()
   WorkflowName: string;
 
-  @Field()
-  WorkflowVersion: string;
+  @Field((type) => Int)
+  WorkflowVersion: number;
 
   @Field()
   Email: string;

@@ -1,9 +1,9 @@
-import { CompositePrimaryKeyInput } from 'src/graphql/common/inputs/workflow-key.input';
-import { CreateWorkflowExecutionInput } from 'src/graphql/workflow-executions/inputs/create-workflow-execution.input';
-import { ListWorkflowExecutionsOfAVersionInput } from 'src/graphql/workflow-executions/inputs/get-workflow-executions-of-version.input';
-import { CreateWorkflowVersionInput } from 'src/graphql/workflow-versions/inputs/create-workflow-version.input';
 import { v4 } from 'uuid';
+import { CompositePrimaryKeyInput } from '../../src/graphql/common/inputs/workflow-key.input';
+import { CreateWorkflowExecutionInput } from '../../src/graphql/workflow-executions/inputs/create-workflow-execution.input';
+import { ListWorkflowExecutionsOfAVersionInput } from '../../src/graphql/workflow-executions/inputs/get-workflow-executions-of-version.input';
 import { SaveWorkflowExecutionInput } from '../../src/graphql/workflow-executions/inputs/save-workflow-execution.input';
+import { CreateWorkflowVersionInput } from '../../src/graphql/workflow-versions/inputs/create-workflow-version.input';
 import { initiateGraphqlRequest, setUpTesting, tearDownTesting } from '../test-e2e';
 
 const gql = {
@@ -87,7 +87,7 @@ const OrgId = 'ORG#1234';
 
 const createWorkflowVersionInput: CreateWorkflowVersionInput = {
   WLFID: `${OrgId}|WLF#1`,
-  WV: '1',
+  WV: 1,
   FAID: '[1, 2, 3]',
   CID: v4(),
 };

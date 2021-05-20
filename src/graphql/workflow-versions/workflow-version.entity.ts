@@ -13,8 +13,8 @@ export class WorkflowVersion implements CompositePrimaryKey {
   @Field()
   CID: string;
 
-  @Field()
-  WV: string;
+  @Field((type) => Int)
+  WV: number;
 
   @Field()
   FAID: string;

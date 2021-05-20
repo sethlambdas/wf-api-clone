@@ -52,7 +52,6 @@ export class WorkflowVersionService {
     return {
       WorkflowVersions: workflowVersions,
       TotalRecords,
-      LastKey: JSON.stringify(workflowVersions.lastKey),
     };
   }
 

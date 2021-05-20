@@ -14,7 +14,7 @@ export const WorkflowVersionSchema = new Schema(
       type: String,
     },
     WV: {
-      type: String,
+      type: Number,
     },
     FAID: {
       type: String,

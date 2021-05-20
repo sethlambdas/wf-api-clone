@@ -1,10 +1,11 @@
-import { CompositePrimaryKeyInput } from 'src/graphql/common/inputs/workflow-key.input';
-import { CreateWorkflowStepInput } from 'src/graphql/workflow-steps/inputs/create-workflow-step.input';
-import { CreateWorkflowVersionInput } from 'src/graphql/workflow-versions/inputs/create-workflow-version.input';
-import { GetWorkflowVersionDetailsInput } from 'src/graphql/workflow-versions/inputs/get-workflow-version-details.input';
-import { ListAllWorkflowVersionsOfWorkflowInput } from 'src/graphql/workflow-versions/inputs/read-queries.inputs';
-import { SaveWorkflowVersionInput } from 'src/graphql/workflow-versions/inputs/save-workflow-version.input';
 import { v4 } from 'uuid';
+import { SortDir } from '../../src/graphql/common/enums/sort-dir.enum';
+import { CompositePrimaryKeyInput } from '../../src/graphql/common/inputs/workflow-key.input';
+import { CreateWorkflowStepInput } from '../../src/graphql/workflow-steps/inputs/create-workflow-step.input';
+import { CreateWorkflowVersionInput } from '../../src/graphql/workflow-versions/inputs/create-workflow-version.input';
+import { GetWorkflowVersionDetailsInput } from '../../src/graphql/workflow-versions/inputs/get-workflow-version-details.input';
+import { ListAllWorkflowVersionsOfWorkflowInput } from '../../src/graphql/workflow-versions/inputs/read-queries.inputs';
+import { SaveWorkflowVersionInput } from '../../src/graphql/workflow-versions/inputs/save-workflow-version.input';
 import { initiateGraphqlRequest, setUpTesting, tearDownTesting } from '../test-e2e';
 
 const gql = {
@@ -110,7 +111,7 @@ const OrgId = 'ORG#1234';
 
 const createWorkflowVersionInput: CreateWorkflowVersionInput = {
   WLFID: `${OrgId}|WLF#1`,
-  WV: '1',
+  WV: 1,
   FAID: '[1, 2, 3]',
   CID: v4(),
 };
@@ -121,7 +122,7 @@ const workflowVersionKeysInput: CompositePrimaryKeyInput = {
 };
 
 const saveWorkflowVersionInput: SaveWorkflowVersionInput = {
-  WV: '2',
+  WV: 2,
   TotalEXC: 1,
 };
 
@@ -177,7 +178,7 @@ describe('WorkflowVersionResolver (e2e)', () => {
         saveWorkflowVersionInput,
       });
 
-      expect(data.SaveWorkflowVersion.WV).toEqual('2');
+      expect(data.SaveWorkflowVersion.WV).toEqual(2);
       expect(data.SaveWorkflowVersion.TotalEXC).toEqual(1);
     });
   });
@@ -287,14 +288,14 @@ describe('WorkflowVersionResolver (e2e)', () => {
 
     const inputs1: CreateWorkflowVersionInput = {
       WLFID: `${OrganizationId}|WLF#1`,
-      WV: '1',
+      WV: 1,
       FAID: '[1, 2, 3]',
       CID: v4(),
     };
 
     const inputs2: CreateWorkflowVersionInput = {
       WLFID: `${OrganizationId}|WLF#1`,
-      WV: '2',
+      WV: 2,
       FAID: '[1, 2, 3]',
       CID: v4(),
     };
@@ -303,6 +304,8 @@ describe('WorkflowVersionResolver (e2e)', () => {
       WorkflowPK: inputs1.WLFID,
       page: 1,
       pageSize: 2,
+      sortBy: ['WV'],
+      sortDir: [SortDir.ASC],
     };
 
     beforeAll(async () => {

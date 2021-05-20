@@ -1,8 +1,8 @@
 import { Field, InputType, PartialType } from '@nestjs/graphql';
-import { PaginationInput } from '../../common/inputs/pagination.input';
+import { ListDynamoSearchInput } from '../../dynamodb/inputs/list-dynamo-search.input';
 
 @InputType()
-export class ListAllWorkflowVersionsOfWorkflowInput extends PartialType(PaginationInput) {
+export class ListAllWorkflowVersionsOfWorkflowInput extends PartialType(ListDynamoSearchInput) {
   @Field()
   WorkflowPK: string;
 
