@@ -9,7 +9,7 @@ phases:
       - echo Updating build badges ...
       - mkdir badges && cd ./badges
       - touch $BADGE_NAME-build.svg
-      - curl -s "https://img.shields.io/badge/Migrations-InProgress-blue.svg" > $BADGE_NAME-build.svg
+      - curl -s "https://img.shields.io/badge/E2E%20Tests-InProgress-blue.svg" > $BADGE_NAME-build.svg
       - aws s3 sync . s3://$S3_EXTRAS_BUCKET/badges --acl public-read
       - aws s3 cp --acl public-read --cache-control="max-age=0, no-cache, no-store, must-revalidate" $BADGE_NAME-build.svg s3://$S3_EXTRAS_BUCKET/badges/$BADGE_NAME-build.svg
       - cd ..
@@ -20,8 +20,11 @@ phases:
       - npm install
   build:
     commands:
-      - echo Running migrations ...
-      - npm run typeorm:run
+      - echo Setting up Mysql and Running Test...
+      - docker login -u $DOCKER_USERNAME -p $DOCKER_TOKEN
+      - docker-compose up -d
+      - npm run test:e2e
+      - docker-compose down
       - buildExitCode=$?
     finally:
       - |
@@ -41,7 +44,7 @@ phases:
       - echo build status $badge_status
       - mkdir badges && cd ./badges
       - touch $BADGE_NAME-build.svg && touch badge-deployment-status.svg
-      - curl -s "https://img.shields.io/badge/Migrations-$badge_status-$badge_colour.svg" > $BADGE_NAME-build.svg
+      - curl -s "https://img.shields.io/badge/E2E%20Tests-$badge_status-$badge_colour.svg" > $BADGE_NAME-build.svg
       - curl -s "https://img.shields.io/badge/Pipeline%20Status-$pipeline_status-$pipeline_color.svg" > badge-deployment-status.svg
       - aws s3 sync . s3://$S3_EXTRAS_BUCKET/badges --acl public-read
       - aws s3 cp --acl public-read --cache-control="max-age=0, no-cache, no-store, must-revalidate" $BADGE_NAME-build.svg s3://$S3_EXTRAS_BUCKET/badges/$BADGE_NAME-build.svg

@@ -1,0 +1,27 @@
+version: 0.2
+
+phases:
+  install:
+    runtime-versions:
+      docker: 19
+  pre_build:
+    commands:
+      - echo Testing badge creation ...
+      - curl -s "https://img.shields.io/badge/Build-Test-blue.svg" > Sample-build.svg
+      - echo Extracting feature branch name ...
+      - export FEATURE_BRANCH=${CODEBUILD_WEBHOOK_HEAD_REF:11}
+      - git checkout $BASE_BRANCH
+      - echo Setting git user identification ...
+      - git config --global user.email "cicd@lambdas"
+      - git config --global user.name "cicd-lambdas"
+      - echo Merging $BASE_BRANCH branch to $FEATURE_BRANCH ...
+      - git merge $FEATURE_BRANCH
+      - echo Installing dependencies...
+      - npm install
+  build:
+    commands:
+      - echo Running Test...
+      - docker login -u $DOCKER_USERNAME -p $DOCKER_TOKEN
+      - docker-compose up -d
+      - npm run test:unit
+      - docker-compose down

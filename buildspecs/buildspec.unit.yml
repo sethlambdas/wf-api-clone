@@ -20,11 +20,11 @@ phases:
       - npm install
   build:
     commands:
-      - echo Setting up Mysql and Running Test...
+      - echo Running Test...
       - docker login -u $DOCKER_USERNAME -p $DOCKER_TOKEN
-      - docker-compose -f test-compose.yml up --d
-      - node ./src/utils/checkState.util.js
+      - docker-compose up -d
       - npm run test:unit
+      - docker-compose down
       - buildExitCode=$?
     finally:
       - |
