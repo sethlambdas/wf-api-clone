@@ -1,13 +1,15 @@
 import * as AWS from 'aws-sdk';
 import { ConfigUtil } from '../config.util';
 
-const config = {
-  endpoint: new AWS.Endpoint(ConfigUtil.get('sqs.endpoint')),
+const config: { [key: string]: any } = {
   region: ConfigUtil.get('aws.region'),
 };
 
-export const SQS = new AWS.SQS(config);
+if (process.env.NODE_ENV === 'development') {
+  config.endpoint = new AWS.Endpoint(ConfigUtil.get('sqs.endpoint'));
+}
 
+export const SQS = new AWS.SQS(config);
 export const QUEUE_NAME = ConfigUtil.get('sqs.queueName');
 export const WORKFLOW_QUEUE_URL = ConfigUtil.get('sqs.queueUrl');
 

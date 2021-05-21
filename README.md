@@ -19,22 +19,6 @@ You'll need to have Node 12.0.0 or up. We recommend upgrading to the LTS version
 npm install
 ```
 
-## Migration
-
-```bash
-# create boilerplate migration
-$ npm run typeorm:create NameOfTheMigration
-
-# generate migration with entity changes made
-$ npm run typeorm:generate NameOfTheMigration
-
-# run all pending migrations
-$ npm run typeorm:run
-
-# revert latest executed migration
-$ npm run typeorm:revert
-```
-
 ## Running the app
 
 ```bash
@@ -99,14 +83,14 @@ Import the postman collection (`nestjs-template.postman_collection.json`) from `
 }
 ```
 
-* __filter__ - an array of objects based on the `key` as the property of entity and `value` as the data to be queried / filtered 
-* __operators__ - an array of objects based on the `key` as the property of entity and `value` as the [find operators](https://github.com/lambdas-crew/nestjs-template-project/blob/master/src/graphql/common/enums/options-operator.enum.ts)
-* __sorting__
-  * `sortBy` - based on the property of the entity to be sorted
-  * `sortDir` - based on the sort direction (`ASC`, `DESC`)
-* __pagination__
-  * `page` - offset (paginated) from where entities should be taken
-  * `pageSize` - limit (paginated) number of entities should be taken
+- **filter** - an array of objects based on the `key` as the property of entity and `value` as the data to be queried / filtered
+- **operators** - an array of objects based on the `key` as the property of entity and `value` as the [find operators](https://github.com/lambdas-crew/nestjs-template-project/blob/master/src/graphql/common/enums/options-operator.enum.ts)
+- **sorting**
+  - `sortBy` - based on the property of the entity to be sorted
+  - `sortDir` - based on the sort direction (`ASC`, `DESC`)
+- **pagination**
+  - `page` - offset (paginated) from where entities should be taken
+  - `pageSize` - limit (paginated) number of entities should be taken
 
 ## CRUD Generator
 
@@ -118,9 +102,9 @@ Generate module, resolver, service, entity and DTO objects based on the model / 
 $ npm run generate:resource graphql/<b>entities</b>
 </pre>
 
-* __entities__ - replace with the entity on plural form like (`products`, `users`) you want to generate
+- **entities** - replace with the entity on plural form like (`products`, `users`) you want to generate
 
-### 2) Transport layer - GraphQL (code first) 
+### 2) Transport layer - GraphQL (code first)
 
 <pre>
 ? What transport layer do you use? 
@@ -151,9 +135,9 @@ UPDATE src/graphql/app.module.ts
 
 ### 5) Modify CRUD resolver names and Update repository logics
 
-* Rename the generated CRUD resolver method names according to `task.resolver` CRUD logics
-* Update generated service according to `task.service` CRUD logics
-* Add repository entity according to `task.repository` CRUD logics
+- Rename the generated CRUD resolver method names according to `task.resolver` CRUD logics
+- Update generated service according to `task.service` CRUD logics
+- Add repository entity according to `task.repository` CRUD logics
 
 ## Configuration
 
@@ -167,9 +151,9 @@ Configs such as (`DB credentials`, `server config`, `authentication config`) are
 $ git commit -m "<b>type</b>(<b>ticket-number</b>): <b>description</b>"
 </pre>
 
-* __type__ - types like (`feat`, `fix`) related on the ticket
-* __ticket-number__ - identity number related on the ticket
-* __description__ - message body related on the ticket
+- **type** - types like (`feat`, `fix`) related on the ticket
+- **ticket-number** - identity number related on the ticket
+- **description** - message body related on the ticket
 
 ### Linting and Consistent Style
 
@@ -184,3 +168,7 @@ $ npm run prettier:fix
 ## Support
 
 Nest is an MIT-licensed open source project. It can grow thanks to the sponsors and support by the amazing backers. If you'd like to join them, please [read more here](https://docs.nestjs.com/support).
+
+## DOCKER AWS Auth
+
+sudo docker login -u AWS -p $(aws ecr get-login-password --region ap-southeast-2) 610780540569.dkr.ecr.ap-southeast-2.amazonaws.com

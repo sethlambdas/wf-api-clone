@@ -97,7 +97,7 @@ RUN apk add --no-cache python3 py-pip jq \
 
 COPY --from=pre-prod /app/config/default.yml /app/config/
 COPY --from=pre-prod /app/config/production.yml /app/config/
-COPY --from=pre-prod /app/config/development.env /app/config/
+COPY --from=pre-prod /app/config/development.yml /app/config/
 COPY --from=pre-prod /app/dist /app
 COPY --from=pre-prod /app/entrypoint.sh /app
 

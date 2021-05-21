@@ -4,11 +4,7 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { GraphQLError } from 'graphql';
 import { DynamooseModule } from 'nestjs-dynamoose';
 import { ConfigUtil } from '../utils/config.util';
-import * as typeOrmConfig from './../config/typeorm.config';
-import { FileModule } from './files/file.module';
 import { OrganizationModule } from './organizations/organization.module';
-import { TaskModule } from './tasks/task.module';
-import { UserModule } from './users/user.module';
 import { WorkflowExecutionModule } from './workflow-executions/workflow-execution.module';
 import { WorkflowStepExecutionHistoryModule } from './workflow-steps-executions-history/worflow-steps-wxh.module';
 import { WorkflowStepModule } from './workflow-steps/workflow-step.module';
@@ -17,7 +13,6 @@ import { WorkflowModule } from './workflow/workflow.module';
 
 @Module({
   imports: [
-    TypeOrmModule.forRoot(typeOrmConfig),
     GraphQLModule.forRoot({
       useGlobalPrefix: true,
       autoSchemaFile: `${__dirname}/schema.gql`,
@@ -43,11 +38,8 @@ import { WorkflowModule } from './workflow/workflow.module';
         return error;
       },
     }),
-    FileModule,
-    TaskModule,
-    UserModule,
     DynamooseModule.forRoot({
-      local: ConfigUtil.get('dynamodb.local'),
+      local: ConfigUtil.get('dynamodb.local') === 'false' ? false : ConfigUtil.get('dynamodb.local'),
       aws: {
         accessKeyId: ConfigUtil.get('aws.accessKeyId'),
         secretAccessKey: ConfigUtil.get('aws.secretAccessKey'),

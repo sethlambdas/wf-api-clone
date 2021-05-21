@@ -5,13 +5,6 @@ server:
   payload:
     limit: '50mb'
 
-db:
-  type: 'mysql'
-  port: 3306
-  database: 'sample'
-  synchronize: false
-  logging: false
-
 aws:
   accessKeyId: 'sampleAccessKeyId'
   secretAccessKey: 'sampleSecretAccessKey'
@@ -45,7 +38,7 @@ sqs:
   endpoint: 'http://localhost:4566'
   queueName: 'WORKFLOW_QUEUE'
   queueUrl: 'http://localhost:4566/000000000000/WORKFLOW_QUEUE'
-  queueError:  'WORKFLOW_QUEUE_ERROR'
+  queueError: 'WORKFLOW_QUEUE_ERROR'
   queueErrorUrl: 'http://localhost:4566/000000000000/WORKFLOW_QUEUE_ERROR'
   maxRetriesLimit: 3
   maxRetriesIntervalSeconds:
