@@ -198,7 +198,7 @@ describe('WorkflowResolver (e2e)', () => {
       expect(workflow.WLFN).toEqual(createWorkflowInput.WorkflowName);
 
       const workflowVersion = await workflowVersionService.getWorkflowVersionByKey(WorkflowVersionkeys);
-      expect(workflowVersion.WV).toEqual('1');
+      expect(workflowVersion.WV).toEqual(1);
 
       const workflowSteps = await workflowStepService.getWorkflowStepWithinAVersion(workflowVersion.SK);
       expect(workflowSteps.count).toEqual(2);
