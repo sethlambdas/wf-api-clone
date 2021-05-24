@@ -102,4 +102,6 @@ COPY --from=pre-prod /app/entrypoint.sh /app
 
 RUN chown -R appuser:appgroup /app
 
+RUN chmod +x /app/entrypoint.sh
+
 USER appuser:appgroup
