@@ -1,9 +1,11 @@
 import { Logger, Module } from '@nestjs/common';
 import { GraphQLModule } from '@nestjs/graphql';
-import { TypeOrmModule } from '@nestjs/typeorm';
+import { TerminusModule } from '@nestjs/terminus';
 import { GraphQLError } from 'graphql';
 import { DynamooseModule } from 'nestjs-dynamoose';
 import { ConfigUtil } from '../utils/config.util';
+import { AppHealthIndicator } from './health/app.health';
+import { HealthController } from './health/health.controller';
 import { OrganizationModule } from './organizations/organization.module';
 import { WorkflowExecutionModule } from './workflow-executions/workflow-execution.module';
 import { WorkflowStepExecutionHistoryModule } from './workflow-steps-executions-history/worflow-steps-wxh.module';
@@ -12,6 +14,8 @@ import { WorkflowVersionModule } from './workflow-versions/workflow-version.modu
 import { WorkflowModule } from './workflow/workflow.module';
 
 @Module({
+  controllers: [HealthController],
+  providers: [AppHealthIndicator],
   imports: [
     GraphQLModule.forRoot({
       useGlobalPrefix: true,
@@ -46,6 +50,7 @@ import { WorkflowModule } from './workflow/workflow.module';
         region: ConfigUtil.get('aws.region'),
       },
     }),
+    TerminusModule,
     WorkflowModule,
     WorkflowExecutionModule,
     WorkflowVersionModule,
