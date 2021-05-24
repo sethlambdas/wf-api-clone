@@ -47,16 +47,20 @@ export class WorkflowService {
       const getWorkflowName = await this.getWorkflowByName({ WorkflowName, OrgId });
       if (getWorkflowName) return { IsWorkflowNameExist: true };
 
+      this.logger.log(`FINDING FOR ORGANIZATION: ${OrgId}`);
       const organization = await this.organizationService.getOrganization({ PK: OrgId });
       if (!organization) return { Error: 'Organization not existing' };
+      this.logger.log(organization);
       await this.organizationService.saveOrganization({ PK: OrgId }, { TotalWLF: organization.TotalWLF + 1 });
 
+      this.logger.log('CREATING WORKFLOW');
       const workflow = await this.workflowRepository.createWorkflow({
         OrgId,
         WorkflowName,
         Repeat,
         WorkflowNumber: organization.TotalWLF,
       });
+      this.logger.log(workflow);
       WLFID = workflow.PK;
     } else {
       WLFID = WorkflowId;
@@ -76,6 +80,7 @@ export class WorkflowService {
       throw new Error('Not every activity type exists.');
     }
 
+    this.logger.log('CREATING WORKFLOW VERSION');
     const createWorkflowVersionInput: CreateWorkflowVersionInput = {
       WLFID,
       CID: v4(),
@@ -84,6 +89,7 @@ export class WorkflowService {
     };
 
     const workflowVersion = await this.workflowVersionService.createWorkflowVersion(createWorkflowVersionInput);
+    this.logger.log(workflowVersion);
 
     for (const state of States) {
       const AID = v4();
