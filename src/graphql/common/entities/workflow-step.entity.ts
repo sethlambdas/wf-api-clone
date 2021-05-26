@@ -86,6 +86,16 @@ export class MD {
 
   @Field({ nullable: true })
   Purpose?: string;
+
+  // FormEditor
+  @Field({ nullable: true })
+  FormDataSchema?: string;
+
+  @Field({ nullable: true })
+  FormUiSchema?: string;
+
+  @Field({ nullable: true })  
+  FormData?: string
 }
 
 @ObjectType()

@@ -79,6 +79,16 @@ export const MDSchema = new Schema({
   Purpose: {
     type: String,
   },
+  // FormEditor
+  FormDataSchema: {
+    type: String
+  },
+  FormUiSchema: {
+    type: String
+  },
+  FormData: {
+    type: String
+  }
 });
 
 export const LabelSchema = new Schema({
