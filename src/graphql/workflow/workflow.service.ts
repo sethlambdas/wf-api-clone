@@ -175,6 +175,7 @@ export class WorkflowService {
         PK: workflowVersion.PK,
         SK: workflowVersion.SK,
       },
+      WorkflowVersion: WV,
       IsWorkflowNameExist: false,
     };
   }

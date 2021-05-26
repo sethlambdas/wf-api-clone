@@ -2,7 +2,7 @@ import { Field, InputType, OmitType } from '@nestjs/graphql';
 import { ACTInput } from '../../common/entities/workflow-step.entity';
 
 @InputType()
-export class CreateWorkflowStepExecutionHistoryInput extends OmitType(ACTInput, ['DESIGN', 'END', 'NM'] as const) {
+export class CreateWorkflowStepExecutionHistoryInput extends OmitType(ACTInput, ['DESIGN', 'END'] as const) {
   @Field()
   OrgId: string;
 

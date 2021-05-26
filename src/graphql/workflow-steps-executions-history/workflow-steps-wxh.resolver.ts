@@ -2,8 +2,13 @@ import { Args, Mutation, Query, Resolver } from '@nestjs/graphql';
 import { CompositePrimaryKeyInput } from '../common/inputs/workflow-key.input';
 import { CreateWorkflowStepExecutionHistoryInput } from './inputs/create.input';
 import { ListAllManualApprovalInput } from './inputs/get-all-approval.input';
+import { ListWorkflowStepExecutionHistoryOfAnExecutionInput } from './inputs/list-workflow-execution-step-history-of-execution.input';
 import { SaveWorkflowStepExecutionHistoryInput } from './inputs/save.input';
-import { ListAllManualApprovalResponse, WorkflowStepExecutionHistory } from './workflow-steps-wxh.entity';
+import {
+  ListAllManualApprovalResponse,
+  ListWorkflowStepExecutionHistory,
+  WorkflowStepExecutionHistory,
+} from './workflow-steps-wxh.entity';
 import { WorkflowStepExecutionHistoryService } from './workflow-steps-wxh.service';
 
 @Resolver((of) => WorkflowStepExecutionHistory)
@@ -46,6 +51,16 @@ export class WorkflowStepExecutionHistoryResolver {
     @Args('listAllManualApprovalInput') listAllManualApprovalInput: ListAllManualApprovalInput,
   ) {
     return this.workflowStepExecutionHistoryService.listAllManualApproval(listAllManualApprovalInput);
+  }
+
+  @Query((returns) => ListWorkflowStepExecutionHistory)
+  async ListWorkflowStepExecutionHistoryOfAnExecution(
+    @Args('listWorkflowStepExecutionHistoryOfAnExecutionInput')
+    listWorkflowStepExecutionHistoryOfAnExecutionInput: ListWorkflowStepExecutionHistoryOfAnExecutionInput,
+  ) {
+    return this.workflowStepExecutionHistoryService.listWorkflowStepExecutionHistoryOfAnExecution(
+      listWorkflowStepExecutionHistoryOfAnExecutionInput,
+    );
   }
 
   @Mutation((returns) => Boolean, { nullable: true })

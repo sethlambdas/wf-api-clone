@@ -2,6 +2,7 @@
 import { Field, Int, ObjectType, OmitType } from '@nestjs/graphql';
 import { ACT } from '../common/entities/workflow-step.entity';
 import { CompositePrimaryKey } from '../common/interfaces/workflow-key.interface';
+import { WorkflowExecution } from '../workflow-executions/workflow-execution.entity';
 
 @ObjectType()
 export class CAT extends OmitType(ACT, ['DESIGN', 'END'] as const) {
@@ -17,7 +18,7 @@ export class CAT extends OmitType(ACT, ['DESIGN', 'END'] as const) {
 
 @ObjectType()
 export class WorkflowStepExecutionHistory
-  extends OmitType(ACT, ['DESIGN', 'END', 'NM'] as const)
+  extends OmitType(ACT, ['DESIGN', 'END'] as const)
   implements CompositePrimaryKey {
   @Field()
   PK: string;
@@ -78,4 +79,19 @@ export class ListAllManualApprovalResponse {
 
   @Field((type) => Int)
   TotalRecords: number;
+}
+
+@ObjectType()
+export class ListWorkflowStepExecutionHistory {
+  @Field((type) => [WorkflowStepExecutionHistory], { nullable: true })
+  WorkflowStepExecutionHistory?: WorkflowStepExecutionHistory[];
+
+  @Field((type) => WorkflowExecution, { nullable: true })
+  WorkflowExecution?: WorkflowExecution;
+
+  @Field((type) => Int, { nullable: true })
+  TotalRecords?: number;
+
+  @Field({ nullable: true })
+  Error?: string;
 }

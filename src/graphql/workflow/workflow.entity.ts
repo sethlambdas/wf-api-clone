@@ -19,6 +19,9 @@ export class CreateWorkflowResponse {
   WorkflowVersionKeys?: PrimaryKey;
 
   @Field({ nullable: true })
+  WorkflowVersion?: number;
+
+  @Field({ nullable: true })
   IsWorkflowNameExist?: boolean;
 
   @Field({ nullable: true })

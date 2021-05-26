@@ -1,9 +1,12 @@
 import { CompositePrimaryKeyInput } from '../../src/graphql/common/inputs/workflow-key.input';
 import { CreateOrganizationInput } from '../../src/graphql/organizations/inputs/create-organization.input';
+import { CreateWorkflowExecutionInput } from '../../src/graphql/workflow-executions/inputs/create-workflow-execution.input';
 import { CreateWorkflowStepExecutionHistoryInput } from '../../src/graphql/workflow-steps-executions-history/inputs/create.input';
 import { ListAllManualApprovalInput } from '../../src/graphql/workflow-steps-executions-history/inputs/get-all-approval.input';
+import { ListWorkflowStepExecutionHistoryOfAnExecutionInput } from '../../src/graphql/workflow-steps-executions-history/inputs/list-workflow-execution-step-history-of-execution.input';
 import { SaveWorkflowStepExecutionHistoryInput } from '../../src/graphql/workflow-steps-executions-history/inputs/save.input';
 import { CreateWorkflowInput } from '../../src/graphql/workflow/inputs/create-workflow.input';
+import { CreateWorkflowResponse } from '../../src/graphql/workflow/workflow.entity';
 import { initiateGraphqlRequest, setUpTesting, tearDownTesting } from '../test-e2e';
 
 const gql = {
@@ -110,12 +113,47 @@ const gql = {
       }
     }
   `,
+  createWorkflowExecutionMutation: `
+    mutation CreateWorkflowExecution($createWorkflowExecutionInput:  CreateWorkflowExecutionInput!) {
+      CreateWorkflowExecution(createWorkflowExecutionInput: $createWorkflowExecutionInput) {
+        PK
+        SK
+        STE
+        WSXH_IDS
+      }
+    }
+  `,
+  listWorkflowStepExecutionHistoryOfAnExecution: `
+    query ListWorkflowStepExecutionHistoryOfAnExecution(
+      $listWorkflowStepExecutionHistoryOfAnExecutionInput: ListWorkflowStepExecutionHistoryOfAnExecutionInput!
+    ) {
+      ListWorkflowStepExecutionHistoryOfAnExecution(
+        listWorkflowStepExecutionHistoryOfAnExecutionInput: $listWorkflowStepExecutionHistoryOfAnExecutionInput
+      ) {
+        WorkflowExecution {
+          PK
+          SK
+          STE
+        }
+        WorkflowStepExecutionHistory {
+          PK
+          SK
+          T
+          NM
+          Status
+          WLFN
+        }
+        TotalRecords
+      }
+    }
+  `,
 };
 
 const WorkflowName = 'TestWorkflowName';
 
 const createWorkflowStepExecutionHistoryInput: CreateWorkflowStepExecutionHistoryInput = {
   T: 'Email',
+  NM: 'node_0',
   MD: { Email: 'test@email.com' },
   OrgId: 'ORG#1234',
   PK: 'WV#1234|WX1',
@@ -171,6 +209,8 @@ const listAllManualApprovalInput: ListAllManualApprovalInput = {
   pageSize: 2,
   page: 1,
 };
+
+let getWorkflow: CreateWorkflowResponse = {};
 
 describe('WorkflowStepExecutionHistoryResolver (e2e)', () => {
   beforeAll(async () => {
@@ -259,6 +299,8 @@ describe('WorkflowStepExecutionHistoryResolver (e2e)', () => {
       const data2 = await initiateGraphqlRequest(gql.createWorkflowMutation, { createWorkflowInput });
       workflow = data2.CreateWorkflow;
 
+      getWorkflow = workflow;
+
       wsxh1.PK = `${workflow.WorkflowVersionKeys.SK}|WX#1`;
       wsxh2.PK = `${workflow.WorkflowVersionKeys.SK}|WX#1`;
 
@@ -277,6 +319,48 @@ describe('WorkflowStepExecutionHistoryResolver (e2e)', () => {
 
       expect(wlfStepExecHistory.ManualApprovals.length).toEqual(2);
       expect(wlfStepExecHistory.TotalRecords).toEqual(2);
+    });
+  });
+
+  describe('listWorkflowStepExecutionHistoryOfAnExecution', () => {
+    it('should list workflow step execution histories of an execution', async () => {
+      const {
+        WorkflowKeys: { PK },
+        WorkflowVersionKeys: { PK: WorkflowVersionPK, SK },
+      } = getWorkflow;
+      const listWorkflowStepExecutionHistoryOfAnExecutionInput: ListWorkflowStepExecutionHistoryOfAnExecutionInput = {
+        WorkflowId: PK,
+        workflowVersionSK: SK,
+      };
+
+      const createWorkflowExecutionInput: CreateWorkflowExecutionInput = {
+        WorkflowVersionKeys: {
+          PK: WorkflowVersionPK,
+          SK,
+        },
+        WSXH_IDS: ['WSXH#1'],
+        STE: '{}',
+        PARALLEL: [],
+      };
+
+      await initiateGraphqlRequest(gql.createWorkflowExecutionMutation, {
+        createWorkflowExecutionInput,
+      });
+
+      const data = await initiateGraphqlRequest(gql.listWorkflowStepExecutionHistoryOfAnExecution, {
+        listWorkflowStepExecutionHistoryOfAnExecutionInput,
+      });
+
+      const {
+        WorkflowStepExecutionHistory,
+        WorkflowExecution,
+        TotalRecords,
+      } = data.ListWorkflowStepExecutionHistoryOfAnExecution;
+
+      expect(WorkflowStepExecutionHistory).not.toBeUndefined();
+      expect(WorkflowExecution).not.toBeUndefined();
+      expect(WorkflowStepExecutionHistory.length).toEqual(2);
+      expect(TotalRecords).toEqual(2);
     });
   });
 });

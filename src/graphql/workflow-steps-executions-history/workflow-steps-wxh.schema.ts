@@ -14,6 +14,9 @@ export const WorkflowStepExecutionHistorySchema = new Schema(
     T: {
       type: String,
     },
+    NM: {
+      type: String,
+    },
     WLFN: {
       type: String,
     },

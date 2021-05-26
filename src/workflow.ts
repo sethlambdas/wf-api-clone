@@ -260,6 +260,7 @@ export default class Workflow {
       PK: wfExecPK,
       SK: WSXH_SK,
       T: act.T,
+      NM: act.NM,
       WLFN: WorkflowName,
       WorkflowStepSK: CurrentWorkflowStepSK,
       Status: act.Status,

@@ -1,14 +1,17 @@
 import { Inject, Injectable } from '@nestjs/common';
 import { v4 } from 'uuid';
 import { CompositePrimaryKeyInput } from '../common/inputs/workflow-key.input';
+import { WorkflowExecutionService } from '../workflow-executions/workflow-execution.service';
 import { WorkflowVersionService } from '../workflow-versions/workflow-version.service';
 import { WorkflowService } from '../workflow/workflow.service';
 import { CreateWorkflowStepExecutionHistoryInput } from './inputs/create.input';
 import { ListAllManualApprovalInput } from './inputs/get-all-approval.input';
+import { ListWorkflowStepExecutionHistoryOfAnExecutionInput } from './inputs/list-workflow-execution-step-history-of-execution.input';
 import { SaveWorkflowStepExecutionHistoryInput } from './inputs/save.input';
 import {
   GetAllManualApproval,
   ListAllManualApprovalResponse,
+  ListWorkflowStepExecutionHistory,
   WorkflowStepExecutionHistory,
 } from './workflow-steps-wxh.entity';
 import { WorkflowStepExecutionHistoryRepository } from './workflow-steps-wxh.repository';
@@ -19,6 +22,7 @@ export class WorkflowStepExecutionHistoryService {
     @Inject(WorkflowStepExecutionHistoryRepository)
     private workflowStepExecutionHistoryRepository: WorkflowStepExecutionHistoryRepository,
     private workflowService: WorkflowService,
+    private workflowExecutionService: WorkflowExecutionService,
     private workflowVersionService: WorkflowVersionService,
   ) {}
 
@@ -103,6 +107,45 @@ export class WorkflowStepExecutionHistoryService {
     return {
       ManualApprovals: manualApprovals,
       LastKey: JSON.stringify(results.lastKey),
+      TotalRecords,
+    };
+  }
+
+  async listWorkflowStepExecutionHistoryOfAnExecution(
+    listWorkflowStepExecutionHistoryOfAnExecutionInput: ListWorkflowStepExecutionHistoryOfAnExecutionInput,
+  ): Promise<ListWorkflowStepExecutionHistory> {
+    const { WorkflowId, workflowVersionSK } = listWorkflowStepExecutionHistoryOfAnExecutionInput;
+    const listWorkflowExecutionsOfAVersionInput = {
+      WorkflowId,
+      workflowVersionSK,
+      page: 1,
+      pageSize: 1,
+    };
+
+    const workflowExecutions = await this.workflowExecutionService.listWorkflowExecutionsOfAVersion(
+      listWorkflowExecutionsOfAVersionInput,
+    );
+
+    if (!workflowExecutions || !workflowExecutions.WorkflowExecution || !workflowExecutions.WorkflowExecution.length) {
+      return { Error: 'Workflow Execution not existing' };
+    }
+
+    const workflowExecution = workflowExecutions.WorkflowExecution[0];
+    const updatedListWorkflowStepExecutionHistoryOfAnExecutionInput = {
+      ...listWorkflowStepExecutionHistoryOfAnExecutionInput,
+      WorkflowExecutionId: workflowExecution.PK,
+    };
+
+    const {
+      workflowStepExecutionHistories,
+      TotalRecords,
+    } = await this.workflowStepExecutionHistoryRepository.listAllWorkflowStepExecutionHistoryOfAnExecution(
+      updatedListWorkflowStepExecutionHistoryOfAnExecutionInput,
+    );
+
+    return {
+      WorkflowExecution: workflowExecution,
+      WorkflowStepExecutionHistory: workflowStepExecutionHistories,
       TotalRecords,
     };
   }
