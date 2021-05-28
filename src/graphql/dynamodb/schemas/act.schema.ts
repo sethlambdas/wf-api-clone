@@ -81,14 +81,14 @@ export const MDSchema = new Schema({
   },
   // FormEditor
   FormDataSchema: {
-    type: String
+    type: String,
   },
   FormUiSchema: {
-    type: String
+    type: String,
   },
   FormData: {
-    type: String
-  }
+    type: String,
+  },
 });
 
 export const LabelSchema = new Schema({

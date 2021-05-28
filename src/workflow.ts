@@ -11,7 +11,10 @@ import { WorkflowStepExecutionHistoryService } from './graphql/workflow-steps-ex
 import { WorkflowStepStatus } from './graphql/workflow-steps/enums/workflow-step-status.enum';
 import { WorkflowStep } from './graphql/workflow-steps/workflow-step.entity';
 import { WorkflowStepService } from './graphql/workflow-steps/workflow-step.service';
+import { WorkflowVersionService } from './graphql/workflow-versions/workflow-version.service';
+import { WorkflowService } from './graphql/workflow/workflow.service';
 import activityRegistry, { ActivityTypes } from './utils/activity/activity-registry.util';
+import { ManualApprovalEmailParams } from './utils/activity/manual-approval.util';
 import { ConfigUtil } from './utils/config.util';
 import { putEventsEB } from './utils/event-bridge/event-bridge.util';
 import { WORKFLOW_QUEUE_URL } from './utils/sqs/sqs-config.util';
@@ -19,20 +22,26 @@ import { changeSQSMessageVisibility } from './utils/sqs/sqs.util';
 
 export default class Workflow {
   private logger: Logger;
+  private workflowService: WorkflowService;
   private workflowStepService: WorkflowStepService;
   private workflowExecutionService: WorkflowExecutionService;
   private workflowStepExecutionHistoryService: WorkflowStepExecutionHistoryService;
+  private workflowVersionService: WorkflowVersionService;
 
   constructor(
     logger: Logger,
+    workflowService: WorkflowService,
     workflowStepService: WorkflowStepService,
     workflowExecutionService: WorkflowExecutionService,
     workflowStepExecutionHistoryService: WorkflowStepExecutionHistoryService,
+    workflowVersionService: WorkflowVersionService,
   ) {
     this.logger = logger;
+    this.workflowService = workflowService;
     this.workflowStepService = workflowStepService;
     this.workflowExecutionService = workflowExecutionService;
     this.workflowStepExecutionHistoryService = workflowStepExecutionHistoryService;
+    this.workflowVersionService = workflowVersionService;
   }
 
   static getRule() {
@@ -212,8 +221,31 @@ export default class Workflow {
             this.logger.log(params);
             if (act.T === ActivityTypes.ManualApproval && !ManualApproval) {
               if (typeof actResult === 'function') {
-                const executeManualApprovalEB = actResult as (WLFN: string, WSID: string) => any;
-                await executeManualApprovalEB(WLFN, CurrentWorkflowStepSK);
+                const workflow = await this.workflowService.getWorkflowByName({
+                  WorkflowName: WLFN,
+                  OrgId,
+                });
+                const workflowVersionSK = wfExec.PK.split('|')[0];
+                const workflowVersion = await this.workflowVersionService.getWorkflowVersionByKey({
+                  PK: workflow.PK,
+                  SK: workflowVersionSK,
+                });
+                const executeManualApprovalEB = actResult as (
+                  manualApprovalEmailParams: ManualApprovalEmailParams,
+                ) => any;
+                const manualApprovalEmailParams: ManualApprovalEmailParams = {
+                  WorkflowExecutionKeyPK: wfExec.PK,
+                  WorkflowExecutionKeySK: wfExec.SK,
+                  WorkflowStepKeyPK: CurrentWorkflowStepPK,
+                  WorkflowStepKeySK: CurrentWorkflowStepSK,
+                  WorkflowStepExecutionHistorySK: wfStepExecHistory.SK,
+                  WorkflowPK: workflow.PK,
+                  WorkflowVersionSK: workflowVersion.SK,
+                  WorkflowVersion: workflowVersion.WV.toString(),
+                  WorkflowName: WLFN,
+                  OrgId,
+                };
+                await executeManualApprovalEB(manualApprovalEmailParams);
                 this.logger.log('Waiting for Manual Approval');
                 return;
               }

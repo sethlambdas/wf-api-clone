@@ -253,15 +253,15 @@ export class WorkflowService {
       return getDesign.id === state.ActivityId;
     });
 
-    const currentEdge = Design.find((getDesign) => {
+    const currentEdges = Design.filter((getDesign) => {
       return getDesign.source === state.ActivityId;
     });
 
-    if (!currentDesign || !currentEdge) {
+    if (!currentDesign || !currentEdges || !currentEdges.length) {
       return [];
     }
 
-    const design = [currentDesign, currentEdge];
+    const design = [currentDesign, ...currentEdges];
 
     const startDesign = Design.find((getDesign) => {
       return getDesign?.data?.nodeType === 'Start';
@@ -299,10 +299,16 @@ export class WorkflowService {
     OrgId: string,
     WorkflowName: string,
     Repeat: string | undefined,
-    workflowVerionsKeys: { PK: string; SK: string },
+    workflowVersionsKeys: { PK: string; SK: string },
     executeWorkflowStepKey: { PK: string; SK: string },
   ) {
     const workflowStep = await this.workflowStepService.getWorkflowStepByKey(executeWorkflowStepKey);
+    const detail = JSON.stringify({
+      ...workflowStep,
+      WLFN: WorkflowName,
+      WorkflowVersionKeys: workflowVersionsKeys,
+      OrgId,
+    });
 
     if (Repeat) {
       const source = `Repeat[${Repeat}]`.replace(/\s/g, '').replace(/\*/g, '.').replace(/\//g, '_');
@@ -323,12 +329,7 @@ export class WorkflowService {
       } = await getSQSQueueAttributes(WORKFLOW_QUEUE_URL);
       const Arn = queueArn;
       const Input = JSON.stringify({
-        delayedDetail: {
-          ...workflowStep,
-          WLFN: WorkflowName,
-          WorkflowVersionKeys: workflowVerionsKeys,
-          OrgId,
-        },
+        delayedDetail: detail,
       });
       const putTargetsParams = {
         Rule: Name,
@@ -345,12 +346,7 @@ export class WorkflowService {
       const params = {
         Entries: [
           {
-            Detail: JSON.stringify({
-              ...workflowStep,
-              WLFN: WorkflowName,
-              WorkflowVersionKeys: workflowVerionsKeys,
-              OrgId,
-            }),
+            Detail: detail,
             DetailType: Workflow.getDetailType(),
             Source: Workflow.getSource(),
           },

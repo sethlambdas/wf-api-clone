@@ -18,7 +18,7 @@ export async function mailgunSendEmail(payload: { Email: string; Body: string; S
     to: Email,
     cc: ConfigUtil.get('mailgun.ccEmail'),
     subject: Subject,
-    text: Body,
+    html: Body,
   };
 
   logger.log('Executing mailgun to send email');

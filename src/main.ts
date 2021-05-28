@@ -8,6 +8,8 @@ import { OrganizationService } from './graphql/organizations/organization.servic
 import { WorkflowExecutionService } from './graphql/workflow-executions/workflow-execution.service';
 import { WorkflowStepExecutionHistoryService } from './graphql/workflow-steps-executions-history/workflow-steps-wxh.service';
 import { WorkflowStepService } from './graphql/workflow-steps/workflow-step.service';
+import { WorkflowVersionService } from './graphql/workflow-versions/workflow-version.service';
+import { WorkflowService } from './graphql/workflow/workflow.service';
 import { ConfigUtil } from './utils/config.util';
 import localStackInit from './utils/localstack-init.util';
 import Workflow from './workflow';
@@ -20,9 +22,11 @@ async function bootstrap() {
   const app = await NestFactory.create(AppModule, {
     logger: ConfigUtil.get('logLevel'),
   });
+  const workflowService = app.get(WorkflowService);
   const workflowStepService = app.get(WorkflowStepService);
   const workflowExecutionService = app.get(WorkflowExecutionService);
   const workflowStepExecutionHistoryService = app.get(WorkflowStepExecutionHistoryService);
+  const workflowVersionService = app.get(WorkflowVersionService);
   const organizationService = app.get(OrganizationService);
 
   if (process.env.NODE_ENV === 'development') {
@@ -55,9 +59,11 @@ async function bootstrap() {
 
   const workflow = new Workflow(
     logger,
+    workflowService,
     workflowStepService,
     workflowExecutionService,
     workflowStepExecutionHistoryService,
+    workflowVersionService,
   );
   await workflow.run();
   logger.log('Workflow has started running...');
