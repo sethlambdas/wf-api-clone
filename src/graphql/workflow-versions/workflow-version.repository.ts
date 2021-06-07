@@ -2,6 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { InjectModel, Model } from 'nestjs-dynamoose';
 import { getPaginatedData } from '../../utils/array-helpers.util';
 import { ConfigUtil } from '../../utils/config.util';
+import { GSI } from '../common/enums/gsi-names.enum';
 import { CompositePrimaryKeyInput } from '../common/inputs/workflow-key.input';
 import { CompositePrimaryKey } from '../common/interfaces/workflow-key.interface';
 import { ListAllWorkflowVersionsOfWorkflowInput } from './inputs/read-queries.inputs';
@@ -48,5 +49,16 @@ export class WorkflowVersionRepository {
 
   async getWorkflowVersionByKey(key: CompositePrimaryKeyInput) {
     return this.workflowVersionModel.get(key);
+  }
+
+  async getWorkflowVersionBySK(key: CompositePrimaryKeyInput) {
+    const { PK, SK } = key;
+    return this.workflowVersionModel
+      .query({ DATA: SK })
+      .and()
+      .where('PK')
+      .beginsWith(PK)
+      .using(GSI.DataOverloading)
+      .exec();
   }
 }

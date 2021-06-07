@@ -5,6 +5,7 @@
   "author": "",
   "license": "MIT",
   "scripts": {
+    "preinstall": "npx npm-force-resolutions",
     "build": "tsc -p tsconfig.build.json",
     "prettier": "prettier **/*.{js,ts} --check",
     "prettier:fix": "npm run prettier -- --write",
@@ -28,6 +29,9 @@
     "typeorm:run": "npm run typeorm migration:run",
     "typeorm:revert": "npm run typeorm migration:revert",
     "generate:resource": "nest g resource"
+  },
+  "resolutions": {
+    "ws": "7.4.6"
   },
   "dependencies": {
     "@commitlint/cli": "^11.0.0",

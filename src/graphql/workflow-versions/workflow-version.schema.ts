@@ -22,6 +22,9 @@ export const WorkflowVersionSchema = new Schema(
     TotalEXC: {
       type: Number,
     },
+    DATA: {
+      type: String,
+    },
   },
   {
     timestamps: {

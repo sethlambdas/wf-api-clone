@@ -21,13 +21,15 @@ export class WorkflowVersionService {
   async createWorkflowVersion(createWorkflowVersionInput: CreateWorkflowVersionInput) {
     const { WLFID, CID, WV, FAID } = createWorkflowVersionInput;
     const WVID = v4();
+    const SK = `WV#${WVID}`;
     const workflowVersion = {
       PK: WLFID,
-      SK: `WV#${WVID}`,
+      SK,
       CID,
       WV,
       FAID,
       TotalEXC: 0,
+      DATA: SK,
     } as WorkflowVersion;
     return this.workflowVersionRepository.createWorkflowVersion(workflowVersion);
   }
@@ -81,6 +83,11 @@ export class WorkflowVersionService {
       Activities,
       Design,
     };
+  }
+
+  async getWorkflowVersionBySK(key: CompositePrimaryKey): Promise<WorkflowVersion> {
+    const result = await this.workflowVersionRepository.getWorkflowVersionBySK(key);
+    return result[0];
   }
 
   async deleteWorkflowVersion(workflowVersionKeysInput: CompositePrimaryKey) {

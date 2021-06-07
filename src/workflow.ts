@@ -13,7 +13,7 @@ import { WorkflowStep } from './graphql/workflow-steps/workflow-step.entity';
 import { WorkflowStepService } from './graphql/workflow-steps/workflow-step.service';
 import { WorkflowVersionService } from './graphql/workflow-versions/workflow-version.service';
 import { WorkflowService } from './graphql/workflow/workflow.service';
-import activityRegistry, { ActivityTypes } from './utils/activity/activity-registry.util';
+import activityRegistry, { ActivityTypes, TriggerTypes } from './utils/activity/activity-registry.util';
 import { ManualApprovalEmailParams } from './utils/activity/manual-approval.util';
 import { ConfigUtil } from './utils/config.util';
 import { putEventsEB } from './utils/event-bridge/event-bridge.util';
@@ -84,6 +84,7 @@ export default class Workflow {
         ManualApproval,
         parallelIndex,
         parallelIndexes,
+        payload,
       } = detail;
 
       const act: CAT = {
@@ -106,6 +107,11 @@ export default class Workflow {
         WLFN,
       );
 
+      if (act.MD?.IsTrigger || (Object as any).values(TriggerTypes).includes(act.T)) {
+        this.logger.log(`${act.T} Trigger is running.`);
+        return;
+      }
+
       let currentParallelIndex = (!isNaN(parallelIndex) && parallelIndex) || 0;
       let currentParallelIndexes = parallelIndexes || [];
 
@@ -127,7 +133,10 @@ export default class Workflow {
             currentParallelIndex = parallelStatus.updatedParallelIndex;
             currentParallelIndexes = parallelStatus.updatedParallelIndexes;
 
-            const state = JSON.parse(wfExec.STE);
+            const state = {
+              ...JSON.parse(wfExec.STE),
+              ...(payload || {}),
+            };
 
             this.logger.log('================WF Execution State===============');
             this.logger.log(state);

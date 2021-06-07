@@ -89,6 +89,14 @@ export const MDSchema = new Schema({
   FormData: {
     type: String,
   },
+  // Trigger Type
+  IsTrigger: {
+    type: Boolean,
+  },
+  // HTTP
+  AID: {
+    type: String,
+  },
 });
 
 export const LabelSchema = new Schema({

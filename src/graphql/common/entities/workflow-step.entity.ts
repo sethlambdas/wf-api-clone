@@ -66,7 +66,7 @@ export class MD {
   @Field({ nullable: true })
   JoinValues?: string;
 
-  // WebService
+  // WebService & HTTP
   @Field({ nullable: true })
   Endpoint?: string;
 
@@ -96,6 +96,14 @@ export class MD {
 
   @Field({ nullable: true })
   FormData?: string;
+
+  // Trigger Type
+  @Field({ nullable: true })
+  IsTrigger?: boolean;
+
+  // HTTP
+  @Field({ nullable: true })
+  AID?: string;
 }
 
 @ObjectType()

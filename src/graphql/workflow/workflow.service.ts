@@ -1,6 +1,6 @@
 import { Inject, Injectable, Logger } from '@nestjs/common';
 import { v4 } from 'uuid';
-import { ActivityTypes } from '../../utils/activity/activity-registry.util';
+import { ActivityTypes, TriggerTypes } from '../../utils/activity/activity-registry.util';
 import { putEventsEB, putRuleEB, putTargetsEB } from '../../utils/event-bridge/event-bridge.util';
 import { WORKFLOW_QUEUE_URL } from '../../utils/sqs/sqs-config.util';
 import { getSQSQueueAttributes } from '../../utils/sqs/sqs.util';
@@ -9,6 +9,7 @@ import { ACT as TypeACT, DesignWorkflowInput } from '../common/entities/workflow
 import { CompositePrimaryKeyInput } from '../common/inputs/workflow-key.input';
 import { OrganizationService } from '../organizations/organization.service';
 import { CreateWorkflowStepInput } from '../workflow-steps/inputs/create-workflow-step.input';
+import { GetWorkflowStepByAidInput } from '../workflow-steps/inputs/get-workflow-step-by-aid.input';
 import { SaveWorkflowStepInput } from '../workflow-steps/inputs/save-workflow-step.input';
 import { WorkflowStep } from '../workflow-steps/workflow-step.entity';
 import { WorkflowStepService } from '../workflow-steps/workflow-step.service';
@@ -73,7 +74,7 @@ export class WorkflowService {
     }
 
     const activityTypesExists = States.every((state) => {
-      return (Object as any).values(ActivityTypes).includes(state.ActivityType);
+      return (Object as any).values({ ...ActivityTypes, ...TriggerTypes }).includes(state.ActivityType);
     });
 
     if (!activityTypesExists) {
@@ -92,7 +93,7 @@ export class WorkflowService {
     this.logger.log(workflowVersion);
 
     for (const state of States) {
-      const AID = v4();
+      const AID = state?.Variables?.AID || v4();
 
       if (state.ActivityId === StartAt) FAID = `AID#${AID}`;
 
@@ -421,5 +422,59 @@ export class WorkflowService {
       Workflows: result,
       TotalRecords: organization.TotalWLF,
     };
+  }
+
+  async trigger(params: string[], payload: any): Promise<string> {
+    const { workflowActivityId }: any = params;
+    if (!workflowActivityId) {
+      return 'Failed';
+    }
+    const getWorkflowStepByAidInput: GetWorkflowStepByAidInput = {
+      AID: `AID#${workflowActivityId}`,
+      WorkflowStepPK: 'WV#',
+    };
+    const workflowStep = await this.workflowStepService.getWorkflowStepByAid(getWorkflowStepByAidInput);
+
+    const paramsEB = {
+      Entries: [],
+    };
+
+    for (const nextActId of workflowStep.NAID) {
+      this.logger.log('Next Activity ID: ', nextActId);
+      const getWorkflowStep = await this.workflowStepService.getWorkflowStepByAid({
+        AID: nextActId,
+        WorkflowStepPK: workflowStep.PK,
+      });
+      const getWorkflowVersion = await this.workflowVersionService.getWorkflowVersionBySK({
+        PK: 'ORG#',
+        SK: getWorkflowStep.PK,
+      });
+      const WorkflowPKSplit = getWorkflowVersion.PK.split('|');
+      const OrgId = WorkflowPKSplit[0];
+      const WorkflowSK = WorkflowPKSplit[1];
+      const getWorkflow = await this.workflowRepository.getWorkflowByKey({
+        PK: getWorkflowVersion.PK,
+        SK: WorkflowSK,
+      });
+      const detail = {
+        ...getWorkflowStep,
+        WLFN: getWorkflow.WLFN,
+        WorkflowVersionKeys: {
+          PK: getWorkflowVersion.PK,
+          SK: getWorkflowVersion.SK,
+        },
+        OrgId,
+        payload,
+      };
+      paramsEB.Entries.push({
+        Detail: JSON.stringify(detail),
+        DetailType: Workflow.getDetailType(),
+        Source: Workflow.getSource(),
+      });
+    }
+
+    await putEventsEB(paramsEB);
+
+    return 'Success';
   }
 }

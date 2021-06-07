@@ -15,6 +15,11 @@ interface ActivityRegistry {
   [key: string]: ActivityRegistryItem;
 }
 
+export enum TriggerTypes {
+  HTTP = 'HTTP',
+  Recurring = 'Recurring',
+}
+
 export enum ActivityTypes {
   WebService = 'Web Service',
   Delay = 'Delay',
