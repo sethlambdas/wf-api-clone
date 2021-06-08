@@ -351,11 +351,8 @@ describe('WorkflowStepExecutionHistoryResolver (e2e)', () => {
         listWorkflowStepExecutionHistoryOfAnExecutionInput,
       });
 
-      const {
-        WorkflowStepExecutionHistory,
-        WorkflowExecution,
-        TotalRecords,
-      } = data.ListWorkflowStepExecutionHistoryOfAnExecution;
+      const { WorkflowStepExecutionHistory, WorkflowExecution, TotalRecords } =
+        data.ListWorkflowStepExecutionHistoryOfAnExecution;
 
       expect(WorkflowStepExecutionHistory).not.toBeUndefined();
       expect(WorkflowExecution).not.toBeUndefined();

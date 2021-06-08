@@ -37,7 +37,7 @@ export class WorkflowService {
   ) {}
 
   async createWorkflow(createWorkflowInput: CreateWorkflowInput): Promise<CreateWorkflowResponse> {
-    const { WorkflowId, Design, StartAt, States, WorkflowName, OrgId, Repeat } = createWorkflowInput;
+    const { WorkflowId, Design, StartAt, States, WorkflowName, OrgId } = createWorkflowInput;
     let WV = 1;
     let WLFID = '';
     let FAID = '';
@@ -58,7 +58,6 @@ export class WorkflowService {
       const workflow = await this.workflowRepository.createWorkflow({
         OrgId,
         WorkflowName,
-        Repeat,
         WorkflowNumber: organization.TotalWLF,
       });
       this.logger.log(workflow);
@@ -162,7 +161,6 @@ export class WorkflowService {
     await this.executeWorkflowEB(
       OrgId,
       WorkflowName,
-      Repeat,
       { PK: workflowVersion.PK, SK: workflowVersion.SK },
       executeWorkflowStepKey,
     );
@@ -299,62 +297,83 @@ export class WorkflowService {
   async executeWorkflowEB(
     OrgId: string,
     WorkflowName: string,
-    Repeat: string | undefined,
     workflowVersionsKeys: { PK: string; SK: string },
     executeWorkflowStepKey: { PK: string; SK: string },
   ) {
     const workflowStep = await this.workflowStepService.getWorkflowStepByKey(executeWorkflowStepKey);
-    const detail = JSON.stringify({
+    const detail = {
       ...workflowStep,
       WLFN: WorkflowName,
       WorkflowVersionKeys: workflowVersionsKeys,
       OrgId,
-    });
+    };
+    const params = {
+      Entries: [
+        {
+          Detail: JSON.stringify(detail),
+          DetailType: Workflow.getDetailType(),
+          Source: Workflow.getSource(),
+        },
+      ],
+    };
 
-    if (Repeat) {
-      const source = `Repeat[${Repeat}]`.replace(/\s/g, '').replace(/\*/g, '.').replace(/\//g, '_');
-      const Name = `Repeat[${Repeat}]Rule`.replace(/\s/g, '').replace(/\*/g, '.').replace(/\//g, '_');
-      const EventPattern = `{"source": ["${source}"]}`;
-      const ScheduleExpression = `cron(${Repeat})`;
+    await putEventsEB(params);
 
-      const putRuleParams = {
-        Name,
-        EventPattern,
-        ScheduleExpression,
-      };
-      await putRuleEB(putRuleParams);
-
-      const Id = '1';
-      const {
-        Attributes: { QueueArn: queueArn },
-      } = await getSQSQueueAttributes(WORKFLOW_QUEUE_URL);
-      const Arn = queueArn;
-      const Input = JSON.stringify({
-        delayedDetail: detail,
+    for (const nextActId of workflowStep.NAID) {
+      this.logger.log('Next Activity ID: ', nextActId);
+      const getWorkflowStep = await this.workflowStepService.getWorkflowStepByAid({
+        AID: nextActId,
+        WorkflowStepPK: workflowStep.PK,
       });
-      const putTargetsParams = {
-        Rule: Name,
-        Targets: [
-          {
-            Id,
-            Arn,
-            Input,
-          },
-        ],
+      const getDetail = {
+        ...getWorkflowStep,
+        WLFN: WorkflowName,
+        WorkflowVersionKeys: workflowVersionsKeys,
+        OrgId,
       };
-      await putTargetsEB(putTargetsParams);
-    } else {
-      const params = {
-        Entries: [
-          {
-            Detail: detail,
-            DetailType: Workflow.getDetailType(),
-            Source: Workflow.getSource(),
-          },
-        ],
-      };
+      if ((Object as any).values(TriggerTypes).includes(workflowStep.ACT.T)) {
+        const { Days, Hours, Minutes } = workflowStep.ACT.MD;
+        let cron: string;
+        if (Hours || Days || Minutes) {
+          cron = `${Minutes ? `*/${Minutes}` : '*'} ${Hours ? `*/${Hours}` : '*'} ${Days ? `*/${Days}` : '*'} * *`;
+        }
+        if (cron) {
+          const replaceSourceName = (text: string) => {
+            return text.replace(/\s/g, '').replace(/\*/g, '.').replace(/\//g, '_');
+          };
+          const source = replaceSourceName(`Recurring[${cron}]`);
+          const Name = replaceSourceName(`Recurring[${cron}]Rule`);
+          const EventPattern = `{"source": ["${source}"]}`;
+          const ScheduleExpression = `cron(${cron})`;
 
-      await putEventsEB(params);
+          const putRuleParams = {
+            Name,
+            EventPattern,
+            ScheduleExpression,
+          };
+          await putRuleEB(putRuleParams);
+
+          const Id = '1';
+          const {
+            Attributes: { QueueArn: queueArn },
+          } = await getSQSQueueAttributes(WORKFLOW_QUEUE_URL);
+          const Arn = queueArn;
+          const Input = JSON.stringify({
+            delayedDetail: getDetail,
+          });
+          const putTargetsParams = {
+            Rule: Name,
+            Targets: [
+              {
+                Id,
+                Arn,
+                Input,
+              },
+            ],
+          };
+          await putTargetsEB(putTargetsParams);
+        }
+      }
     }
   }
 

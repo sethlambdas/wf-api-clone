@@ -30,14 +30,15 @@ export class MD {
   @Field({ nullable: true })
   Body?: string;
 
-  // Delay
+  // Delay & Recurring
   @Field({ nullable: true })
   Days?: string;
 
-  // Delay
+  // Delay & Recurring
   @Field({ nullable: true })
   Hours?: string;
 
+  // Delay & Recurring
   @Field({ nullable: true })
   Minutes?: string;
 

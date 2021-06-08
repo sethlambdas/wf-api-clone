@@ -10,9 +10,6 @@ export class CreateWorkflowInputRepository {
   @Field()
   WorkflowName: string;
 
-  @Field({ nullable: true })
-  Repeat?: string;
-
   @Field((type) => Int)
   WorkflowNumber: number;
 }
@@ -24,9 +21,6 @@ export class CreateWorkflowInput {
 
   @Field()
   WorkflowName: string;
-
-  @Field({ nullable: true })
-  Repeat?: string;
 
   @Field({ nullable: true })
   WorkflowId?: string;

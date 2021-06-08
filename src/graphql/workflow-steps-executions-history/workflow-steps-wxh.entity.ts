@@ -19,7 +19,8 @@ export class CAT extends OmitType(ACT, ['DESIGN', 'END'] as const) {
 @ObjectType()
 export class WorkflowStepExecutionHistory
   extends OmitType(ACT, ['DESIGN', 'END'] as const)
-  implements CompositePrimaryKey {
+  implements CompositePrimaryKey
+{
   @Field()
   PK: string;
 
