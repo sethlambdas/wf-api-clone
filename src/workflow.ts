@@ -17,8 +17,11 @@ import activityRegistry, { ActivityTypes, TriggerTypes } from './utils/activity/
 import { ManualApprovalEmailParams } from './utils/activity/manual-approval.util';
 import { ConfigUtil } from './utils/config.util';
 import { putEventsEB } from './utils/event-bridge/event-bridge.util';
+import { ExternalActivityTypes, runExternalService } from './utils/external-activity/external-activities.util';
 import { WORKFLOW_QUEUE_URL } from './utils/sqs/sqs-config.util';
 import { changeSQSMessageVisibility } from './utils/sqs/sqs.util';
+import { ExternalServiceDetails } from './utils/workflow-types/details.types';
+import { IDetail } from './utils/workflow-types/details.types';
 
 export default class Workflow {
   private logger: Logger;
@@ -49,11 +52,11 @@ export default class Workflow {
   }
 
   static getDetailType() {
-    return 'workflowStep';
+    return 'service::workflow-engine::run-workflowStep';
   }
 
   static getSource() {
-    return 'workflow.initiate';
+    return 'workflow.engine';
   }
 
   private getDetail(message: SQS.Message) {
@@ -74,8 +77,7 @@ export default class Workflow {
     try {
       const detail = this.getDetail(message);
       const {
-        PK: CurrentWorkflowStepPK,
-        SK: CurrentWorkflowStepSK,
+        currentWorkflowStep,
         OrgId,
         WorkflowVersionKeys,
         wfExecKeys,
@@ -85,22 +87,25 @@ export default class Workflow {
         parallelIndex,
         parallelIndexes,
         payload,
-      } = detail;
+        externalServiceDetails,
+      }: IDetail = detail;
 
       const act: CAT = {
-        T: detail?.ACT.T,
-        NM: detail?.ACT.NM,
-        MD: detail?.ACT.MD,
-        WSID: CurrentWorkflowStepSK,
+        T: currentWorkflowStep?.ACT.T,
+        NM: currentWorkflowStep?.ACT.NM,
+        MD: currentWorkflowStep?.ACT.MD,
+        WSID: currentWorkflowStep.SK,
         Status: '',
       };
 
-      if (detail && detail.ACT.END) act.END = detail.ACT.END;
+      const externalService: ExternalServiceDetails = externalServiceDetails;
+
+      if (currentWorkflowStep && currentWorkflowStep.ACT.END) act.END = currentWorkflowStep.ACT.END;
 
       const { wfExec, wfStepExecHistory } = await this.getCurrentWorkflowExecution(
         OrgId,
         act,
-        CurrentWorkflowStepSK,
+        currentWorkflowStep.SK,
         wfExecKeys,
         WorkflowVersionKeys,
         WorkflowStepExecutionHistorySK,
@@ -112,17 +117,27 @@ export default class Workflow {
         return;
       }
 
+      if ((Object as any).values(ExternalActivityTypes).includes(act.T) && !externalService) {
+        const activeWorkflowDetails = {
+          ...detail,
+          wfExecKeys: { PK: wfExec.PK, SK: wfExec.SK },
+          WorkflowStepExecutionHistorySK: wfStepExecHistory.SK,
+        };
+        await runExternalService(act, activeWorkflowDetails);
+        return;
+      }
+
       let currentParallelIndex = (!isNaN(parallelIndex) && parallelIndex) || 0;
       let currentParallelIndexes = parallelIndexes || [];
 
       try {
-        if (detail?.ACT) {
+        if (currentWorkflowStep?.ACT) {
           this.logger.log('================Activity Type===============');
           this.logger.log(act?.T);
           this.logger.log('================Activity Type===============');
 
-          if (activityRegistry[act?.T]) {
-            const nextActIds = detail.NAID;
+          if (activityRegistry[act?.T] || externalService.isDone) {
+            const nextActIds = currentWorkflowStep.NAID;
             const parallelStatus = await this.updateParallelStatus(
               wfExec,
               act,
@@ -145,11 +160,14 @@ export default class Workflow {
             this.logger.log(act?.MD);
             this.logger.log('==================MD===============');
 
-            const actResult = await activityRegistry[act?.T].processActivity(act?.MD, state);
+            let actResult: any;
 
-            this.logger.log('==============Activity Result=================');
-            this.logger.log(`${JSON.stringify(actResult)}`);
-            this.logger.log('==============Activity Result=================');
+            if (activityRegistry[act?.T]) {
+              actResult = await activityRegistry[act?.T].processActivity(act?.MD, state);
+              this.logger.log('==============Activity Result=================');
+              this.logger.log(`${JSON.stringify(actResult)}`);
+              this.logger.log('==============Activity Result=================');
+            }
 
             const params = {
               Entries: [],
@@ -171,16 +189,19 @@ export default class Workflow {
             );
             this.logger.log('Successfully saved workflow execution');
 
-            const pushEntries = (getWorkflowStep: WorkflowStep) => {
+            const pushEntries = (getWorkflowStep: WorkflowStep, currentWlfStepResults?: any) => {
+              const details: IDetail = {
+                currentWorkflowStep: getWorkflowStep,
+                parallelIndex: currentParallelIndex,
+                parallelIndexes: currentParallelIndexes,
+                wfExecKeys: { PK: wfExec.PK, SK: wfExec.SK },
+                WLFN,
+                OrgId,
+                previousStepResults: currentWlfStepResults,
+              };
+
               params.Entries.push({
-                Detail: JSON.stringify({
-                  ...getWorkflowStep,
-                  parallelIndex: currentParallelIndex,
-                  parallelIndexes: currentParallelIndexes,
-                  wfExecKeys: { PK: wfExec.PK, SK: wfExec.SK },
-                  WLFN,
-                  OrgId,
-                }),
+                Detail: JSON.stringify(details),
                 DetailType: Workflow.getDetailType(),
                 Source: source,
               });
@@ -191,7 +212,7 @@ export default class Workflow {
               if (actResult) {
                 workflowStep = await this.workflowStepService.getWorkflowStepByAid({
                   AID: actResult as string,
-                  WorkflowStepPK: CurrentWorkflowStepPK,
+                  WorkflowStepPK: currentWorkflowStep.PK,
                 });
 
                 this.logger.log(workflowStep);
@@ -202,12 +223,12 @@ export default class Workflow {
               if (ManualApproval.IsApprove)
                 workflowStep = await this.workflowStepService.getWorkflowStepByAid({
                   AID: act.MD.ApproveStep,
-                  WorkflowStepPK: CurrentWorkflowStepPK,
+                  WorkflowStepPK: currentWorkflowStep.PK,
                 });
               else if (!ManualApproval.IsApprove && act.MD.RejectStep)
                 workflowStep = await this.workflowStepService.getWorkflowStepByAid({
                   AID: act.MD.RejectStep,
-                  WorkflowStepPK: CurrentWorkflowStepPK,
+                  WorkflowStepPK: currentWorkflowStep.PK,
                 });
 
               this.logger.log(workflowStep);
@@ -218,12 +239,16 @@ export default class Workflow {
                 this.logger.log('Next Activity ID: ', nextActId);
                 workflowStep = await this.workflowStepService.getWorkflowStepByAid({
                   AID: nextActId,
-                  WorkflowStepPK: CurrentWorkflowStepPK,
+                  WorkflowStepPK: currentWorkflowStep.PK,
                 });
 
                 this.logger.log(workflowStep);
 
-                pushEntries(workflowStep);
+                let currentWorkflowStepResults: any;
+
+                if (externalService.results) currentWorkflowStepResults = externalService.results;
+
+                pushEntries(workflowStep, currentWorkflowStepResults);
               }
             }
 
@@ -245,8 +270,8 @@ export default class Workflow {
                 const manualApprovalEmailParams: ManualApprovalEmailParams = {
                   WorkflowExecutionKeyPK: wfExec.PK,
                   WorkflowExecutionKeySK: wfExec.SK,
-                  WorkflowStepKeyPK: CurrentWorkflowStepPK,
-                  WorkflowStepKeySK: CurrentWorkflowStepSK,
+                  WorkflowStepKeyPK: currentWorkflowStep.PK,
+                  WorkflowStepKeySK: currentWorkflowStep.SK,
                   WorkflowStepExecutionHistorySK: wfStepExecHistory.SK,
                   WorkflowPK: workflow.PK,
                   WorkflowVersionSK: workflowVersion.SK,
@@ -336,6 +361,7 @@ export default class Workflow {
       wfExec = await this.workflowExecutionService.saveWorkflowExecution(wfExecKeys, {
         WSXH_IDS: [...wfExec.WSXH_IDS, WSXH_SK],
       });
+
       if (WorkflowStepExecutionHistorySK)
         wfStepExecHistory = await this.workflowStepExecutionHistoryService.getWorkflowStepExecutionHistoryByKey({
           PK: wfExecKeys.PK,

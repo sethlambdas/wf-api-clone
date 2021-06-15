@@ -97,6 +97,29 @@ export const MDSchema = new Schema({
   AID: {
     type: String,
   },
+  // External Services
+  ExternalServiceAction: {
+    type: String,
+  },
+  // Email Ingestion Service
+  Password: {
+    type: String,
+  },
+  Host: {
+    type: String,
+  },
+  Port: {
+    type: Number,
+  },
+  TLS: {
+    type: Boolean,
+  },
+  source_folder: {
+    type: String,
+  },
+  destination_folder: {
+    type: String,
+  },
 });
 
 export const LabelSchema = new Schema({

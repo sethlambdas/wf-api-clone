@@ -7,6 +7,7 @@ export default async function localStackInit() {
   const putRuleParams = {
     Name: Workflow.getRule(),
     EventPattern: JSON.stringify({
+      'detail-type': [Workflow.getDetailType()],
       source: [Workflow.getSource()],
     }),
   };

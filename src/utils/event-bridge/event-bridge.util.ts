@@ -1,5 +1,9 @@
 import { Logger } from '@nestjs/common';
+
+import Workflow from '../../workflow';
+import { IDetail } from '../workflow-types/details.types';
 import { EB } from './event-bridge-config.util';
+
 const logger = new Logger('EventBridge');
 
 // tslint:disable-next-line: class-name
@@ -62,4 +66,18 @@ export async function putTargetsEB(putTargetsParams: PutTargetsInput) {
   } catch (err) {
     logger.error(`Error, ${err}`);
   }
+}
+
+export function formCreateEventParams(detail: IDetail) {
+  const Entries = [
+    {
+      Detail: JSON.stringify(detail),
+      DetailType: Workflow.getDetailType(),
+      Source: Workflow.getSource(),
+    },
+  ];
+
+  const params = { Entries };
+
+  return params;
 }

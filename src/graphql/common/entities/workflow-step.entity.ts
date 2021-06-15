@@ -1,5 +1,5 @@
 /* tslint:disable:max-classes-per-file */
-import { Field, InputType, Int, ObjectType, OmitType, PartialType, PickType } from '@nestjs/graphql';
+import { Field, Float, InputType, Int, ObjectType, OmitType, PartialType, PickType } from '@nestjs/graphql';
 
 // Object Types
 
@@ -20,7 +20,7 @@ export class ChoiceWorkflow {
 
 @ObjectType()
 export class MD {
-  // Email or ManualApproval
+  // Email or ManualApproval or Email Ingestion
   @Field({ nullable: true })
   Email?: string;
 
@@ -99,12 +99,32 @@ export class MD {
   FormData?: string;
 
   // Trigger Type
-  @Field({ nullable: true })
+  @Field(() => Boolean, { nullable: true })
   IsTrigger?: boolean;
 
   // HTTP
   @Field({ nullable: true })
   AID?: string;
+
+  // External Services
+  @Field({ nullable: true })
+  ExternalServiceAction?: string;
+
+  // Email Ingestion Service
+  @Field({ nullable: true })
+  Password?: string;
+
+  @Field({ nullable: true })
+  Port?: number;
+
+  @Field(() => Boolean, { nullable: true })
+  TLS?: boolean;
+
+  @Field({ nullable: true })
+  source_folder?: string;
+
+  @Field({ nullable: true })
+  destination_folder?: string;
 }
 
 @ObjectType()
@@ -136,10 +156,10 @@ export class Data {
 
 @ObjectType()
 export class Position {
-  @Field((type) => Int)
+  @Field((type) => Float)
   x: number;
 
-  @Field((type) => Int)
+  @Field((type) => Float)
   y: number;
 }
 

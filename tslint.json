@@ -15,7 +15,8 @@
     "object-literal-sort-keys": false,
     "no-eval": false,
     "no-var-requires": false,
-    "max-classes-per-file": [true, 10]
+    "max-classes-per-file": [true, 10],
+    "variable-name": [true, "ban-keywords", "check-format", "allow-pascal-case", "allow-snake-case"]
   },
   "rulesDirectory": []
 }
