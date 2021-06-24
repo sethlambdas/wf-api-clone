@@ -1,5 +1,5 @@
-import { WorkflowStep } from '../../graphql/workflow-steps/workflow-step.entity';
 import { CompositePrimaryKey } from '../../graphql/common/interfaces/workflow-key.interface';
+import { WorkflowStep } from '../../graphql/workflow-steps/workflow-step.entity';
 
 export interface IDetail {
   OrgId: string;

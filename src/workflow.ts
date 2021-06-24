@@ -75,7 +75,7 @@ export default class Workflow {
 
   private async handleMessage(message: SQS.Message) {
     try {
-      const detail = this.getDetail(message);
+      const detail: IDetail = this.getDetail(message);
       const {
         currentWorkflowStep,
         OrgId,

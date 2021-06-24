@@ -10,8 +10,8 @@ import {
 import { ExternalActivityTypes } from '../../utils/external-activity/external-activities.util';
 import { WORKFLOW_QUEUE_URL } from '../../utils/sqs/sqs-config.util';
 import { getSQSQueueAttributes } from '../../utils/sqs/sqs.util';
-import Workflow from '../../workflow';
 import { IDetail } from '../../utils/workflow-types/details.types';
+import Workflow from '../../workflow';
 import { ACT as TypeACT, DesignWorkflowInput } from '../common/entities/workflow-step.entity';
 import { CompositePrimaryKeyInput } from '../common/inputs/workflow-key.input';
 import { OrganizationService } from '../organizations/organization.service';

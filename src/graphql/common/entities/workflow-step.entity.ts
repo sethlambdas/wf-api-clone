@@ -125,6 +125,10 @@ export class MD {
 
   @Field({ nullable: true })
   destination_folder?: string;
+
+  // OCR
+  @Field({ nullable: true })
+  TesseractConfig?: string;
 }
 
 @ObjectType()

@@ -120,6 +120,10 @@ export const MDSchema = new Schema({
   destination_folder: {
     type: String,
   },
+  // OCR
+  TesseractConfig: {
+    type: String,
+  },
 });
 
 export const LabelSchema = new Schema({

@@ -4,6 +4,7 @@ import { putEventsEB } from '../event-bridge/event-bridge.util';
 
 export enum ExternalActivityTypes {
   EmailIngestion = 'Email Ingestion',
+  OCR = 'OCR',
 }
 
 export const runExternalService = async (act: CAT, activeWorkflowDetails: any) => {
