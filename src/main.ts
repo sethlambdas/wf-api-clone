@@ -33,7 +33,6 @@ async function bootstrap() {
     logger.log('Setting up local stack');
     localStackInit();
     logger.log('Finished setting up local stack');
-    // Create Organization for Testing
   }
 
   app.setGlobalPrefix(ConfigUtil.get('server.prefix'));
@@ -52,6 +51,7 @@ async function bootstrap() {
   await app.listen(port);
   logger.log(`Application listening on port ${port}`);
 
+  // Create Organization for Testing
   const organization = await organizationService.getOrganization({ PK: 'ORG#1234' });
   if (!organization) {
     await organizationService.createOrganization({ orgName: 'TestOrgName', orgId: '1234' });

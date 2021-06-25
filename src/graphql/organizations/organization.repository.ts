@@ -21,12 +21,13 @@ export class OrganizationRepository {
       ORGNAME: orgName,
       TotalWLF: 0,
       TotalUSR: 0,
+      APIKEY: [],
     });
 
     return results;
   }
 
-  async saveOrganization(simplePrimaryKey: SimplePrimaryKey, organization: Organization) {
+  async saveOrganization(simplePrimaryKey: SimplePrimaryKey, organization: Partial<Organization>) {
     return this.organzationModel.update(simplePrimaryKey, organization);
   }
 

@@ -13,3 +13,4 @@ test/uploads/*
 sample.sh
 pnpm-lock.yaml
 example.gql
+cli

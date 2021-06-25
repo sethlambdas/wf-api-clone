@@ -211,3 +211,12 @@ export const ACTSchema = new Schema({
     schema: [DesignWorkflowSchema],
   },
 });
+
+export const APIKeySchema = new Schema({
+  KEY: {
+    type: String,
+  },
+  ACTIVE: {
+    type: Boolean,
+  },
+});

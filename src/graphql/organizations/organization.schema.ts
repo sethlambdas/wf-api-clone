@@ -1,4 +1,5 @@
 import { Schema } from 'dynamoose';
+import { APIKeySchema } from '../dynamodb/schemas/act.schema';
 
 export const OrganizationSchema = new Schema(
   {
@@ -14,6 +15,10 @@ export const OrganizationSchema = new Schema(
     },
     TotalUSR: {
       type: Number,
+    },
+    APIKEY: {
+      type: Array,
+      schema: [APIKeySchema],
     },
   },
   {

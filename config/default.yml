@@ -24,6 +24,13 @@ jwt:
     expiresIn: '12h'
     maxAge: 43200000
 
+apiGateway:
+  endpoint: 'http://localhost:4566'
+  usagePlanName: 'Workflow Usage Plan'
+  restApiName: 'Workflow API'
+  restApiResource: 'trigger'
+  description: 'Workflow API Deployment'
+
 cache:
   expiresIn: 300000
 
