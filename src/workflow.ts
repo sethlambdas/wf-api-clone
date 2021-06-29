@@ -525,5 +525,7 @@ export default class Workflow {
     workflowSQSQueue.on('processing_error', (err: Error) => this.onSQSQueueError(err));
 
     workflowSQSQueue.start();
+
+    this.logger.log(`CHECKING SQS CONSUMER IF RUNNING: ${workflowSQSQueue.isRunning}`);
   }
 }
