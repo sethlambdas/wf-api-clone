@@ -47,6 +47,9 @@ import { WorkflowModule } from './workflow/workflow.module';
       aws: {
         region: ConfigUtil.get('aws.region'),
       },
+      model: {
+        create: ConfigUtil.get('dynamodb.local') === 'false' ? false : true
+      }
     }),
     TerminusModule,
     WorkflowModule,

@@ -1,8 +1,12 @@
-# NestJS - A progressive Node.js framework
+# Workflow - API
 
-A progressive [Node.js](http://nodejs.org) framework for building
-efficient and scalable server-side applications, heavily inspired by
-[Angular](https://angular.io).
+# Build Badges
+- Development
+![Build badge](https://s3-extras-bucket-coredocs-workflow-api-dev.s3-ap-southeast-2.amazonaws.com/badges/badge-build-action-build.svg)
+![Unit Tests badge](https://s3-extras-bucket-coredocs-workflow-api-dev.s3-ap-southeast-2.amazonaws.com/badges/badge-unit-test-action-build.svg)
+![E2E Tests badge](https://s3-extras-bucket-coredocs-workflow-api-dev.s3-ap-southeast-2.amazonaws.com/badges/badge-e2e-test-action-build.svg)
+![Deployment status badge](https://s3-extras-bucket-coredocs-workflow-api-dev.s3-ap-southeast-2.amazonaws.com/badges/badge-deployment-status.svg)
+
 
 ## Description
 
