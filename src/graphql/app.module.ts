@@ -45,8 +45,6 @@ import { WorkflowModule } from './workflow/workflow.module';
     DynamooseModule.forRoot({
       local: ConfigUtil.get('dynamodb.local') === 'false' ? false : ConfigUtil.get('dynamodb.local'),
       aws: {
-        accessKeyId: ConfigUtil.get('aws.accessKeyId'),
-        secretAccessKey: ConfigUtil.get('aws.secretAccessKey'),
         region: ConfigUtil.get('aws.region'),
       },
     }),

@@ -8,6 +8,7 @@ export class AppHealthIndicator extends HealthIndicator {
     const result = this.getStatus(key, isHealthy, {
       state: 'running',
       status: 'healthy',
+      application: 'workflow-api'
     });
 
     if (isHealthy) {

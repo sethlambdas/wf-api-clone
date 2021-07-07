@@ -5,6 +5,9 @@ server:
   payload:
     limit: '50mb'
 
+externalServices:
+  imapEndpoint: http://localhost:3001
+
 aws:
   accessKeyId: 'sampleAccessKeyId'
   secretAccessKey: 'sampleSecretAccessKey'

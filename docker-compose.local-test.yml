@@ -1,0 +1,16 @@
+version: '3.8'
+
+services:
+  localstack:
+    image: localstack/localstack:latest
+    mem_limit: 1g
+    environment:
+      - AWS_DEFAULT_REGION=ap-southeast-2
+      - EDGE_PORT=4566
+      - SERVICES=sqs,events,cloudformation,dynamodb,s3,apigateway
+      - DEBUG=1
+    ports:
+      - '4566:4566'
+    volumes:
+      - '${TMPDIR:-/tmp/localstack}:/tmp/localstack'
+      - '/var/run/docker.sock:/var/run/docker.sock'
