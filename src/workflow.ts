@@ -308,6 +308,7 @@ export default class Workflow {
       }
     } catch (err) {
       await this.handleRetries(message);
+      this.logger.error('Error Occured:');
       this.logger.error(err);
       throw err;
     }

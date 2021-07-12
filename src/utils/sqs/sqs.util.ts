@@ -11,6 +11,29 @@ import {
 
 const logger = new Logger('SQS');
 
+export async function getQueueURL(queueName: string) {
+  try {
+    logger.log('Getting SQS Queue URL');
+    const queueURL = await SQS.getQueueUrl({ QueueName: queueName }).promise();
+
+    logger.log(queueURL);
+    return queueURL;
+  } catch (err) {
+    logger.error(`Error, ${err}`);
+  }
+}
+
+export async function deleteQueue(queueUrl: string) {
+  try {
+    logger.log('Deleting existing queue');
+    const isDeleted = await SQS.deleteQueue({ QueueUrl: queueUrl }).promise();
+    logger.log(isDeleted);
+    return;
+  } catch (err) {
+    logger.error(`Error, ${err}`);
+  }
+}
+
 // tslint:disable-next-line: class-name
 interface ListSQSQueueInput {
   [key: string]: unknown;

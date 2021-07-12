@@ -10,11 +10,19 @@ import {
   putMethodResponseAPIGateway,
 } from './api-gateway/api-gateway.util';
 import { ConfigUtil } from './config.util';
-import { putRuleEB, putTargetsEB } from './event-bridge/event-bridge.util';
-import { QUEUE_ERROR, WORKFLOW_QUEUE_URL, WORKFLOW_QUEUE_URL_ERROR } from './sqs/sqs-config.util';
-import { createSQSQueue, getSQSQueueAttributes } from './sqs/sqs.util';
+import { putRuleEB, putTargetsEB, deleteEventRule } from './event-bridge/event-bridge.util';
+import { QUEUE_NAME, QUEUE_ERROR, WORKFLOW_QUEUE_URL, WORKFLOW_QUEUE_URL_ERROR } from './sqs/sqs-config.util';
+import { createSQSQueue, getSQSQueueAttributes, getQueueURL, deleteQueue } from './sqs/sqs.util';
 
 export default async function localStackInit() {
+  const queue = await getQueueURL(QUEUE_NAME);
+
+  if (queue) {
+    await deleteEventRule(Workflow.getRule());
+    await deleteQueue(WORKFLOW_QUEUE_URL_ERROR);
+    await deleteQueue(WORKFLOW_QUEUE_URL);
+  }
+
   const putRuleParams = {
     Name: Workflow.getRule(),
     EventPattern: JSON.stringify({

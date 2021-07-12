@@ -6,6 +6,20 @@ import { EB } from './event-bridge-config.util';
 
 const logger = new Logger('EventBridge');
 
+
+export async function deleteEventRule(name: string) {
+  try {
+    logger.log('Deleting Event Rule');
+
+    const isDeleted = await EB.deleteRule({Name: name}).promise();
+    logger.log(isDeleted);
+
+    return;
+  } catch (err) {
+    logger.error(`Error, ${err}`);
+  }
+}
+
 // tslint:disable-next-line: class-name
 interface PutEventsInput {
   Entries: {

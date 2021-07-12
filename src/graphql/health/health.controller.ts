@@ -20,4 +20,23 @@ export class HealthController {
     const res = await fetch(url);
     return await res.json();
   }
+
+  @Get('/check/emailIngestion/sampleEvent')
+  async sampleEventEmailIngestionService() {
+    const url = ConfigUtil.get('externalServices.imapEndpoint') + '/api/health/test/createEvent';
+    return fetch(url).then(res => res.json());
+  }
+
+  @Get('/check/ocr')
+  async checOCRService() {
+    const url = ConfigUtil.get('externalServices.ocrEndpoint') + '/api/health';
+    const res = await fetch(url);
+    return await res.json();
+  }
+
+  @Get('/check/ocr/sampleEvent')
+  async sampleEventOCRService() {
+    const url = ConfigUtil.get('externalServices.ocrEndpoint') + '/api/health/test/createEvent';
+    return fetch(url).then(res => res.json());
+  }
 }

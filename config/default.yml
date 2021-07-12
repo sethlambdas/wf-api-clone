@@ -7,6 +7,7 @@ server:
 
 externalServices:
   imapEndpoint: http://localhost:3001
+  ocrEndpoint: http://localhost:3002
 
 aws:
   accessKeyId: 'sampleAccessKeyId'
