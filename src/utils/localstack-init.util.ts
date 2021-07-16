@@ -1,3 +1,5 @@
+import { ConfigUtil } from '@lambdascrew/utility';
+
 import Workflow from '../workflow';
 import {
   createDeploymentAPIGateway,
@@ -9,10 +11,9 @@ import {
   putMethodAPIGateway,
   putMethodResponseAPIGateway,
 } from './api-gateway/api-gateway.util';
-import { ConfigUtil } from './config.util';
-import { putRuleEB, putTargetsEB, deleteEventRule } from './event-bridge/event-bridge.util';
-import { QUEUE_NAME, QUEUE_ERROR, WORKFLOW_QUEUE_URL, WORKFLOW_QUEUE_URL_ERROR } from './sqs/sqs-config.util';
-import { createSQSQueue, getSQSQueueAttributes, getQueueURL, deleteQueue } from './sqs/sqs.util';
+import { deleteEventRule, putRuleEB, putTargetsEB } from './event-bridge/event-bridge.util';
+import { QUEUE_ERROR, QUEUE_NAME, WORKFLOW_QUEUE_URL, WORKFLOW_QUEUE_URL_ERROR } from './sqs/sqs-config.util';
+import { createSQSQueue, deleteQueue, getQueueURL, getSQSQueueAttributes } from './sqs/sqs.util';
 
 export default async function localStackInit() {
   const queue = await getQueueURL(QUEUE_NAME);
@@ -72,7 +73,7 @@ export async function localStackApiGateway() {
 
   const restApi = await createRestApiAPIGateway({
     name: ConfigUtil.get('apiGateway.restApiName'),
-    endpointConfiguration: { types: ['EDGE'] }
+    endpointConfiguration: { types: ['EDGE'] },
   });
 
   const restResources = await getResourcesAPIGateway({
@@ -108,8 +109,8 @@ export async function localStackApiGateway() {
     restApiId: restApi.id,
     resourceId: createResourceId.id,
     httpMethod: 'POST',
-    statusCode: '200'
-  })
+    statusCode: '200',
+  });
 
   const putIntegration = await putIntegrationAPIGateway({
     restApiId: restApi.id,

@@ -1,7 +1,9 @@
 import { Injectable } from '@nestjs/common';
 import _ from 'lodash';
 import { InjectModel, Model } from 'nestjs-dynamoose';
-import { ConfigUtil } from '../../utils/config.util';
+
+import { ConfigUtil } from '@lambdascrew/utility';
+
 import { GSI } from '../common/enums/gsi-names.enum';
 import { CompositePrimaryKeyInput } from '../common/inputs/workflow-key.input';
 import { CompositePrimaryKey } from '../common/interfaces/workflow-key.interface';

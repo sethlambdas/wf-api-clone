@@ -1,7 +1,9 @@
 import { Logger } from '@nestjs/common';
 import { mapValues } from 'lodash';
 import { stringify } from 'query-string';
-import { ConfigUtil } from '../config.util';
+
+import { ConfigUtil } from '@lambdascrew/utility';
+
 import { mailgunSendEmail } from '../mailgun-helpers.util';
 import { ActivityTypes } from './activity-registry.util';
 

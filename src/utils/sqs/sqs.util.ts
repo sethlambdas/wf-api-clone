@@ -1,5 +1,7 @@
 import { Logger } from '@nestjs/common';
-import { ConfigUtil } from '../config.util';
+
+import { ConfigUtil } from '@lambdascrew/utility';
+
 import {
   defaultCreateParams,
   defaultListParams,

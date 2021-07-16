@@ -1,6 +1,8 @@
 import { Module } from '@nestjs/common';
 import { DynamooseModule } from 'nestjs-dynamoose';
-import { ConfigUtil } from '../../utils/config.util';
+
+import { ConfigUtil } from '@lambdascrew/utility';
+
 import { OrganizationSchema } from '../organizations/organization.schema';
 import { WorkflowExecutionSchema } from '../workflow-executions/workflow-execution.schema';
 import { WorkflowStepExecutionHistorySchema } from '../workflow-steps-executions-history/workflow-steps-wxh.schema';

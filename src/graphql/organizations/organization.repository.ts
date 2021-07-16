@@ -1,7 +1,9 @@
 import { Injectable } from '@nestjs/common';
 import { InjectModel, Model } from 'nestjs-dynamoose';
 import { v4 } from 'uuid';
-import { ConfigUtil } from '../../utils/config.util';
+
+import { ConfigUtil } from '@lambdascrew/utility';
+
 import { SimplePrimaryKey } from '../common/interfaces/workflow-key.interface';
 import { CreateOrganizationInput } from './inputs/create-organization.input';
 import { Organization } from './organization.entity';

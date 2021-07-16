@@ -1,4 +1,7 @@
 import { Inject, Injectable } from '@nestjs/common';
+
+import { ConfigUtil } from '@lambdascrew/utility';
+
 import {
   createApiKeyAPIGateway,
   createUsagePlanAPIGateway,
@@ -6,7 +9,6 @@ import {
   getRestApisAPIGateway,
   getUsagePlansAPIGateway,
 } from '../../utils/api-gateway/api-gateway.util';
-import { ConfigUtil } from '../../utils/config.util';
 import { SimplePrimaryKey } from '../common/interfaces/workflow-key.interface';
 import { CreateOrganizationApiKeyInput } from './inputs/create-organization-api-key.input';
 import { CreateOrganizationInput } from './inputs/create-organization.input';

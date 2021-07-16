@@ -3,7 +3,9 @@ import { GraphQLModule } from '@nestjs/graphql';
 import { TerminusModule } from '@nestjs/terminus';
 import { GraphQLError } from 'graphql';
 import { DynamooseModule } from 'nestjs-dynamoose';
-import { ConfigUtil } from '../utils/config.util';
+
+import { ConfigUtil } from '@lambdascrew/utility';
+
 import { AppHealthIndicator } from './health/app.health';
 import { HealthController } from './health/health.controller';
 import { OrganizationModule } from './organizations/organization.module';
@@ -43,13 +45,13 @@ import { WorkflowModule } from './workflow/workflow.module';
       },
     }),
     DynamooseModule.forRoot({
-      local: ConfigUtil.get('dynamodb.local') === 'false' ? false : ConfigUtil.get('dynamodb.local'),
+      local: ConfigUtil.get('dynamodb.local') ? ConfigUtil.get('dynamodb.local') : false,
       aws: {
         region: ConfigUtil.get('aws.region'),
       },
       model: {
-        create: ConfigUtil.get('dynamodb.local') === 'false' ? false : true
-      }
+        create: ConfigUtil.get('dynamodb.local') ? true : false,
+      },
     }),
     TerminusModule,
     WorkflowModule,

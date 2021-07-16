@@ -1,5 +1,6 @@
 import * as AWS from 'aws-sdk';
-import { ConfigUtil } from '../config.util';
+
+import { ConfigUtil } from '@lambdascrew/utility';
 
 const config: { [key: string]: any } = {
   region: ConfigUtil.get('aws.region'),

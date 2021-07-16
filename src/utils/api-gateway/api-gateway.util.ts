@@ -126,7 +126,6 @@ interface PutMethodResponseInput {
   statusCode: string;
 }
 
-
 export async function putMethodResponseAPIGateway(putMethodResponseParams: PutMethodResponseInput) {
   try {
     logger.log('Put Method Response on API Gateway');

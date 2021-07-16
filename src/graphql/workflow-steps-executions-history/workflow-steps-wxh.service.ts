@@ -136,12 +136,10 @@ export class WorkflowStepExecutionHistoryService {
       WorkflowExecutionId: workflowExecution.PK,
     };
 
-    const {
-      workflowStepExecutionHistories,
-      TotalRecords,
-    } = await this.workflowStepExecutionHistoryRepository.listAllWorkflowStepExecutionHistoryOfAnExecution(
-      updatedListWorkflowStepExecutionHistoryOfAnExecutionInput,
-    );
+    const { workflowStepExecutionHistories, TotalRecords } =
+      await this.workflowStepExecutionHistoryRepository.listAllWorkflowStepExecutionHistoryOfAnExecution(
+        updatedListWorkflowStepExecutionHistoryOfAnExecutionInput,
+      );
 
     return {
       WorkflowExecution: workflowExecution,

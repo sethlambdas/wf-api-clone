@@ -1,5 +1,6 @@
 import { Logger } from '@nestjs/common';
-import { ConfigUtil } from './config.util';
+
+import { ConfigUtil } from '@lambdascrew/utility';
 
 // @ts-ignore
 const formData = require('form-data');

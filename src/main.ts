@@ -3,6 +3,9 @@ import { NestFactory } from '@nestjs/core';
 import * as AWS from 'aws-sdk';
 import * as bodyParser from 'body-parser';
 import * as cookieParser from 'cookie-parser';
+
+import { ConfigUtil } from '@lambdascrew/utility';
+
 import { AppModule } from './graphql/app.module';
 import { OrganizationService } from './graphql/organizations/organization.service';
 import { WorkflowExecutionService } from './graphql/workflow-executions/workflow-execution.service';
@@ -10,7 +13,6 @@ import { WorkflowStepExecutionHistoryService } from './graphql/workflow-steps-ex
 import { WorkflowStepService } from './graphql/workflow-steps/workflow-step.service';
 import { WorkflowVersionService } from './graphql/workflow-versions/workflow-version.service';
 import { WorkflowService } from './graphql/workflow/workflow.service';
-import { ConfigUtil } from './utils/config.util';
 import localStackInit from './utils/localstack-init.util';
 import Workflow from './workflow';
 

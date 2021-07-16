@@ -1,7 +1,9 @@
 import { Controller, Get } from '@nestjs/common';
 import { HealthCheck, HealthCheckService } from '@nestjs/terminus';
+
+import { ConfigUtil } from '@lambdascrew/utility';
+
 import { AppHealthIndicator } from './app.health';
-import { ConfigUtil } from '../../utils/config.util';
 
 @Controller('health')
 export class HealthController {
@@ -13,7 +15,6 @@ export class HealthController {
     return this.health.check([async () => this.appHealthIndicator.isHealthy('application')]);
   }
 
-
   @Get('/check/emailIngestion')
   async checkEmailIngestionService() {
     const url = ConfigUtil.get('externalServices.imapEndpoint') + '/api/health';
@@ -24,7 +25,7 @@ export class HealthController {
   @Get('/check/emailIngestion/sampleEvent')
   async sampleEventEmailIngestionService() {
     const url = ConfigUtil.get('externalServices.imapEndpoint') + '/api/health/test/createEvent';
-    return fetch(url).then(res => res.json());
+    return fetch(url).then((res) => res.json());
   }
 
   @Get('/check/ocr')
@@ -37,6 +38,6 @@ export class HealthController {
   @Get('/check/ocr/sampleEvent')
   async sampleEventOCRService() {
     const url = ConfigUtil.get('externalServices.ocrEndpoint') + '/api/health/test/createEvent';
-    return fetch(url).then(res => res.json());
+    return fetch(url).then((res) => res.json());
   }
 }

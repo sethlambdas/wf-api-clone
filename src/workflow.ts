@@ -3,6 +3,9 @@ import { SQS } from 'aws-sdk';
 import { find } from 'lodash';
 import { Consumer } from 'sqs-consumer';
 import { v4 } from 'uuid';
+
+import { ConfigUtil } from '@lambdascrew/utility';
+
 import { CAT, WorkflowExecution } from './graphql/workflow-executions/workflow-execution.entity';
 import { WorkflowExecutionService } from './graphql/workflow-executions/workflow-execution.service';
 import { CreateWorkflowStepExecutionHistoryInput } from './graphql/workflow-steps-executions-history/inputs/create.input';
@@ -15,7 +18,6 @@ import { WorkflowVersionService } from './graphql/workflow-versions/workflow-ver
 import { WorkflowService } from './graphql/workflow/workflow.service';
 import activityRegistry, { ActivityTypes, TriggerTypes } from './utils/activity/activity-registry.util';
 import { ManualApprovalEmailParams } from './utils/activity/manual-approval.util';
-import { ConfigUtil } from './utils/config.util';
 import { putEventsEB } from './utils/event-bridge/event-bridge.util';
 import { ExternalActivityTypes, runExternalService } from './utils/external-activity/external-activities.util';
 import { WORKFLOW_QUEUE_URL } from './utils/sqs/sqs-config.util';
