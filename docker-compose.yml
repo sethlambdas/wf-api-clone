@@ -2,11 +2,11 @@ version: '3.8'
 
 services:
   localstack:
-    image: localstack/localstack:latest
+    image: localstack/localstack:0.12.16
     environment:
       - AWS_DEFAULT_REGION=ap-southeast-2
       - EDGE_PORT=4566
-      - SERVICES=sqs,events,cloudformation,dynamodb,s3,apigateway
+      - SERVICES=sqs,events,cloudformation,dynamodb,s3,apigateway,lambda
       - DEBUG=1
     ports:
       - '4566:4566'

@@ -99,7 +99,7 @@ export async function localStackApiGateway() {
     resourceId: createResourceId.id,
     httpMethod: 'POST',
     authorizationType: 'NONE',
-    apiKeyRequired: true,
+    apiKeyRequired: false,
     requestParameters: {
       'method.request.path.aid': true,
     },
@@ -118,9 +118,9 @@ export async function localStackApiGateway() {
     httpMethod: 'POST',
     type: 'HTTP',
     integrationHttpMethod: 'POST',
-    uri: `http://host.docker.internal:3000/api/workflows/trigger/{id}`,
+    uri: `http://host.docker.internal:3000/api/workflows/trigger/{aid}`,
     requestParameters: {
-      'integration.request.path.id': 'method.request.path.aid',
+      'integration.request.path.aid': 'method.request.path.aid',
     },
   });
 
