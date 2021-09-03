@@ -165,7 +165,7 @@ export default class Workflow {
             let actResult: any;
 
             if (activityRegistry[act?.T]) {
-              actResult = await activityRegistry[act?.T].processActivity(act?.MD, state);
+              actResult = await activityRegistry[act?.T].processActivity({ ...act?.MD, WLFN }, state);
               this.logger.log('==============Activity Result=================');
               this.logger.log(`${JSON.stringify(actResult)}`);
               this.logger.log('==============Activity Result=================');
@@ -248,7 +248,7 @@ export default class Workflow {
 
                 let currentWorkflowStepResults: any;
 
-                if (externalService.results) currentWorkflowStepResults = externalService.results;
+                if (externalService?.results) currentWorkflowStepResults = externalService.results;
 
                 pushEntries(workflowStep, currentWorkflowStepResults);
               }

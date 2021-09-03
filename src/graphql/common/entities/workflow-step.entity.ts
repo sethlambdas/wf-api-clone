@@ -51,14 +51,14 @@ export class MD {
 
   // Conditional
   @Field((type) => [ChoiceWorkflow], { nullable: true })
-  Choices?: ChoiceWorkflow[];
+  Choice?: ChoiceWorkflow[];
 
   @Field({ nullable: true })
   DefaultNext?: string;
 
   // AssignData
   @Field({ nullable: true })
-  FieldValues?: string;
+  CustomVariables?: string;
 
   // MergeData
   @Field({ nullable: true })
@@ -74,6 +74,10 @@ export class MD {
   // WebService & Start
   @Field({ nullable: true })
   Name?: string;
+
+  // WebService
+  @Field({ nullable: true })
+  Method?: string;
 
   // ManualApproval
   @Field((type) => Boolean, { nullable: true })
@@ -215,10 +219,10 @@ export class ACT {
 export class ChoiceWorkflowInput extends PartialType(ChoiceWorkflow, InputType) {}
 
 @InputType()
-export class MDInput extends OmitType(MD, ['Choices'] as const, InputType) {
+export class MDInput extends OmitType(MD, ['Choice'] as const, InputType) {
   // Conditional
   @Field((type) => [ChoiceWorkflowInput], { nullable: true })
-  Choices?: ChoiceWorkflowInput[];
+  Choice?: ChoiceWorkflowInput[];
 }
 
 @InputType()

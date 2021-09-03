@@ -5,18 +5,18 @@ const logger = new Logger('assignData');
 export default async function assignData(payload: any, state?: any) {
   logger.log('AssignData Activity');
   try {
-    const { FieldValues } = payload;
-    const fieldValuesData = (FieldValues && JSON.parse(FieldValues)) || {};
-    const assignDataObject = {};
-    for (const fieldValueKey in fieldValuesData) {
-      if (fieldValuesData.hasOwnProperty(fieldValueKey)) {
-        const fieldValueData = fieldValuesData[fieldValueKey];
-        const fieldName = fieldValueData.fieldName;
-        const fieldValue = fieldValueData.fieldValue;
-        assignDataObject[fieldName] = fieldValue;
-      }
+    const { CustomVariables } = payload;
+    const fieldValues: any[] = (CustomVariables && JSON.parse(CustomVariables)) || [];
+
+    const result = {};
+    for (const keyValue of fieldValues) {
+      logger.log(keyValue);
+      Object.keys(keyValue).forEach((key) => {
+        result[key] = keyValue[key];
+      });
     }
-    return assignDataObject;
+    
+    return result;
   } catch (err) {
     logger.log(err);
   }

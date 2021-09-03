@@ -47,7 +47,7 @@ const activityRegistry: ActivityRegistry = {
   },
   [ActivityTypes.WebService]: {
     label: ActivityTypes.WebService,
-    processActivity: (payload?: any, state?: any) => webService(payload),
+    processActivity: (payload?: any, state?: any) => webService(payload, state),
   },
   [ActivityTypes.Delay]: {
     label: ActivityTypes.Delay,

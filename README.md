@@ -58,6 +58,14 @@ $ npm run test:watch:e2e
 $ npm run test:watch:unit
 ```
 
+## Run dynamodb-admin viewer
+
+1. Run `npm install -g dynamodb-admin`
+2. Run localstack with dynamodb service
+3. set env `$env:DYNAMO_ENDPOINT = "http://localhost:4566"` (for windows)
+4. Check env if set `Get-ChildItem Env:DYNAMO_ENDPOINT`
+5. If all good then Run `dynamodb-admin`
+
 ### Examples on using query builder, pagination and sorting
 
 Import the postman collection (`nestjs-template.postman_collection.json`) from `docs/postman` folder to [postman](https://www.postman.com/downloads/) app for more detailed example requests and responses.

@@ -41,7 +41,7 @@ export const MDSchema = new Schema({
     type: String,
   },
   // Conditional
-  Choices: {
+  Choice: {
     type: Array,
     schema: [ChoiceWorkflowSchema],
   },
@@ -49,7 +49,7 @@ export const MDSchema = new Schema({
     type: String,
   },
   // AssignData
-  FieldValues: {
+  CustomVariables: {
     type: String,
   },
   // MergeData
@@ -64,6 +64,9 @@ export const MDSchema = new Schema({
     type: String,
   },
   Name: {
+    type: String,
+  },
+  Method: {
     type: String,
   },
   // ManualApproval

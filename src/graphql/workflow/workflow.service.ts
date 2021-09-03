@@ -237,7 +237,7 @@ export class WorkflowService {
       if (ACT.MD) {
         ACT.MD.DefaultNext = DefaultNext;
 
-        ACT.MD.Choices = ACT.MD.Choices.map((choice) => {
+        ACT.MD.Choice = ACT.MD.Choice.map((choice) => {
           choice.Next = getCurrentStepByNM(choice.Next)?.AID;
           return choice;
         });
