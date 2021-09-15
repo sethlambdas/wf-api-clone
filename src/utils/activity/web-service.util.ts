@@ -1,12 +1,18 @@
 import { Logger } from '@nestjs/common';
 import fetch from 'node-fetch';
 
+import { HttpMethod } from '../../graphql/common/enums/general.enum';
+import { networkClient, NetworkClientOptions } from '../networkRequest.util';
+
 const logger = new Logger('webService');
 
 export default async function webService(payload: any, state?: any) {
   logger.log('Web Service Activity');
   try {
-    const { Endpoint, Name, Body, WLFN } = payload;
+    const { Method, Endpoint, Name, Body, WLFN, ClientPK, ClientSK } = payload;
+
+    logger.log('WEB SERVICE PAYLOAD');
+    logger.log(payload);
 
     if (!Endpoint) {
       logger.error('No http/s endpoint specified.');
@@ -18,20 +24,28 @@ export default async function webService(payload: any, state?: any) {
       throw new Error();
     }
 
-    const resolvedBody = resolvedFieldsFromBody(WLFN, Body, state)
+    const resolvedBody = resolvedFieldsFromBody(WLFN, Body, state);
 
-    const fetchOptions = {
-      method: payload.Method,
+    const fetchOptions: NetworkClientOptions = {
+      method: Method,
+      url: Endpoint,
       headers: {
         'Content-Type': 'application/json'
       },
+      queryParams: {}
     }
 
-    if (Body) fetchOptions['body'] = resolvedBody;
+    if (ClientPK && ClientSK) fetchOptions.queryParams = {
+      client_pk: ClientPK,
+      client_sk: ClientSK,
+    }
 
-    const apiResult = await fetch(payload.Endpoint, fetchOptions);
+    if (Method === HttpMethod.POST) fetchOptions.bodyParams = resolvedBody || {};
 
-    const data = await apiResult.json();
+    const data = await networkClient(fetchOptions);
+
+    findErrors(data);
+
     return { [`${payload.Name}`]: data };
   } catch (err) {
     logger.log('ERROR OCCURED:');
@@ -41,7 +55,7 @@ export default async function webService(payload: any, state?: any) {
 }
 
 const resolvedFieldsFromBody = (WLFN: string, Body: string, state: any) => {
-  if (!Body) return '';
+  if (!Body) return null;
 
   const { data } = state;
 
@@ -94,4 +108,29 @@ const resolvedFieldsFromBody = (WLFN: string, Body: string, state: any) => {
   logger.log(bodyObject);
 
   return bodyObject;
+}
+
+const findErrors = (data: any) => {
+  logger.log("API RESULT");
+  logger.log(data)
+
+  const findErrorMessage = (object: any) => {
+    Object.keys(object).forEach((key) => {
+      if (key.toLowerCase() === 'message' || key.toLowerCase() === 'errormessage') {
+        logger.log('FOUND ERROR MESSAGE');
+        logger.log(key);
+        throw new Error(JSON.stringify(object[key]));
+      }
+    })
+  }
+
+  Object.keys(data).forEach((key) => {
+    if (key.toLowerCase() === 'error' || key.toLowerCase() === 'errortype' || key.toLowerCase() === 'errormessage') {
+      logger.log('OBJECT KEYS');
+      if ((typeof data[key]) === 'object')
+        findErrorMessage(data[key]);
+      else
+        findErrorMessage(data);
+    }
+  })
 }

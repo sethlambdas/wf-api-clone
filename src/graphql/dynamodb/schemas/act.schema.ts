@@ -69,6 +69,12 @@ export const MDSchema = new Schema({
   Method: {
     type: String,
   },
+  ClientPK: {
+    type: String,
+  },
+  ClientSK: {
+    type: String,
+  },
   // ManualApproval
   Completed: {
     type: Boolean,

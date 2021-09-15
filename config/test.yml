@@ -1,3 +1,5 @@
+authBeEndpoint: 'http://localhost:3001/api/graphql'
+
 dynamodb:
   schema:
     workflow: 'workflow_test'

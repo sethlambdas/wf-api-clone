@@ -79,6 +79,12 @@ export class MD {
   @Field({ nullable: true })
   Method?: string;
 
+  @Field({ nullable: true })
+  ClientPK?: string;
+
+  @Field({ nullable: true })
+  ClientSK?: string;
+
   // ManualApproval
   @Field((type) => Boolean, { nullable: true })
   Completed?: boolean;
