@@ -75,6 +75,9 @@ export const MDSchema = new Schema({
   ClientSK: {
     type: String,
   },
+  Operation: {
+    type: String,
+  },
   // ManualApproval
   Completed: {
     type: Boolean,

@@ -9,7 +9,7 @@ const logger = new Logger('webService');
 export default async function webService(payload: any, state?: any) {
   logger.log('Web Service Activity');
   try {
-    const { Method, Endpoint, Name, Body, WLFN, ClientPK, ClientSK } = payload;
+    const { Method, Endpoint, Name, Body, WLFN, ClientPK, ClientSK, Operation } = payload;
 
     logger.log('WEB SERVICE PAYLOAD');
     logger.log(payload);
@@ -39,6 +39,8 @@ export default async function webService(payload: any, state?: any) {
       client_pk: ClientPK,
       client_sk: ClientSK,
     }
+
+    if (Operation) fetchOptions.queryParams.operation = Operation;
 
     if (Method === HttpMethod.POST) fetchOptions.bodyParams = resolvedBody || {};
 
