@@ -4,7 +4,9 @@ export const LIST_CLIENTS = `
       PK
       SK
       name
-      operations
+      secrets {
+        rootUrl
+      }
     }
   }
 `;

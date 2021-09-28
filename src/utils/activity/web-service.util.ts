@@ -3,7 +3,7 @@ import { Logger } from '@nestjs/common';
 
 import { InvokeLambda } from '../../aws-services/aws-lambda/lambda.util';
 import { HttpMethod } from '../../graphql/common/enums/general.enum';
-import { EventRequestParams } from '../workflow-types/lambda.types';
+import { EventRequestParams, IFieldValue } from '../workflow-types/lambda.types';
 
 const logger = new Logger('webService');
 
@@ -48,12 +48,12 @@ export default async function webService(payload: any, state?: any) {
 
     if (Headers) {
       const parsedHeaders = JSON.parse(Headers);
-      eventReqPramas.headers = { ...eventReqPramas.headers, ...parsedHeaders };
+      eventReqPramas.headers = { ...eventReqPramas.headers, ...resolveFieldValues(parsedHeaders) };
     }
 
     if (QueryStrings) {
       const parsedQueryStrings = JSON.parse(QueryStrings);
-      eventReqPramas.queryStrings = { ...eventReqPramas.queryStrings, ...parsedQueryStrings };
+      eventReqPramas.queryStrings = { ...eventReqPramas.queryStrings, ...resolveFieldValues(parsedQueryStrings) };
     }
 
     if (Method === HttpMethod.POST) eventReqPramas.body = resolvedBody || {};
@@ -69,6 +69,15 @@ export default async function webService(payload: any, state?: any) {
     return 'ERROR OCCURRED!!!!';
   }
 }
+
+const resolveFieldValues = (fieldValues: IFieldValue[]) => {
+  const object: any = {};
+  fieldValues.forEach(({ fieldName, fieldValue }) => {
+    object[fieldName] = fieldValue;
+  });
+
+  return object;
+};
 
 const resolvedFieldsFromBody = (WLFN: string, Body: string, state: any) => {
   if (!Body) return null;

@@ -11,3 +11,8 @@ export interface EventRequestParams {
     client_sk: string;
   } | null;
 }
+
+export interface IFieldValue {
+  fieldName: string;
+  fieldValue: string;
+}
