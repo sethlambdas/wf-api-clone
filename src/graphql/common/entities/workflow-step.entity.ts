@@ -86,7 +86,10 @@ export class MD {
   ClientSK?: string;
 
   @Field({ nullable: true })
-  Operation?: string;
+  Headers?: string;
+
+  @Field({ nullable: true })
+  QueryStrings?: string;
 
   // ManualApproval
   @Field((type) => Boolean, { nullable: true })

@@ -15,7 +15,7 @@ export default async function assignData(payload: any, state?: any) {
         result[key] = keyValue[key];
       });
     }
-    
+
     return result;
   } catch (err) {
     logger.log(err);

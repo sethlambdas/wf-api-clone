@@ -4,7 +4,7 @@ import { stringify } from 'query-string';
 
 import { ConfigUtil } from '@lambdascrew/utility';
 
-import { mailgunSendEmail } from '../mailgun-helpers.util';
+import { mailgunSendEmail } from '../helpers/mailgun-helpers.util';
 import { ActivityTypes } from './activity-registry.util';
 
 const logger = new Logger('manualApproval');

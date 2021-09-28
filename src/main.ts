@@ -13,7 +13,7 @@ import { WorkflowStepExecutionHistoryService } from './graphql/workflow-steps-ex
 import { WorkflowStepService } from './graphql/workflow-steps/workflow-step.service';
 import { WorkflowVersionService } from './graphql/workflow-versions/workflow-version.service';
 import { WorkflowService } from './graphql/workflow/workflow.service';
-import localStackInit from './utils/localstack-init.util';
+import localStackInit from './utils/helpers/localstack-init.util';
 import Workflow from './workflow';
 
 AWS.config.update({ region: ConfigUtil.get('aws.region') });

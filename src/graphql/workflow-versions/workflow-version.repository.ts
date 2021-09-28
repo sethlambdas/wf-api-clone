@@ -3,7 +3,7 @@ import { InjectModel, Model } from 'nestjs-dynamoose';
 
 import { ConfigUtil } from '@lambdascrew/utility';
 
-import { getPaginatedData } from '../../utils/array-helpers.util';
+import { getPaginatedData } from '../../utils/helpers/array-helpers.util';
 import { GSI } from '../common/enums/gsi-names.enum';
 import { CompositePrimaryKeyInput } from '../common/inputs/workflow-key.input';
 import { CompositePrimaryKey } from '../common/interfaces/workflow-key.interface';

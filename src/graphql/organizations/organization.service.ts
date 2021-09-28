@@ -8,7 +8,7 @@ import {
   createUsagePlanKeyAPIGateway,
   getRestApisAPIGateway,
   getUsagePlansAPIGateway,
-} from '../../utils/api-gateway/api-gateway.util';
+} from '../../aws-services/api-gateway/api-gateway.util';
 import { SimplePrimaryKey } from '../common/interfaces/workflow-key.interface';
 import { CreateOrganizationApiKeyInput } from './inputs/create-organization-api-key.input';
 import { CreateOrganizationInput } from './inputs/create-organization.input';

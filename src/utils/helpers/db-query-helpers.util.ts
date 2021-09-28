@@ -15,11 +15,11 @@ import {
   Not,
   SelectQueryBuilder,
 } from 'typeorm';
-import { OptionsOperator } from '../graphql/common/enums/options-operator.enum';
-import { PaginationInput } from '../graphql/common/inputs/pagination.input';
-import { SortingInput } from '../graphql/common/inputs/sorting.input';
-import { SortDir } from './../graphql/common/enums/sort-dir.enum';
-import { PaginateInterface } from './../graphql/common/interfaces/paginate.interface';
+import { OptionsOperator } from '../../graphql/common/enums/options-operator.enum';
+import { SortDir } from '../../graphql/common/enums/sort-dir.enum';
+import { PaginationInput } from '../../graphql/common/inputs/pagination.input';
+import { SortingInput } from '../../graphql/common/inputs/sorting.input';
+import { PaginateInterface } from '../../graphql/common/interfaces/paginate.interface';
 
 export function queryFilter(filter: any) {
   if (!filter) return null;

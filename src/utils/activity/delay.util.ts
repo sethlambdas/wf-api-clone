@@ -1,9 +1,9 @@
 import { Logger } from '@nestjs/common';
 import { startCase } from 'lodash';
 import * as moment from 'moment';
-import { putRuleEB, putTargetsEB } from '../event-bridge/event-bridge.util';
-import { WORKFLOW_QUEUE_URL } from '../sqs/sqs-config.util';
-import { getSQSQueueAttributes } from '../sqs/sqs.util';
+import { putRuleEB, putTargetsEB } from '../../aws-services/event-bridge/event-bridge.util';
+import { WORKFLOW_QUEUE_URL } from '../../aws-services/sqs/sqs-config.util';
+import { getSQSQueueAttributes } from '../../aws-services/sqs/sqs.util';
 
 const logger = new Logger('delay');
 

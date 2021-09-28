@@ -1,7 +1,7 @@
 import { Logger } from '@nestjs/common';
 
+import { IDetail } from '../../utils/workflow-types/details.types';
 import Workflow from '../../workflow';
-import { IDetail } from '../workflow-types/details.types';
 import { EB } from './event-bridge-config.util';
 
 const logger = new Logger('EventBridge');

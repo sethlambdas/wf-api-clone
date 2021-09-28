@@ -1,6 +1,6 @@
+import { putEventsEB } from '../../aws-services/event-bridge/event-bridge.util';
 import { CAT } from '../../graphql/workflow-executions/workflow-execution.entity';
 import Workflow from '../../workflow';
-import { putEventsEB } from '../event-bridge/event-bridge.util';
 
 export enum ExternalActivityTypes {
   EmailIngestion = 'Email Ingestion',

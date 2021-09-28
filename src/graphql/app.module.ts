@@ -6,6 +6,7 @@ import { DynamooseModule } from 'nestjs-dynamoose';
 
 import { ConfigUtil } from '@lambdascrew/utility';
 
+import { ClientModule } from './client/client.module';
 import { AppHealthIndicator } from './health/app.health';
 import { HealthController } from './health/health.controller';
 import { OrganizationModule } from './organizations/organization.module';
@@ -14,7 +15,6 @@ import { WorkflowStepExecutionHistoryModule } from './workflow-steps-executions-
 import { WorkflowStepModule } from './workflow-steps/workflow-step.module';
 import { WorkflowVersionModule } from './workflow-versions/workflow-version.module';
 import { WorkflowModule } from './workflow/workflow.module';
-import { ClientModule } from './client/client.module';
 
 @Module({
   controllers: [HealthController],

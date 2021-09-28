@@ -6,6 +6,9 @@ import { v4 } from 'uuid';
 
 import { ConfigUtil } from '@lambdascrew/utility';
 
+import { putEventsEB } from './aws-services/event-bridge/event-bridge.util';
+import { WORKFLOW_QUEUE_URL } from './aws-services/sqs/sqs-config.util';
+import { changeSQSMessageVisibility } from './aws-services/sqs/sqs.util';
 import { CAT, WorkflowExecution } from './graphql/workflow-executions/workflow-execution.entity';
 import { WorkflowExecutionService } from './graphql/workflow-executions/workflow-execution.service';
 import { CreateWorkflowStepExecutionHistoryInput } from './graphql/workflow-steps-executions-history/inputs/create.input';
@@ -18,10 +21,7 @@ import { WorkflowVersionService } from './graphql/workflow-versions/workflow-ver
 import { WorkflowService } from './graphql/workflow/workflow.service';
 import activityRegistry, { ActivityTypes, TriggerTypes } from './utils/activity/activity-registry.util';
 import { ManualApprovalEmailParams } from './utils/activity/manual-approval.util';
-import { putEventsEB } from './utils/event-bridge/event-bridge.util';
 import { ExternalActivityTypes, runExternalService } from './utils/external-activity/external-activities.util';
-import { WORKFLOW_QUEUE_URL } from './utils/sqs/sqs-config.util';
-import { changeSQSMessageVisibility } from './utils/sqs/sqs.util';
 import { ExternalServiceDetails } from './utils/workflow-types/details.types';
 import { IDetail } from './utils/workflow-types/details.types';
 

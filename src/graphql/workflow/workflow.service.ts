@@ -1,15 +1,15 @@
 import { Inject, Injectable, Logger } from '@nestjs/common';
 import { v4 } from 'uuid';
-import { ActivityTypes, TriggerTypes } from '../../utils/activity/activity-registry.util';
 import {
   formCreateEventParams,
   putEventsEB,
   putRuleEB,
   putTargetsEB,
-} from '../../utils/event-bridge/event-bridge.util';
+} from '../../aws-services/event-bridge/event-bridge.util';
+import { WORKFLOW_QUEUE_URL } from '../../aws-services/sqs/sqs-config.util';
+import { getSQSQueueAttributes } from '../../aws-services/sqs/sqs.util';
+import { ActivityTypes, TriggerTypes } from '../../utils/activity/activity-registry.util';
 import { ExternalActivityTypes } from '../../utils/external-activity/external-activities.util';
-import { WORKFLOW_QUEUE_URL } from '../../utils/sqs/sqs-config.util';
-import { getSQSQueueAttributes } from '../../utils/sqs/sqs.util';
 import { IDetail } from '../../utils/workflow-types/details.types';
 import Workflow from '../../workflow';
 import { ACT as TypeACT, DesignWorkflowInput } from '../common/entities/workflow-step.entity';

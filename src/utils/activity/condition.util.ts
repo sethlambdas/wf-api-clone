@@ -48,7 +48,7 @@ const resolvedVariableField = (WLFN: string, Variable: string, state: any) => {
   let workflowNameArr = WLFN.split(' ');
   workflowNameArr = workflowNameArr.filter((value) => {
     return value !== '' ? true : false;
-  })
+  });
   const workflowName = workflowNameArr.join('_');
 
   let fields: string[];
@@ -57,8 +57,7 @@ const resolvedVariableField = (WLFN: string, Variable: string, state: any) => {
   if (word.includes(`${workflowName}.payload`)) {
     fields = trimWord.split('payload.')[1].split('.');
     dataValue = { ...data };
-  }
-  else {
+  } else {
     fields = trimWord.split('.');
     dataValue = { ...state };
     delete dataValue.data;
@@ -70,4 +69,4 @@ const resolvedVariableField = (WLFN: string, Variable: string, state: any) => {
   });
 
   return Variable;
-}
+};

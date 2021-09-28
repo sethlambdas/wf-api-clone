@@ -1,6 +1,6 @@
 import { Logger } from '@nestjs/common';
-import { mailgunSendEmail } from '../mailgun-helpers.util';
-import { replaceAt } from '../string-helpers.util';
+import { mailgunSendEmail } from '../helpers/mailgun-helpers.util';
+import { replaceAt } from '../helpers/string-helpers.util';
 
 const logger = new Logger('email');
 

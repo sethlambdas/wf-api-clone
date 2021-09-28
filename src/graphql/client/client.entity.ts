@@ -40,6 +40,6 @@ export class Client {
 
 export interface IListClients {
   data: {
-    ListClients: Client[]
-  }
+    ListClients: Client[];
+  };
 }

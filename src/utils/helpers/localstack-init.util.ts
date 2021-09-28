@@ -1,6 +1,5 @@
 import { ConfigUtil } from '@lambdascrew/utility';
 
-import Workflow from '../workflow';
 import {
   createDeploymentAPIGateway,
   createResourceAPIGateway,
@@ -10,10 +9,16 @@ import {
   putIntegrationAPIGateway,
   putMethodAPIGateway,
   putMethodResponseAPIGateway,
-} from './api-gateway/api-gateway.util';
-import { deleteEventRule, putRuleEB, putTargetsEB } from './event-bridge/event-bridge.util';
-import { QUEUE_ERROR, QUEUE_NAME, WORKFLOW_QUEUE_URL, WORKFLOW_QUEUE_URL_ERROR } from './sqs/sqs-config.util';
-import { createSQSQueue, deleteQueue, getQueueURL, getSQSQueueAttributes } from './sqs/sqs.util';
+} from '../../aws-services/api-gateway/api-gateway.util';
+import { deleteEventRule, putRuleEB, putTargetsEB } from '../../aws-services/event-bridge/event-bridge.util';
+import {
+  QUEUE_ERROR,
+  QUEUE_NAME,
+  WORKFLOW_QUEUE_URL,
+  WORKFLOW_QUEUE_URL_ERROR,
+} from '../../aws-services/sqs/sqs-config.util';
+import { createSQSQueue, deleteQueue, getQueueURL, getSQSQueueAttributes } from '../../aws-services/sqs/sqs.util';
+import Workflow from '../../workflow';
 
 export default async function localStackInit() {
   const queue = await getQueueURL(QUEUE_NAME);

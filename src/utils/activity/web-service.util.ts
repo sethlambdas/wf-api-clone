@@ -1,15 +1,16 @@
+import { ConfigUtil } from '@lambdascrew/utility';
 import { Logger } from '@nestjs/common';
-import fetch from 'node-fetch';
 
+import { InvokeLambda } from '../../aws-services/aws-lambda/lambda.util';
 import { HttpMethod } from '../../graphql/common/enums/general.enum';
-import { networkClient, NetworkClientOptions } from '../networkRequest.util';
+import { EventRequestParams } from '../workflow-types/lambda.types';
 
 const logger = new Logger('webService');
 
 export default async function webService(payload: any, state?: any) {
   logger.log('Web Service Activity');
   try {
-    const { Method, Endpoint, Name, Body, WLFN, ClientPK, ClientSK, Operation } = payload;
+    const { WLFN, Method, Endpoint, Name, Body, Headers, QueryStrings, ClientPK, ClientSK } = payload;
 
     logger.log('WEB SERVICE PAYLOAD');
     logger.log(payload);
@@ -26,25 +27,38 @@ export default async function webService(payload: any, state?: any) {
 
     const resolvedBody = resolvedFieldsFromBody(WLFN, Body, state);
 
-    const fetchOptions: NetworkClientOptions = {
-      method: Method,
-      url: Endpoint,
-      headers: {
-        'Content-Type': 'application/json'
+    const eventReqPramas: EventRequestParams = {
+      endpoint: {
+        url: Endpoint,
+        method: Method,
       },
-      queryParams: {}
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      queryStrings: {},
+      body: '',
+      auth: null,
+    };
+
+    if (ClientPK && ClientSK)
+      eventReqPramas.auth = {
+        client_pk: ClientPK,
+        client_sk: ClientSK,
+      };
+
+    if (Headers) {
+      const parsedHeaders = JSON.parse(Headers);
+      eventReqPramas.headers = { ...eventReqPramas.headers, ...parsedHeaders };
     }
 
-    if (ClientPK && ClientSK) fetchOptions.queryParams = {
-      client_pk: ClientPK,
-      client_sk: ClientSK,
+    if (QueryStrings) {
+      const parsedQueryStrings = JSON.parse(QueryStrings);
+      eventReqPramas.queryStrings = { ...eventReqPramas.queryStrings, ...parsedQueryStrings };
     }
 
-    if (Operation) fetchOptions.queryParams.operation = Operation;
+    if (Method === HttpMethod.POST) eventReqPramas.body = resolvedBody || {};
 
-    if (Method === HttpMethod.POST) fetchOptions.bodyParams = resolvedBody || {};
-
-    const data = await networkClient(fetchOptions);
+    const data = await InvokeLambda(ConfigUtil.get('lambda.webServiceFunctionName'), eventReqPramas);
 
     findErrors(data);
 
@@ -76,11 +90,10 @@ const resolvedFieldsFromBody = (WLFN: string, Body: string, state: any) => {
     let workflowNameArr = WLFN.split(' ');
     workflowNameArr = workflowNameArr.filter((value) => {
       return value !== '' ? true : false;
-    })
+    });
     const workflowName = workflowNameArr.join('_');
 
-    if (word === `${workflowName}.payload`)
-      bodyObject[key] = { ...data };
+    if (word === `${workflowName}.payload`) bodyObject[key] = { ...data };
     else {
       let fields: string[];
       let dataValue: any;
@@ -88,8 +101,7 @@ const resolvedFieldsFromBody = (WLFN: string, Body: string, state: any) => {
       if (word.includes(`${workflowName}.payload`)) {
         fields = trimWord.split('payload.')[1].split('.');
         dataValue = { ...data };
-      }
-      else {
+      } else {
         fields = trimWord.split('.');
         dataValue = { ...state };
         delete dataValue.data;
@@ -105,16 +117,16 @@ const resolvedFieldsFromBody = (WLFN: string, Body: string, state: any) => {
       bodyObject[key] = bodyObjectValue;
     }
   });
-  
+
   logger.log('RESOLVED BODY');
   logger.log(bodyObject);
 
   return bodyObject;
-}
+};
 
 const findErrors = (data: any) => {
-  logger.log("API RESULT");
-  logger.log(data)
+  logger.log('API RESULT');
+  logger.log(data);
 
   const findErrorMessage = (object: any) => {
     Object.keys(object).forEach((key) => {
@@ -123,16 +135,14 @@ const findErrors = (data: any) => {
         logger.log(key);
         throw new Error(JSON.stringify(object[key]));
       }
-    })
-  }
+    });
+  };
 
   Object.keys(data).forEach((key) => {
     if (key.toLowerCase() === 'error' || key.toLowerCase() === 'errortype' || key.toLowerCase() === 'errormessage') {
       logger.log('OBJECT KEYS');
-      if ((typeof data[key]) === 'object')
-        findErrorMessage(data[key]);
-      else
-        findErrorMessage(data);
+      if (typeof data[key] === 'object') findErrorMessage(data[key]);
+      else findErrorMessage(data);
     }
-  })
-}
+  });
+};

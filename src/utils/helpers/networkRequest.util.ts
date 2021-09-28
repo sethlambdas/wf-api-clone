@@ -17,11 +17,11 @@ export interface IGraphqlPayload {
 }
 
 export interface NetworkClientOptions {
-  method: HttpMethod, 
-  url: string, 
-  headers: any, 
-  queryParams: any,
-  bodyParams?: any
+  method: HttpMethod;
+  url: string;
+  headers: any;
+  queryParams: any;
+  bodyParams?: any;
 }
 
 const logger = new Logger('NETWORK-REQUEST-CLIENT');
@@ -30,7 +30,7 @@ export const networkClient = async ({ method, url, headers, queryParams, bodyPar
   const options = getOptions(method, url, headers, queryParams, bodyParams);
 
   logger.log('REQUEST OPTIONS:');
-  logger.log(options)
+  logger.log(options);
 
   const data = await got(options).json();
 
@@ -56,8 +56,7 @@ const getOptions = (method: HttpMethod, url: string, headers: any, queryParams: 
     ...queryOptions,
   };
 
-  if (method === HttpMethod.POST) 
-    options = { ...options, ...bodyOptions };
+  if (method === HttpMethod.POST) options = { ...options, ...bodyOptions };
 
   return options;
 };
