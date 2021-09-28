@@ -62,7 +62,7 @@ eventBridge:
   endpoint: 'http://localhost:4566'
 
 lambda:
-  webServiceFunctionName: 'srvls-sample-local-sample'
+  webServiceFunctionName: 'srvls-generic-svc-local-genericFunction'
 
 mailgun:
   test: false
