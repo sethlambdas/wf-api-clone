@@ -1,7 +1,9 @@
 import { ConfigUtil } from '@lambdascrew/utility';
 import { Logger } from '@nestjs/common';
+import { get } from 'lodash';
 
 import { InvokeLambda } from '../../aws-services/aws-lambda/lambda.util';
+import { replaceAt } from '../helpers/string-helpers.util';
 import { HttpMethod } from '../../graphql/common/enums/general.enum';
 import { EventRequestParams, IFieldValue } from '../workflow-types/lambda.types';
 
@@ -79,59 +81,46 @@ const resolveFieldValues = (fieldValues: IFieldValue[]) => {
   return object;
 };
 
-const resolvedFieldsFromBody = (WLFN: string, Body: string, state: any) => {
-  if (!Body) return null;
+export function resolvedFieldsFromBody(WLFN: string, Body: string, state?: any) {
+  if (!Body) {
+    return '';
+  }
 
   const { data } = state;
 
-  const bodyObject = JSON.parse(Body);
+  let workflowNameArr = WLFN.split(' ');
+  workflowNameArr = workflowNameArr.filter((value) => {
+    return value !== '' ? true : false;
+  });
+  const workflowName = workflowNameArr.join('_').toLowerCase();
 
-  Object.keys(bodyObject).forEach((key: string) => {
-    const regexBrackets = new RegExp(/{{(.*?)}}/gm);
-
-    const match = regexBrackets.exec(bodyObject[key]);
-
-    if (!match) return;
-
-    const { 1: word } = match;
+  const regexBrackets = /{{(.*?)}}/gm;
+  let updatedBody = Body;
+  while (true) {
+    const match = regexBrackets.exec(updatedBody);
+    if (!match) {
+      break;
+    }
+    const { 0: origWord, 1: word, index } = match;
+    const lastIndex = index + origWord.length;
     const trimWord = word.trim();
 
-    let workflowNameArr = WLFN.split(' ');
-    workflowNameArr = workflowNameArr.filter((value) => {
-      return value !== '' ? true : false;
-    });
-    const workflowName = workflowNameArr.join('_');
+    let replacement: any;
+    let fields = trimWord;
 
-    if (word === `${workflowName}.payload`) bodyObject[key] = { ...data };
-    else {
-      let fields: string[];
-      let dataValue: any;
+    if (trimWord === `${workflowName}.payload`) replacement = data;
+    else if (trimWord.includes(`${workflowName}.payload`)) fields = trimWord.split('payload.')[1];
 
-      if (word.includes(`${workflowName}.payload`)) {
-        fields = trimWord.split('payload.')[1].split('.');
-        dataValue = { ...data };
-      } else {
-        fields = trimWord.split('.');
-        dataValue = { ...state };
-        delete dataValue.data;
-      }
+    replacement = get(data, fields);
 
-      let bodyObjectValue: any;
-
-      fields.forEach((fieldName) => {
-        bodyObjectValue = dataValue[fieldName];
-        dataValue = dataValue[fieldName];
-      });
-
-      bodyObject[key] = bodyObjectValue;
-    }
-  });
+    updatedBody = replaceAt(updatedBody, index, lastIndex, replacement);
+  }
 
   logger.log('RESOLVED BODY');
-  logger.log(bodyObject);
+  logger.log(updatedBody);
 
-  return bodyObject;
-};
+  return JSON.parse(updatedBody);
+}
 
 const findErrors = (data: any) => {
   logger.log('API RESULT');
