@@ -20,6 +20,6 @@ export const InvokeLambda = async (functionaName: string, eventReqPramas: EventR
 
     return response.Payload;
   } catch (err) {
-    logger.error(`Error, ${err}`);
+    logger.log(`Error, ${err}`);
   }
 };

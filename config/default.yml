@@ -41,6 +41,9 @@ cache:
 
 logLevel:
   - 'log'
+  - 'error'
+  - 'warn'
+  - 'info'
   - 'debug'
 
 files:
