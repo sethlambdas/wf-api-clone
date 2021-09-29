@@ -36,7 +36,7 @@ export default async function webService(payload: any, state?: any) {
         'Content-Type': 'application/json',
       },
       queryStrings: {},
-      body: '',
+      body: {},
       auth: null,
     };
 
