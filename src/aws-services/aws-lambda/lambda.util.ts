@@ -6,6 +6,9 @@ const logger = new Logger('Lambda');
 
 export const InvokeLambda = async (functionaName: string, eventReqPramas: EventRequestParams) => {
   logger.log(`Invoking lambda function ${functionaName} ...`);
+
+  logger.log('EVENT REQUEST PARAMS');
+  logger.log(eventReqPramas);
   try {
     const params = {
       FunctionName: functionaName,

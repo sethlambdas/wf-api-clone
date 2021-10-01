@@ -3,8 +3,8 @@ import { Logger } from '@nestjs/common';
 import { get } from 'lodash';
 
 import { InvokeLambda } from '../../aws-services/aws-lambda/lambda.util';
-import { replaceAt } from '../helpers/string-helpers.util';
 import { HttpMethod } from '../../graphql/common/enums/general.enum';
+import { replaceAt } from '../helpers/string-helpers.util';
 import { EventRequestParams, IFieldValue } from '../workflow-types/lambda.types';
 
 const logger = new Logger('webService');
@@ -27,11 +27,11 @@ export default async function webService(payload: any, state?: any) {
       throw new Error();
     }
 
-    const resolvedBody = resolvedFieldsFromBody(WLFN, Body, state);
+    const resolvedBody = resolveMentionedVariables(WLFN, Body, state);
 
     const eventReqPramas: EventRequestParams = {
       endpoint: {
-        url: Endpoint,
+        url: resolveMentionedVariables(WLFN, Endpoint, state),
         method: Method,
       },
       headers: {
@@ -50,15 +50,18 @@ export default async function webService(payload: any, state?: any) {
 
     if (Headers) {
       const parsedHeaders = JSON.parse(Headers);
-      eventReqPramas.headers = { ...eventReqPramas.headers, ...resolveFieldValues(parsedHeaders) };
+      eventReqPramas.headers = { ...eventReqPramas.headers, ...resolveFieldValues(parsedHeaders, WLFN, state) };
     }
 
     if (QueryStrings) {
       const parsedQueryStrings = JSON.parse(QueryStrings);
-      eventReqPramas.queryStrings = { ...eventReqPramas.queryStrings, ...resolveFieldValues(parsedQueryStrings) };
+      eventReqPramas.queryStrings = {
+        ...eventReqPramas.queryStrings,
+        ...resolveFieldValues(parsedQueryStrings, WLFN, state),
+      };
     }
 
-    if (Method === HttpMethod.POST) eventReqPramas.body = resolvedBody || {};
+    if (Method === HttpMethod.POST) eventReqPramas.body = JSON.parse(resolvedBody) || {};
 
     const data = await InvokeLambda(ConfigUtil.get('lambda.webServiceFunctionName'), eventReqPramas);
 
@@ -72,17 +75,17 @@ export default async function webService(payload: any, state?: any) {
   }
 }
 
-const resolveFieldValues = (fieldValues: IFieldValue[]) => {
+const resolveFieldValues = (fieldValues: IFieldValue[], WLFN: string, state: any) => {
   const object: any = {};
   fieldValues.forEach(({ fieldName, fieldValue }) => {
-    object[fieldName] = fieldValue;
+    object[fieldName] = resolveMentionedVariables(WLFN, fieldValue, state);
   });
 
   return object;
 };
 
-export function resolvedFieldsFromBody(WLFN: string, Body: string, state?: any) {
-  if (!Body) {
+export function resolveMentionedVariables(WLFN: string, unresolvedString: string, state?: any) {
+  if (!unresolvedString) {
     return '';
   }
 
@@ -95,9 +98,9 @@ export function resolvedFieldsFromBody(WLFN: string, Body: string, state?: any) 
   const workflowName = workflowNameArr.join('_').toLowerCase();
 
   const regexBrackets = /{{(.*?)}}/gm;
-  let updatedBody = Body;
+  let resolvedString = unresolvedString;
   while (true) {
-    const match = regexBrackets.exec(updatedBody);
+    const match = regexBrackets.exec(resolvedString);
     if (!match) {
       break;
     }
@@ -108,18 +111,21 @@ export function resolvedFieldsFromBody(WLFN: string, Body: string, state?: any) 
     let replacement: any;
     let fields = trimWord;
 
-    if (trimWord === `${workflowName}.payload`) replacement = data;
-    else if (trimWord.includes(`${workflowName}.payload`)) fields = trimWord.split('payload.')[1];
+    if (trimWord === `http_${workflowName}`) replacement = data;
+    else if (trimWord.includes(`http_${workflowName}`)) {
+      fields = trimWord.split('.')[1];
+      replacement = get(data, fields);
+    } else {
+      replacement = get(state, trimWord);
+    }
 
-    replacement = get(data, fields);
-
-    updatedBody = replaceAt(updatedBody, index, lastIndex, replacement);
+    resolvedString = replaceAt(resolvedString, index, lastIndex, replacement);
   }
 
-  logger.log('RESOLVED BODY');
-  logger.log(updatedBody);
+  logger.log('RESOLVED STRING');
+  logger.log(resolvedString);
 
-  return JSON.parse(updatedBody);
+  return resolvedString;
 }
 
 const findErrors = (data: any) => {

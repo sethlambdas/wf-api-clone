@@ -150,9 +150,10 @@ export default class Workflow {
             currentParallelIndex = parallelStatus.updatedParallelIndex;
             currentParallelIndexes = parallelStatus.updatedParallelIndexes;
 
+            const parsedSte = JSON.parse(wfExec.STE);
             const state = {
-              ...JSON.parse(wfExec.STE),
-              ...(payload || {}),
+              ...parsedSte,
+              ...({ data: { ...parsedSte.data, ...payload } } || {}),
             };
 
             this.logger.log('================WF Execution State===============');
