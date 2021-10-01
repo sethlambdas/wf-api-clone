@@ -61,7 +61,7 @@ export default async function webService(payload: any, state?: any) {
       };
     }
 
-    if (Method === HttpMethod.POST) eventReqPramas.body = JSON.parse(resolvedBody) || {};
+    if ([HttpMethod.POST, HttpMethod.PUT, HttpMethod.PATCH].includes(Method)) eventReqPramas.body = JSON.parse(resolvedBody) || {};
 
     const data = await InvokeLambda(ConfigUtil.get('lambda.webServiceFunctionName'), eventReqPramas);
 
