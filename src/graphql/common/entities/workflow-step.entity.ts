@@ -91,6 +91,12 @@ export class MD {
   @Field({ nullable: true })
   QueryStrings?: string;
 
+  @Field({ nullable: true })
+  Files?: string;
+
+  @Field({ nullable: true })
+  FileFilter?: string;
+
   // ManualApproval
   @Field((type) => Boolean, { nullable: true })
   Completed?: boolean;

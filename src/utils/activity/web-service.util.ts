@@ -12,7 +12,7 @@ const logger = new Logger('webService');
 export default async function webService(payload: any, state?: any) {
   logger.log('Web Service Activity');
   try {
-    const { WLFN, Method, Endpoint, Name, Body, Headers, QueryStrings, ClientPK, ClientSK } = payload;
+    const { WLFN, Method, Endpoint, Name, Body, Headers, QueryStrings, ClientPK, ClientSK, Files, FileFilter } = payload;
 
     logger.log('WEB SERVICE PAYLOAD');
     logger.log(payload);
@@ -40,6 +40,10 @@ export default async function webService(payload: any, state?: any) {
       queryStrings: {},
       body: {},
       auth: null,
+      file: {
+        files: [],
+        filefilter: [],
+      }
     };
 
     if (ClientPK && ClientSK)
@@ -59,6 +63,21 @@ export default async function webService(payload: any, state?: any) {
         ...eventReqPramas.queryStrings,
         ...resolveFieldValues(parsedQueryStrings, WLFN, state),
       };
+    }
+
+    if (Files) {
+      const fileLinks: string[] = (Files as string).split(',').map((value) => {
+        return value.trim();
+      });
+
+      const fileFilters: string[] = (FileFilter as string).split(',').map((value) => {
+        return value.trim();
+      });
+
+      eventReqPramas.file = {
+        files: fileLinks,
+        filefilter: fileFilters
+      }
     }
 
     if ([HttpMethod.POST, HttpMethod.PUT, HttpMethod.PATCH].includes(Method)) eventReqPramas.body = JSON.parse(resolvedBody) || {};

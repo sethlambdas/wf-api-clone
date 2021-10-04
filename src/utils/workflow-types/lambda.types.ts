@@ -10,6 +10,10 @@ export interface EventRequestParams {
     client_pk: string;
     client_sk: string;
   } | null;
+  file: {
+    files: string[];
+    filefilter: string[];
+  }
 }
 
 export interface IFieldValue {

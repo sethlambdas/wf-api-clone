@@ -181,6 +181,7 @@ export default class Workflow {
             if (actResult && typeof actResult === 'object' && act.T !== ActivityTypes.Condition) {
               STE = { ...state, ...(actResult as any) };
             }
+            if (externalService && externalService.results) STE = { ...STE, ...externalService.results };
 
             const source = Workflow.getSource();
 

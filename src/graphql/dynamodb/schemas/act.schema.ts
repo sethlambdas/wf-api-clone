@@ -81,6 +81,12 @@ export const MDSchema = new Schema({
   QueryStrings: {
     type: String,
   },
+  Files: {
+    type: String,
+  },
+  FileFilter:{
+    type: String,
+  },
   // ManualApproval
   Completed: {
     type: Boolean,
