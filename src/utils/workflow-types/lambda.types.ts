@@ -13,6 +13,10 @@ export interface EventRequestParams {
   file: {
     files: string[];
     filefilter: string[];
+  },
+  retry: {
+    retries: number;
+    interval: number;
   }
 }
 

@@ -178,7 +178,7 @@ export default class Workflow {
 
             this.logger.log('Saving workflow execution');
             let STE = { ...state };
-            if (actResult && typeof actResult === 'object' && act.T !== ActivityTypes.Condition) {
+            if (actResult && typeof actResult === 'object' && !actResult.isError && act.T !== ActivityTypes.Condition) {
               STE = { ...state, ...(actResult as any) };
             }
             if (externalService && externalService.results) STE = { ...STE, ...externalService.results };
@@ -257,53 +257,59 @@ export default class Workflow {
             }
 
             this.logger.log(params);
-            if (act.T === ActivityTypes.ManualApproval && !ManualApproval) {
-              if (typeof actResult === 'function') {
-                const workflow = await this.workflowService.getWorkflowByName({
-                  WorkflowName: WLFN,
-                  OrgId,
-                });
-                const workflowVersionSK = wfExec.PK.split('|')[0];
-                const workflowVersion = await this.workflowVersionService.getWorkflowVersionByKey({
-                  PK: workflow.PK,
-                  SK: workflowVersionSK,
-                });
-                const executeManualApprovalEB = actResult as (
-                  manualApprovalEmailParams: ManualApprovalEmailParams,
-                ) => any;
-                const manualApprovalEmailParams: ManualApprovalEmailParams = {
-                  WorkflowExecutionKeyPK: wfExec.PK,
-                  WorkflowExecutionKeySK: wfExec.SK,
-                  WorkflowStepKeyPK: currentWorkflowStep.PK,
-                  WorkflowStepKeySK: currentWorkflowStep.SK,
-                  WorkflowStepExecutionHistorySK: wfStepExecHistory.SK,
-                  WorkflowPK: workflow.PK,
-                  WorkflowVersionSK: workflowVersion.SK,
-                  WorkflowVersion: workflowVersion.WV.toString(),
-                  WorkflowName: WLFN,
-                  OrgId,
-                };
-                await executeManualApprovalEB(manualApprovalEmailParams);
-                this.logger.log('Waiting for Manual Approval');
-                return;
-              }
-            } else if (act.T === ActivityTypes.Delay) {
-              if (typeof actResult === 'function') {
-                const executeDelayEB = actResult as (delayedDetail: any) => any;
-                for (const Entry of params.Entries) {
-                  await executeDelayEB(Entry.Detail);
-                }
-                this.logger.log('Delay activity executing!');
-              }
-            } else if (act.T === ActivityTypes.ParallelEnd) {
-              await this.updateParallelFinished(wfExec, currentParallelIndex, currentParallelIndexes, params);
-            } else if (act.END) {
-              this.logger.log('Workflow has finished executing!');
-            } else {
-              await putEventsEB(params);
+            if (actResult.isError) {
+              this.logger.log(`Error occured on ${act.NM} named ${act.MD.Name}`);
+              await this.updateCATStatus(wfStepExecHistory, WorkflowStepStatus.Error);
             }
+            else {
+              if (act.T === ActivityTypes.ManualApproval && !ManualApproval) {
+                if (typeof actResult === 'function') {
+                  const workflow = await this.workflowService.getWorkflowByName({
+                    WorkflowName: WLFN,
+                    OrgId,
+                  });
+                  const workflowVersionSK = wfExec.PK.split('|')[0];
+                  const workflowVersion = await this.workflowVersionService.getWorkflowVersionByKey({
+                    PK: workflow.PK,
+                    SK: workflowVersionSK,
+                  });
+                  const executeManualApprovalEB = actResult as (
+                    manualApprovalEmailParams: ManualApprovalEmailParams,
+                  ) => any;
+                  const manualApprovalEmailParams: ManualApprovalEmailParams = {
+                    WorkflowExecutionKeyPK: wfExec.PK,
+                    WorkflowExecutionKeySK: wfExec.SK,
+                    WorkflowStepKeyPK: currentWorkflowStep.PK,
+                    WorkflowStepKeySK: currentWorkflowStep.SK,
+                    WorkflowStepExecutionHistorySK: wfStepExecHistory.SK,
+                    WorkflowPK: workflow.PK,
+                    WorkflowVersionSK: workflowVersion.SK,
+                    WorkflowVersion: workflowVersion.WV.toString(),
+                    WorkflowName: WLFN,
+                    OrgId,
+                  };
+                  await executeManualApprovalEB(manualApprovalEmailParams);
+                  this.logger.log('Waiting for Manual Approval');
+                  return;
+                }
+              } else if (act.T === ActivityTypes.Delay) {
+                if (typeof actResult === 'function') {
+                  const executeDelayEB = actResult as (delayedDetail: any) => any;
+                  for (const Entry of params.Entries) {
+                    await executeDelayEB(Entry.Detail);
+                  }
+                  this.logger.log('Delay activity executing!');
+                }
+              } else if (act.T === ActivityTypes.ParallelEnd) {
+                await this.updateParallelFinished(wfExec, currentParallelIndex, currentParallelIndexes, params);
+              } else if (act.END) {
+                this.logger.log('Workflow has finished executing!');
+              } else {
+                await putEventsEB(params);
+              }
 
-            await this.updateCATStatus(wfStepExecHistory, WorkflowStepStatus.Finished);
+              await this.updateCATStatus(wfStepExecHistory, WorkflowStepStatus.Finished);
+            }
           }
         }
       } catch (err) {

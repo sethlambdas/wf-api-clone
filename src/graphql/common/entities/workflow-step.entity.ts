@@ -97,6 +97,15 @@ export class MD {
   @Field({ nullable: true })
   FileFilter?: string;
 
+  @Field({ nullable: true })
+  Evaluations?: string;
+
+  @Field({ nullable: true })
+  Retries?: number;
+
+  @Field({ nullable: true })
+  Interval?: number;
+
   // ManualApproval
   @Field((type) => Boolean, { nullable: true })
   Completed?: boolean;

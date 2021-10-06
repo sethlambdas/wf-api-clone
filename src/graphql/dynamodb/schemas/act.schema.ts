@@ -84,8 +84,17 @@ export const MDSchema = new Schema({
   Files: {
     type: String,
   },
-  FileFilter:{
+  FileFilter: {
     type: String,
+  },
+  Evaluations: {
+    type: String,
+  },
+  Retries: {
+    type: Number,
+  },
+  Interval: {
+    type: Number,
   },
   // ManualApproval
   Completed: {

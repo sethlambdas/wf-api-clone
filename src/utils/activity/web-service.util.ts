@@ -12,7 +12,7 @@ const logger = new Logger('webService');
 export default async function webService(payload: any, state?: any) {
   logger.log('Web Service Activity');
   try {
-    const { WLFN, Method, Endpoint, Name, Body, Headers, QueryStrings, ClientPK, ClientSK, Files, FileFilter } = payload;
+    const { WLFN, Method, Endpoint, Name, Body, Headers, QueryStrings, ClientPK, ClientSK, Files, FileFilter, Evaluations, Retries, Interval } = payload;
 
     logger.log('WEB SERVICE PAYLOAD');
     logger.log(payload);
@@ -43,6 +43,10 @@ export default async function webService(payload: any, state?: any) {
       file: {
         files: [],
         filefilter: [],
+      },
+      retry: {
+        retries: Retries || 3,
+        interval: Interval || 10
       }
     };
 
@@ -84,13 +88,13 @@ export default async function webService(payload: any, state?: any) {
 
     const data = await InvokeLambda(ConfigUtil.get('lambda.webServiceFunctionName'), eventReqPramas);
 
-    findErrors(data);
+    checkEvaluations(Evaluations, data);
 
     return { [`${payload.Name}`]: data };
   } catch (err) {
     logger.log('ERROR OCCURED:');
     logger.log(err);
-    return 'ERROR OCCURRED!!!!';
+    return { isError: true, details: err };
   }
 }
 
@@ -147,25 +151,42 @@ export function resolveMentionedVariables(WLFN: string, unresolvedString: string
   return resolvedString;
 }
 
-const findErrors = (data: any) => {
-  logger.log('API RESULT');
-  logger.log(data);
+const checkEvaluations = (Evaluations: string, data: any) => {
+  const parseEval: IFieldValue[] = JSON.parse(Evaluations);
+  const result = JSON.parse(data);
 
-  const findErrorMessage = (object: any) => {
-    Object.keys(object).forEach((key) => {
-      if (key.toLowerCase() === 'message' || key.toLowerCase() === 'errormessage') {
-        logger.log('FOUND ERROR MESSAGE');
-        logger.log(key);
-        throw new Error(JSON.stringify(object[key]));
-      }
-    });
-  };
+  parseEval.forEach(({ fieldName, fieldValue }) => {
 
-  Object.keys(data).forEach((key) => {
-    if (key.toLowerCase() === 'error' || key.toLowerCase() === 'errortype' || key.toLowerCase() === 'errormessage') {
-      logger.log('OBJECT KEYS');
-      if (typeof data[key] === 'object') findErrorMessage(data[key]);
-      else findErrorMessage(data);
-    }
-  });
-};
+    const resultValue = get(result, fieldName);
+    
+    if (!resultValue) throw new Error(`${fieldName} field not existing in response of request`);
+
+    processEvaluation(fieldName, fieldValue, resultValue);
+  })
+
+  logger.log('ALL EVALUATIONS PASSED :: REQUEST IS SUCCESSFUL');
+}
+
+const processEvaluation = (fieldName: string, fieldValue: string, result: any) => {
+  const regexBrackets = /<<(.*?)>>/gm;
+  const match = regexBrackets.exec(fieldValue);
+  let operation = 'default';
+
+  if (match) {
+    const { 1: word } = match;
+    operation = word.trim();
+  }
+
+  evalOperations[operation](fieldName, fieldValue, result);
+}
+
+const evalOperations = {
+  exist: () => {
+    return;
+  },
+  default: (...args) => {
+    const [fieldName, fieldValue, result] = args;
+    if (result !== fieldValue) 
+      throw new Error(`${fieldName} Field with value '${fieldValue}' is not equals to actual result '${result}'`);
+  }
+}
