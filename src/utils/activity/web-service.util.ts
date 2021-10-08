@@ -12,7 +12,22 @@ const logger = new Logger('webService');
 export default async function webService(payload: any, state?: any) {
   logger.log('Web Service Activity');
   try {
-    const { WLFN, Method, Endpoint, Name, Body, Headers, QueryStrings, ClientPK, ClientSK, Files, FileFilter, Evaluations, Retries, Interval } = payload;
+    const {
+      WLFN,
+      Method,
+      Endpoint,
+      Name,
+      Body,
+      Headers,
+      QueryStrings,
+      ClientPK,
+      ClientSK,
+      Files,
+      FileFilter,
+      Evaluations,
+      Retries,
+      Interval,
+    } = payload;
 
     logger.log('WEB SERVICE PAYLOAD');
     logger.log(payload);
@@ -35,7 +50,7 @@ export default async function webService(payload: any, state?: any) {
         method: Method,
       },
       headers: {
-        'Content-Type': 'application/json',
+        Accept: 'application/json',
       },
       queryStrings: {},
       body: {},
@@ -46,8 +61,8 @@ export default async function webService(payload: any, state?: any) {
       },
       retry: {
         retries: Retries || 3,
-        interval: Interval || 10
-      }
+        interval: Interval || 10,
+      },
     };
 
     if (ClientPK && ClientSK)
@@ -57,12 +72,12 @@ export default async function webService(payload: any, state?: any) {
       };
 
     if (Headers) {
-      const parsedHeaders = JSON.parse(Headers);
+      const parsedHeaders = Headers && JSON.parse(Headers);
       eventReqPramas.headers = { ...eventReqPramas.headers, ...resolveFieldValues(parsedHeaders, WLFN, state) };
     }
 
     if (QueryStrings) {
-      const parsedQueryStrings = JSON.parse(QueryStrings);
+      const parsedQueryStrings = QueryStrings && JSON.parse(QueryStrings);
       eventReqPramas.queryStrings = {
         ...eventReqPramas.queryStrings,
         ...resolveFieldValues(parsedQueryStrings, WLFN, state),
@@ -70,21 +85,21 @@ export default async function webService(payload: any, state?: any) {
     }
 
     if (Files) {
-      const fileLinks: string[] = (Files as string).split(',').map((value) => {
-        return value.trim();
-      });
+      const fileLinks = getMentionedData(Name, Files, state);
+      const parsedFiles = fileLinks && JSON.parse(fileLinks);
 
       const fileFilters: string[] = (FileFilter as string).split(',').map((value) => {
         return value.trim();
       });
 
       eventReqPramas.file = {
-        files: fileLinks,
-        filefilter: fileFilters
-      }
+        files: parsedFiles,
+        filefilter: fileFilters,
+      };
     }
 
-    if ([HttpMethod.POST, HttpMethod.PUT, HttpMethod.PATCH].includes(Method)) eventReqPramas.body = JSON.parse(resolvedBody) || {};
+    if ([HttpMethod.POST, HttpMethod.PUT, HttpMethod.PATCH].includes(Method))
+      eventReqPramas.body = (resolvedBody && JSON.parse(resolvedBody)) || {};
 
     const data = await InvokeLambda(ConfigUtil.get('lambda.webServiceFunctionName'), eventReqPramas);
 
@@ -112,13 +127,17 @@ export function resolveMentionedVariables(WLFN: string, unresolvedString: string
     return '';
   }
 
-  const { data } = state;
-
   let workflowNameArr = WLFN.split(' ');
   workflowNameArr = workflowNameArr.filter((value) => {
     return value !== '' ? true : false;
   });
   const workflowName = workflowNameArr.join('_').toLowerCase();
+
+  return getMentionedData(workflowName, unresolvedString, state);
+}
+
+export function getMentionedData(name: string, unresolvedString: string, state?: any) {
+  const { data } = state;
 
   const regexBrackets = /{{(.*?)}}/gm;
   let resolvedString = unresolvedString;
@@ -134,15 +153,20 @@ export function resolveMentionedVariables(WLFN: string, unresolvedString: string
     let replacement: any;
     let fields = trimWord;
 
-    if (trimWord === `http_${workflowName}`) replacement = data;
-    else if (trimWord.includes(`http_${workflowName}`)) {
+    if (trimWord === `http_${name}`) replacement = data;
+    else if (trimWord.includes(`http_${name}`)) {
       fields = trimWord.split('.')[1];
       replacement = get(data, fields);
     } else {
       replacement = get(state, trimWord);
     }
 
-    resolvedString = replaceAt(resolvedString, index, lastIndex, replacement);
+    resolvedString = replaceAt(
+      resolvedString,
+      index,
+      lastIndex,
+      typeof replacement === 'object' ? JSON.stringify(replacement) : replacement,
+    );
   }
 
   logger.log('RESOLVED STRING');
@@ -156,16 +180,15 @@ const checkEvaluations = (Evaluations: string, data: any) => {
   const result = JSON.parse(data);
 
   parseEval.forEach(({ fieldName, fieldValue }) => {
-
     const resultValue = get(result, fieldName);
-    
+
     if (!resultValue) throw new Error(`${fieldName} field not existing in response of request`);
 
     processEvaluation(fieldName, fieldValue, resultValue);
-  })
+  });
 
   logger.log('ALL EVALUATIONS PASSED :: REQUEST IS SUCCESSFUL');
-}
+};
 
 const processEvaluation = (fieldName: string, fieldValue: string, result: any) => {
   const regexBrackets = /<<(.*?)>>/gm;
@@ -178,7 +201,7 @@ const processEvaluation = (fieldName: string, fieldValue: string, result: any) =
   }
 
   evalOperations[operation](fieldName, fieldValue, result);
-}
+};
 
 const evalOperations = {
   exist: () => {
@@ -186,7 +209,7 @@ const evalOperations = {
   },
   default: (...args) => {
     const [fieldName, fieldValue, result] = args;
-    if (result !== fieldValue) 
+    if (result !== fieldValue)
       throw new Error(`${fieldName} Field with value '${fieldValue}' is not equals to actual result '${result}'`);
-  }
-}
+  },
+};

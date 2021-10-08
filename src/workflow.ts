@@ -257,11 +257,10 @@ export default class Workflow {
             }
 
             this.logger.log(params);
-            if (actResult.isError) {
+            if (actResult?.isError) {
               this.logger.log(`Error occured on ${act.NM} named ${act.MD.Name}`);
               await this.updateCATStatus(wfStepExecHistory, WorkflowStepStatus.Error);
-            }
-            else {
+            } else {
               if (act.T === ActivityTypes.ManualApproval && !ManualApproval) {
                 if (typeof actResult === 'function') {
                   const workflow = await this.workflowService.getWorkflowByName({

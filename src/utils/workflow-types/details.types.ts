@@ -37,7 +37,7 @@ export interface ExternalServiceDetails {
 
 export interface WorkflowStepResults {
   // Get Email Attachments result
-  s3LinkAttachments: string[];
+  files: { name: string; url: string }[];
 }
 
 export interface IManualApproval {

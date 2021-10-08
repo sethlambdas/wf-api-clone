@@ -11,13 +11,13 @@ export interface EventRequestParams {
     client_sk: string;
   } | null;
   file: {
-    files: string[];
+    files: { name: string; url: string }[];
     filefilter: string[];
-  },
+  };
   retry: {
     retries: number;
     interval: number;
-  }
+  };
 }
 
 export interface IFieldValue {
