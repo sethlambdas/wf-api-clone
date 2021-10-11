@@ -201,6 +201,7 @@ describe('WorkflowExecutionResolver (e2e)', () => {
     const listWorkflowExecutionsOfAVersionInput: ListWorkflowExecutionsOfAVersionInput = {
       WorkflowId: '',
       workflowVersionSK: '',
+      order: 'asc',
       page: 1,
       pageSize: 2,
     };

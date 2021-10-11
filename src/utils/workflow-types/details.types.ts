@@ -1,7 +1,10 @@
+import { CAT } from 'src/graphql/workflow-executions/workflow-execution.entity';
 import { CompositePrimaryKey } from '../../graphql/common/interfaces/workflow-key.interface';
 import { WorkflowStep } from '../../graphql/workflow-steps/workflow-step.entity';
 
 export interface IDetail {
+  httpTrigger?: HttpTrigger;
+
   OrgId: string;
 
   WLFN: string;
@@ -25,6 +28,13 @@ export interface IDetail {
   parallelIndexes?: number[];
 
   payload?: any;
+}
+
+export interface HttpTrigger {
+  IsHttpTriggered: boolean;
+  httpACT: CAT;
+  HTTP_WSXH_SK: string;
+  HTTP_workflowStepSK: string;
 }
 
 export interface ExternalServiceDetails {

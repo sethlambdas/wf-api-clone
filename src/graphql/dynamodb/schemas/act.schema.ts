@@ -127,6 +127,9 @@ export const MDSchema = new Schema({
   AID: {
     type: String,
   },
+  OrgId: {
+    type: String,
+  },
   // External Services
   ExternalServiceAction: {
     type: String,

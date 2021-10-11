@@ -130,11 +130,6 @@ const gql = {
       ListWorkflowStepExecutionHistoryOfAnExecution(
         listWorkflowStepExecutionHistoryOfAnExecutionInput: $listWorkflowStepExecutionHistoryOfAnExecutionInput
       ) {
-        WorkflowExecution {
-          PK
-          SK
-          STE
-        }
         WorkflowStepExecutionHistory {
           PK
           SK
@@ -150,6 +145,8 @@ const gql = {
 };
 
 const WorkflowName = 'TestWorkflowName';
+
+let workflowExecutionPK = '';
 
 const createWorkflowStepExecutionHistoryInput: CreateWorkflowStepExecutionHistoryInput = {
   T: 'Email',
@@ -303,6 +300,7 @@ describe('WorkflowStepExecutionHistoryResolver (e2e)', () => {
 
       wsxh1.PK = `${workflow.WorkflowVersionKeys.SK}|WX#1`;
       wsxh2.PK = `${workflow.WorkflowVersionKeys.SK}|WX#1`;
+      workflowExecutionPK = `${workflow.WorkflowVersionKeys.SK}|WX#1`;
 
       // Create Workflow Step Execution History
       await initiateGraphqlRequest(gql.createWorkflowStepExecutionHistoryMutation, {
@@ -324,38 +322,14 @@ describe('WorkflowStepExecutionHistoryResolver (e2e)', () => {
 
   describe('listWorkflowStepExecutionHistoryOfAnExecution', () => {
     it('should list workflow step execution histories of an execution', async () => {
-      const {
-        WorkflowKeys: { PK },
-        WorkflowVersionKeys: { PK: WorkflowVersionPK, SK },
-      } = getWorkflow;
-      const listWorkflowStepExecutionHistoryOfAnExecutionInput: ListWorkflowStepExecutionHistoryOfAnExecutionInput = {
-        WorkflowId: PK,
-        workflowVersionSK: SK,
-      };
-
-      const createWorkflowExecutionInput: CreateWorkflowExecutionInput = {
-        WorkflowVersionKeys: {
-          PK: WorkflowVersionPK,
-          SK,
-        },
-        WSXH_IDS: ['WSXH#1'],
-        STE: '{}',
-        PARALLEL: [],
-      };
-
-      await initiateGraphqlRequest(gql.createWorkflowExecutionMutation, {
-        createWorkflowExecutionInput,
-      });
-
       const data = await initiateGraphqlRequest(gql.listWorkflowStepExecutionHistoryOfAnExecution, {
-        listWorkflowStepExecutionHistoryOfAnExecutionInput,
+        listWorkflowStepExecutionHistoryOfAnExecutionInput: { workflowExecutionPK },
       });
-
-      const { WorkflowStepExecutionHistory, WorkflowExecution, TotalRecords } =
+  
+      const { WorkflowStepExecutionHistory, TotalRecords } =
         data.ListWorkflowStepExecutionHistoryOfAnExecution;
-
+  
       expect(WorkflowStepExecutionHistory).not.toBeUndefined();
-      expect(WorkflowExecution).not.toBeUndefined();
       expect(WorkflowStepExecutionHistory.length).toEqual(2);
       expect(TotalRecords).toEqual(2);
     });

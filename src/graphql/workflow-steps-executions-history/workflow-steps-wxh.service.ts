@@ -114,35 +114,10 @@ export class WorkflowStepExecutionHistoryService {
   async listWorkflowStepExecutionHistoryOfAnExecution(
     listWorkflowStepExecutionHistoryOfAnExecutionInput: ListWorkflowStepExecutionHistoryOfAnExecutionInput,
   ): Promise<ListWorkflowStepExecutionHistory> {
-    const { WorkflowId, workflowVersionSK } = listWorkflowStepExecutionHistoryOfAnExecutionInput;
-    const listWorkflowExecutionsOfAVersionInput = {
-      WorkflowId,
-      workflowVersionSK,
-      page: 1,
-      pageSize: 1,
-    };
-
-    const workflowExecutions = await this.workflowExecutionService.listWorkflowExecutionsOfAVersion(
-      listWorkflowExecutionsOfAVersionInput,
-    );
-
-    if (!workflowExecutions || !workflowExecutions.WorkflowExecution || !workflowExecutions.WorkflowExecution.length) {
-      return { Error: 'Workflow Execution not existing' };
-    }
-
-    const workflowExecution = workflowExecutions.WorkflowExecution[0];
-    const updatedListWorkflowStepExecutionHistoryOfAnExecutionInput = {
-      ...listWorkflowStepExecutionHistoryOfAnExecutionInput,
-      WorkflowExecutionId: workflowExecution.PK,
-    };
-
     const { workflowStepExecutionHistories, TotalRecords } =
-      await this.workflowStepExecutionHistoryRepository.listAllWorkflowStepExecutionHistoryOfAnExecution(
-        updatedListWorkflowStepExecutionHistoryOfAnExecutionInput,
-      );
+      await this.workflowStepExecutionHistoryRepository.listAllWorkflowStepExecutionHistoryOfAnExecution(listWorkflowStepExecutionHistoryOfAnExecutionInput);
 
     return {
-      WorkflowExecution: workflowExecution,
       WorkflowStepExecutionHistory: workflowStepExecutionHistories,
       TotalRecords,
     };

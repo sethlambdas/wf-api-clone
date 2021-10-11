@@ -9,6 +9,9 @@ export class ListWorkflowExecutionsOfAVersionInput extends PartialType(Paginatio
   @Field()
   workflowVersionSK: string;
 
+  @Field({ defaultValue: 'asc' })
+  order: string;
+
   @Field((type) => Int, { nullable: true })
   TotalEXC?: number;
 }

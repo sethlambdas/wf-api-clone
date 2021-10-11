@@ -23,6 +23,7 @@ import { WorkflowStepService } from '../workflow-steps/workflow-step.service';
 import { CreateWorkflowVersionInput } from '../workflow-versions/inputs/create-workflow-version.input';
 import { SaveWorkflowVersionInput } from '../workflow-versions/inputs/save-workflow-version.input';
 import { WorkflowVersionService } from '../workflow-versions/workflow-version.service';
+import { WorkflowExecutionService } from '../workflow-executions/workflow-execution.service';
 import { CreateWorkflowInput } from './inputs/create-workflow.input';
 import { GetWorkflowByNameInput } from './inputs/get-workflow-by-name.input';
 import { InitiateAWorkflowStepInput } from './inputs/initiate-step.input';
@@ -30,6 +31,7 @@ import { ListWorkflowsOfAnOrgInput } from './inputs/list-workflows.input';
 import { StateWorkflowInput } from './inputs/state-workflow.input';
 import { CreateWorkflowResponse, ListWorkflowsOfAnOrg } from './workflow.entity';
 import { WorkflowRepository } from './workflow.repository';
+import { CAT } from '../workflow-executions/workflow-execution.entity';
 
 @Injectable()
 export class WorkflowService {
@@ -40,6 +42,7 @@ export class WorkflowService {
     private workflowRepository: WorkflowRepository,
     private workflowStepService: WorkflowStepService,
     private workflowVersionService: WorkflowVersionService,
+    private workflowExecutionService: WorkflowExecutionService,
     private organizationService: OrganizationService,
   ) {}
 
@@ -449,42 +452,80 @@ export class WorkflowService {
       Entries: [],
     };
 
-    for (const nextActId of workflowStep.NAID) {
-      this.logger.log('Next Activity ID: ', nextActId);
-      const getWorkflowStep = await this.workflowStepService.getWorkflowStepByAid({
-        AID: nextActId,
-        WorkflowStepPK: workflowStep.PK,
-      });
-      const getWorkflowVersion = await this.workflowVersionService.getWorkflowVersionBySK({
+    if (workflowStep.NAID.length > 0){
+      const workflowVersion = await this.workflowVersionService.getWorkflowVersionBySK({
         PK: 'ORG#',
-        SK: getWorkflowStep.PK,
+        SK: workflowStep.PK,
       });
-      const WorkflowPKSplit = getWorkflowVersion.PK.split('|');
-      const OrgId = WorkflowPKSplit[0];
-      const WorkflowSK = WorkflowPKSplit[1];
-      const getWorkflow = await this.workflowRepository.getWorkflowByKey({
-        PK: getWorkflowVersion.PK,
-        SK: WorkflowSK,
+
+      const WSXH_SK = `WSXH|${workflowStep.ACT.MD.OrgId}|HTTP|${v4()}`;
+
+      const wfExec = await this.workflowExecutionService.createWorkflowExecution({
+        WorkflowVersionKeys: { PK: workflowVersion.PK, SK: workflowVersion.SK },
+        STE: '{}',
+        WSXH_IDS: [WSXH_SK],
       });
-      const detail: IDetail = {
-        currentWorkflowStep: getWorkflowStep,
-        WLFN: getWorkflow.WLFN,
-        WorkflowVersionKeys: {
-          PK: getWorkflowVersion.PK,
-          SK: getWorkflowVersion.SK,
-        },
-        OrgId,
-        payload,
+
+      const httpACT: CAT = {
+        T: workflowStep?.ACT.T,
+        NM: workflowStep?.ACT.NM,
+        MD: workflowStep?.ACT.MD,
+        WSID: workflowStep.SK,
+        Status: '',
       };
-      paramsEB.Entries.push({
-        Detail: JSON.stringify(detail),
-        DetailType: Workflow.getDetailType(),
-        Source: Workflow.getSource(),
-      });
+
+      const httpTrigger =  {
+        IsHttpTriggered: true,
+        httpACT,
+        HTTP_WSXH_SK: WSXH_SK,
+        HTTP_workflowStepSK: workflowStep.SK
+      }
+
+      let i = 0;
+
+      for (const nextActId of workflowStep.NAID) {
+        this.logger.log('Next Activity ID: ', nextActId);
+        const getWorkflowStep = await this.workflowStepService.getWorkflowStepByAid({
+          AID: nextActId,
+          WorkflowStepPK: workflowStep.PK,
+        });
+
+        const WorkflowPKSplit = workflowVersion.PK.split('|');
+        const OrgId = WorkflowPKSplit[0];
+        const WorkflowSK = WorkflowPKSplit[1];
+        const getWorkflow = await this.workflowRepository.getWorkflowByKey({
+          PK: workflowVersion.PK,
+          SK: WorkflowSK,
+        });
+        const detail: IDetail = {
+          currentWorkflowStep: getWorkflowStep,
+          WLFN: getWorkflow.WLFN,
+          WorkflowVersionKeys: {
+            PK: workflowVersion.PK,
+            SK: workflowVersion.SK,
+          },
+          wfExecKeys: {
+            PK: wfExec.PK,
+            SK: wfExec.SK,
+          },
+          OrgId,
+          payload,
+        };
+
+        if (i === 0) {
+          detail.httpTrigger = { ...httpTrigger };
+          ++i;
+        }
+
+        paramsEB.Entries.push({
+          Detail: JSON.stringify(detail),
+          DetailType: Workflow.getDetailType(),
+          Source: Workflow.getSource(),
+        });
+      }
+
+      await putEventsEB(paramsEB);
     }
-
-    await putEventsEB(paramsEB);
-
     return 'Success';
   }
 }

@@ -32,22 +32,37 @@ export class WorkflowExecutionRepository {
   }
 
   async listWorkflowExecutionsOfAVersion(listWorkflowExecutionsOfAVersionInput: ListWorkflowExecutionsOfAVersionInput) {
-    const { workflowVersionSK, TotalEXC, page, pageSize } = listWorkflowExecutionsOfAVersionInput;
+    const { workflowVersionSK, TotalEXC, page, pageSize, order } = listWorkflowExecutionsOfAVersionInput;
 
     let results: any;
     const readItems = [];
-    let wlfExecNumber = pageSize * page - pageSize + 1;
+    let wlfExecNumber = 0;
     let index = 1;
 
-    while (index <= pageSize && wlfExecNumber <= TotalEXC) {
-      readItems.push({
-        PK: `${workflowVersionSK}|WX#${wlfExecNumber}`,
-        SK: `WX#${wlfExecNumber}`,
-      });
+    if (order === 'asc') {
+      wlfExecNumber = pageSize * page - pageSize + 1;
+      while (index <= pageSize && wlfExecNumber <= TotalEXC) {
+        readItems.push({
+          PK: `${workflowVersionSK}|WX#${wlfExecNumber}`,
+          SK: `WX#${wlfExecNumber}`,
+        });
 
-      ++wlfExecNumber;
-      ++index;
+        ++wlfExecNumber;
+        ++index;
+      }
+    } else {
+      wlfExecNumber = (TotalEXC - (page * pageSize)) + pageSize;
+      while (index <= pageSize && wlfExecNumber >= 0) {
+        readItems.push({
+          PK: `${workflowVersionSK}|WX#${wlfExecNumber}`,
+          SK: `WX#${wlfExecNumber}`,
+        });
+
+        --wlfExecNumber;
+        ++index;
+      }
     }
+
 
     if (readItems.length > 0) results = await this.runBatchGetItems(readItems);
 

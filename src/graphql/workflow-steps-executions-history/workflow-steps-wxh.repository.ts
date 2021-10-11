@@ -80,10 +80,10 @@ export class WorkflowStepExecutionHistoryRepository {
   async listAllWorkflowStepExecutionHistoryOfAnExecution(
     listWorkflowStepExecutionHistoryOfAnExecutionInput: ListWorkflowStepExecutionHistoryOfAnExecutionInput,
   ) {
-    const { WorkflowExecutionId } = listWorkflowStepExecutionHistoryOfAnExecutionInput;
+    const { workflowExecutionPK } = listWorkflowStepExecutionHistoryOfAnExecutionInput;
 
     const workflowStepExecutionHistories = await this.workflowStepExecutionHistoryModel
-      .query({ PK: WorkflowExecutionId })
+      .query({ PK: workflowExecutionPK })
       .and()
       .where('SK')
       .beginsWith(`WSXH|`)

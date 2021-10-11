@@ -137,6 +137,9 @@ export class MD {
   @Field({ nullable: true })
   AID?: string;
 
+  @Field({ nullable: true })
+  OrgId?: string;
+
   // External Services
   @Field({ nullable: true })
   ExternalServiceAction?: string;

@@ -87,9 +87,6 @@ export class ListWorkflowStepExecutionHistory {
   @Field((type) => [WorkflowStepExecutionHistory], { nullable: true })
   WorkflowStepExecutionHistory?: WorkflowStepExecutionHistory[];
 
-  @Field((type) => WorkflowExecution, { nullable: true })
-  WorkflowExecution?: WorkflowExecution;
-
   @Field((type) => Int, { nullable: true })
   TotalRecords?: number;
 

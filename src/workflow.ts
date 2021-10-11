@@ -79,6 +79,7 @@ export default class Workflow {
     try {
       const detail: IDetail = this.getDetail(message);
       const {
+        httpTrigger,
         currentWorkflowStep,
         OrgId,
         WorkflowVersionKeys,
@@ -104,6 +105,14 @@ export default class Workflow {
 
       if (currentWorkflowStep && currentWorkflowStep.ACT.END) act.END = currentWorkflowStep.ACT.END;
 
+      if (act.MD?.IsTrigger || (Object as any).values(TriggerTypes).includes(act.T)) {
+        this.logger.log(`${act.T} Trigger is running.`);
+        return;
+      }
+
+      if (httpTrigger && httpTrigger.IsHttpTriggered)
+        await this.UpdateHttpStepStatus(OrgId, httpTrigger.httpACT, httpTrigger.HTTP_workflowStepSK, wfExecKeys, httpTrigger.HTTP_WSXH_SK, WLFN);
+
       const { wfExec, wfStepExecHistory } = await this.getCurrentWorkflowExecution(
         OrgId,
         act,
@@ -114,10 +123,10 @@ export default class Workflow {
         WLFN,
       );
 
-      if (act.MD?.IsTrigger || (Object as any).values(TriggerTypes).includes(act.T)) {
-        this.logger.log(`${act.T} Trigger is running.`);
-        return;
-      }
+      // if (act.MD?.IsTrigger || (Object as any).values(TriggerTypes).includes(act.T)) {
+      //   this.logger.log(`${act.T} Trigger is running.`);
+      //   return;
+      // }
 
       if ((Object as any).values(ExternalActivityTypes).includes(act.T) && !externalService) {
         const activeWorkflowDetails = {
@@ -404,6 +413,26 @@ export default class Workflow {
     }
 
     return { wfExec, wfStepExecHistory };
+  }
+
+  private async UpdateHttpStepStatus(
+    OrgId: string,
+    act: CAT,
+    CurrentWorkflowStepSK: string,
+    wfExecKeys: any,
+    WSXH_SK: string,
+    WorkflowName: string,
+  ) {
+    act.Status = WorkflowStepStatus.Finished;
+
+    await this.createStepExecHistory(
+      OrgId,
+      wfExecKeys.PK,
+      WSXH_SK,
+      act,
+      CurrentWorkflowStepSK,
+      WorkflowName,
+    );
   }
 
   private async updateParallelStatus(
