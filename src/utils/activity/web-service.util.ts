@@ -56,8 +56,8 @@ export default async function webService(payload: any, state?: any) {
       body: {},
       auth: null,
       file: {
-        files: [],
-        filefilter: [],
+        files: null,
+        filefilter: null,
       },
       retry: {
         retries: Retries || 3,
@@ -86,15 +86,15 @@ export default async function webService(payload: any, state?: any) {
 
     if (Files) {
       const fileLinks = getMentionedData(Name, Files, state);
-      const parsedFiles = fileLinks && JSON.parse(fileLinks);
+      const parsedFilesArr = fileLinks && JSON.parse(fileLinks);
 
       const fileFilters: string[] = (FileFilter as string).split(',').map((value) => {
         return value.trim();
       });
 
       eventReqPramas.file = {
-        files: parsedFiles,
-        filefilter: fileFilters,
+        files: parsedFilesArr.length === 0 ? null : parsedFilesArr,
+        filefilter: fileFilters.length === 0 ? null : fileFilters,
       };
     }
 
@@ -103,12 +103,19 @@ export default async function webService(payload: any, state?: any) {
 
     const data = await InvokeLambda(ConfigUtil.get('lambda.webServiceFunctionName'), eventReqPramas);
 
-    checkEvaluations(Evaluations, data);
+    const requestParams: any = { ...eventReqPramas };
+    delete requestParams.auth;
+    delete requestParams.retry;
+    if (requestParams.file.files === null) delete requestParams.file;
 
-    return { [`${payload.Name}`]: data };
+    checkEvaluations(Evaluations, data, requestParams);
+
+    return { request: requestParams, response: data, result: { [`${payload.Name}`]: data } };
   } catch (err) {
     logger.log('ERROR OCCURED:');
     logger.log(err);
+    if (err.errorMessage)
+      return { isError: true, details: err.errorMessage, request: err.request ? { ...err.request } : '', response: err.response ? { ...err.response } : '' };
     return { isError: true, details: err };
   }
 }
@@ -175,22 +182,22 @@ export function getMentionedData(name: string, unresolvedString: string, state?:
   return resolvedString;
 }
 
-const checkEvaluations = (Evaluations: string, data: any) => {
+const checkEvaluations = (Evaluations: string, data: any, requestParams: EventRequestParams) => {
   const parseEval: IFieldValue[] = JSON.parse(Evaluations);
   const result = JSON.parse(data);
 
   parseEval.forEach(({ fieldName, fieldValue }) => {
     const resultValue = get(result, fieldName);
 
-    if (!resultValue) throw new Error(`${fieldName} field not existing in response of request`);
+    if (!resultValue) throw { errorMessage: `"${fieldName}" field not existing in network response`, request: requestParams, response: { ...result } };
 
-    processEvaluation(fieldName, fieldValue, resultValue);
+    processEvaluation(fieldName, fieldValue, resultValue, result, requestParams);
   });
 
   logger.log('ALL EVALUATIONS PASSED :: REQUEST IS SUCCESSFUL');
 };
 
-const processEvaluation = (fieldName: string, fieldValue: string, result: any) => {
+const processEvaluation = (fieldName: string, fieldValue: string, result: any, data: any, requestParams: any) => {
   const regexBrackets = /<<(.*?)>>/gm;
   const match = regexBrackets.exec(fieldValue);
   let operation = 'default';
@@ -200,7 +207,7 @@ const processEvaluation = (fieldName: string, fieldValue: string, result: any) =
     operation = word.trim();
   }
 
-  evalOperations[operation](fieldName, fieldValue, result);
+  evalOperations[operation](fieldName, fieldValue, result, data, requestParams);
 };
 
 const evalOperations = {
@@ -208,8 +215,8 @@ const evalOperations = {
     return;
   },
   default: (...args) => {
-    const [fieldName, fieldValue, result] = args;
+    const [fieldName, fieldValue, result, data, requestParams] = args;
     if (result !== fieldValue)
-      throw new Error(`${fieldName} Field with value '${fieldValue}' is not equals to actual result '${result}'`);
+      throw { errorMessage: `${fieldName} Field with value '${fieldValue}' is not equals to actual result '${result}'`, request: requestParams, response: { ...data } };
   },
 };

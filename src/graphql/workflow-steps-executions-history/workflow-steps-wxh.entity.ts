@@ -2,7 +2,6 @@
 import { Field, Int, ObjectType, OmitType } from '@nestjs/graphql';
 import { ACT } from '../common/entities/workflow-step.entity';
 import { CompositePrimaryKey } from '../common/interfaces/workflow-key.interface';
-import { WorkflowExecution } from '../workflow-executions/workflow-execution.entity';
 
 @ObjectType()
 export class CAT extends OmitType(ACT, ['DESIGN', 'END'] as const) {
@@ -14,6 +13,18 @@ export class CAT extends OmitType(ACT, ['DESIGN', 'END'] as const) {
 
   @Field((type) => Boolean, { defaultValue: false })
   END?: boolean;
+}
+
+@ObjectType()
+export class WebService {
+  @Field({ nullable: true })
+  Request?: string;
+
+  @Field({ nullable: true })
+  Result?: string;
+
+  @Field({ nullable: true })
+  Error?: string;
 }
 
 @ObjectType()
@@ -38,6 +49,9 @@ export class WorkflowStepExecutionHistory
 
   @Field((type) => Boolean, { defaultValue: false })
   END?: boolean;
+
+  @Field((type) => WebService, { nullable: true })
+  WEB_SERVICE?: WebService
 }
 
 @ObjectType()

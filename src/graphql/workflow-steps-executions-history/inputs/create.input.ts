@@ -1,5 +1,9 @@
-import { Field, InputType, OmitType } from '@nestjs/graphql';
+import { Field, InputType, OmitType, PartialType } from '@nestjs/graphql';
 import { ACTInput } from '../../common/entities/workflow-step.entity';
+import { WebService } from '../workflow-steps-wxh.entity';
+
+@InputType()
+export class WebServiceInput extends PartialType(WebService, InputType) {}
 
 @InputType()
 export class CreateWorkflowStepExecutionHistoryInput extends OmitType(ACTInput, ['DESIGN', 'END'] as const) {
@@ -23,4 +27,7 @@ export class CreateWorkflowStepExecutionHistoryInput extends OmitType(ACTInput, 
 
   @Field((type) => Boolean, { defaultValue: false })
   END?: boolean;
+
+  @Field((type) => WebServiceInput, { nullable: true })
+  WEB_SERVICE?: WebServiceInput
 }

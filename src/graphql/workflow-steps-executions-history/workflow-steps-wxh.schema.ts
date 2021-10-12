@@ -1,6 +1,18 @@
 import { Schema } from 'dynamoose';
 import { MDSchema } from '../dynamodb/schemas/act.schema';
 
+export const WebServiceSchema = new Schema({
+  Request: {
+    type: String,
+  },
+  Result: {
+    type: String,
+  },
+  Error: {
+    type: String,
+  },
+});
+
 export const WorkflowStepExecutionHistorySchema = new Schema(
   {
     PK: {
@@ -33,6 +45,10 @@ export const WorkflowStepExecutionHistorySchema = new Schema(
     Status: {
       type: String,
     },
+    WEB_SERVICE: {
+      type: Object,
+      schema: WebServiceSchema
+    }
   },
   {
     timestamps: {
