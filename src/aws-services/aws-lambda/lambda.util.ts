@@ -2,9 +2,15 @@ import { Logger } from '@nestjs/common';
 import { EventRequestParams } from '../../utils/workflow-types/lambda.types';
 import { Lambda } from './lambda.config.util';
 
+export interface NetWorkClientResponse {
+  statusCode: number;
+  headers: any;
+  body: any;
+}
+
 const logger = new Logger('Lambda');
 
-export const InvokeLambda = async (functionaName: string, eventReqPramas: EventRequestParams) => {
+export const InvokeLambda = async (functionaName: string, eventReqPramas: EventRequestParams): Promise<NetWorkClientResponse> => {
   logger.log(`Invoking lambda function ${functionaName} ...`);
 
   logger.log('EVENT REQUEST PARAMS');
@@ -21,7 +27,7 @@ export const InvokeLambda = async (functionaName: string, eventReqPramas: EventR
     logger.log(response.Payload);
     logger.log('============Lambda Invoke Result============');
 
-    return response.Payload;
+    return response.Payload as NetWorkClientResponse;
   } catch (err) {
     logger.log(`Error, ${err}`);
   }

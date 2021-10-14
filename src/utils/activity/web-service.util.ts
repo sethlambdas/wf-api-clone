@@ -110,7 +110,7 @@ export default async function webService(payload: any, state?: any) {
 
     checkEvaluations(Evaluations, data, requestParams);
 
-    return { request: requestParams, response: data, result: { [`${payload.Name}`]: data } };
+    return { request: requestParams, response: data };
   } catch (err) {
     logger.log('ERROR OCCURED:');
     logger.log(err);
@@ -216,7 +216,7 @@ const evalOperations = {
   },
   default: (...args) => {
     const [fieldName, fieldValue, result, data, requestParams] = args;
-    if (result !== fieldValue)
+    if (JSON.stringify(result) !== fieldValue)
       throw { errorMessage: `${fieldName} Field with value '${fieldValue}' is not equals to actual result '${result}'`, request: requestParams, response: { ...data } };
   },
 };

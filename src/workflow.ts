@@ -184,12 +184,13 @@ export default class Workflow {
             this.logger.log('Saving workflow execution');
             let STE = { ...state };
             if (act.T === ActivityTypes.WebService) {
-              STE = { ...state, ...(actResult.result as any) };
+              const result = JSON.parse(actResult?.response);
+              STE = { ...state, [`${act?.MD.Name}`]: result.body };
             }
             else if (actResult && typeof actResult === 'object' && !actResult.isError && act.T !== ActivityTypes.Condition) {
               STE = { ...state, ...(actResult as any) };
             }
-            if (externalService && externalService.results) STE = { ...STE, ...externalService.results };
+           else if (externalService && externalService.results) STE = { ...STE, ...externalService.results };
 
             const source = Workflow.getSource();
 
