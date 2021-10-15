@@ -29,5 +29,5 @@ export class CreateWorkflowStepExecutionHistoryInput extends OmitType(ACTInput, 
   END?: boolean;
 
   @Field((type) => WebServiceInput, { nullable: true })
-  WEB_SERVICE?: WebServiceInput
+  WEB_SERVICE?: WebServiceInput;
 }

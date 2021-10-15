@@ -15,6 +15,8 @@ import Workflow from '../../workflow';
 import { ACT as TypeACT, DesignWorkflowInput } from '../common/entities/workflow-step.entity';
 import { CompositePrimaryKeyInput } from '../common/inputs/workflow-key.input';
 import { OrganizationService } from '../organizations/organization.service';
+import { CAT } from '../workflow-executions/workflow-execution.entity';
+import { WorkflowExecutionService } from '../workflow-executions/workflow-execution.service';
 import { CreateWorkflowStepInput } from '../workflow-steps/inputs/create-workflow-step.input';
 import { GetWorkflowStepByAidInput } from '../workflow-steps/inputs/get-workflow-step-by-aid.input';
 import { SaveWorkflowStepInput } from '../workflow-steps/inputs/save-workflow-step.input';
@@ -23,7 +25,6 @@ import { WorkflowStepService } from '../workflow-steps/workflow-step.service';
 import { CreateWorkflowVersionInput } from '../workflow-versions/inputs/create-workflow-version.input';
 import { SaveWorkflowVersionInput } from '../workflow-versions/inputs/save-workflow-version.input';
 import { WorkflowVersionService } from '../workflow-versions/workflow-version.service';
-import { WorkflowExecutionService } from '../workflow-executions/workflow-execution.service';
 import { CreateWorkflowInput } from './inputs/create-workflow.input';
 import { GetWorkflowByNameInput } from './inputs/get-workflow-by-name.input';
 import { InitiateAWorkflowStepInput } from './inputs/initiate-step.input';
@@ -31,7 +32,6 @@ import { ListWorkflowsOfAnOrgInput } from './inputs/list-workflows.input';
 import { StateWorkflowInput } from './inputs/state-workflow.input';
 import { CreateWorkflowResponse, ListWorkflowsOfAnOrg } from './workflow.entity';
 import { WorkflowRepository } from './workflow.repository';
-import { CAT } from '../workflow-executions/workflow-execution.entity';
 
 @Injectable()
 export class WorkflowService {
@@ -437,10 +437,12 @@ export class WorkflowService {
     };
   }
 
-  async trigger(params: string[], payload: any): Promise<string> {
+  async trigger(params: string[], payload: any): Promise<any> {
     const { workflowActivityId }: any = params;
     if (!workflowActivityId) {
-      return 'Failed';
+      return {
+        type: 'failed',
+      };
     }
     const getWorkflowStepByAidInput: GetWorkflowStepByAidInput = {
       AID: `AID#${workflowActivityId}`,
@@ -452,7 +454,9 @@ export class WorkflowService {
       Entries: [],
     };
 
-    if (workflowStep.NAID.length > 0){
+    let workflowExecutionPK = null;
+
+    if (workflowStep.NAID.length > 0) {
       const workflowVersion = await this.workflowVersionService.getWorkflowVersionBySK({
         PK: 'ORG#',
         SK: workflowStep.PK,
@@ -466,6 +470,8 @@ export class WorkflowService {
         WSXH_IDS: [WSXH_SK],
       });
 
+      workflowExecutionPK = wfExec.PK;
+
       const httpACT: CAT = {
         T: workflowStep?.ACT.T,
         NM: workflowStep?.ACT.NM,
@@ -474,12 +480,12 @@ export class WorkflowService {
         Status: '',
       };
 
-      const httpTrigger =  {
+      const httpTrigger = {
         IsHttpTriggered: true,
         httpACT,
         HTTP_WSXH_SK: WSXH_SK,
-        HTTP_workflowStepSK: workflowStep.SK
-      }
+        HTTP_workflowStepSK: workflowStep.SK,
+      };
 
       let i = 0;
 
@@ -526,6 +532,11 @@ export class WorkflowService {
 
       await putEventsEB(paramsEB);
     }
-    return 'Success';
+    return {
+      type: 'success',
+      metadata: {
+        WorkflowExecutionKeyPK: workflowExecutionPK,
+      },
+    };
   }
 }

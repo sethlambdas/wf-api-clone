@@ -115,7 +115,9 @@ export class WorkflowStepExecutionHistoryService {
     listWorkflowStepExecutionHistoryOfAnExecutionInput: ListWorkflowStepExecutionHistoryOfAnExecutionInput,
   ): Promise<ListWorkflowStepExecutionHistory> {
     const { workflowStepExecutionHistories, TotalRecords } =
-      await this.workflowStepExecutionHistoryRepository.listAllWorkflowStepExecutionHistoryOfAnExecution(listWorkflowStepExecutionHistoryOfAnExecutionInput);
+      await this.workflowStepExecutionHistoryRepository.listAllWorkflowStepExecutionHistoryOfAnExecution(
+        listWorkflowStepExecutionHistoryOfAnExecutionInput,
+      );
 
     return {
       WorkflowStepExecutionHistory: workflowStepExecutionHistories,

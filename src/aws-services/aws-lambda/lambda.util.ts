@@ -10,7 +10,10 @@ export interface NetWorkClientResponse {
 
 const logger = new Logger('Lambda');
 
-export const InvokeLambda = async (functionaName: string, eventReqPramas: EventRequestParams): Promise<NetWorkClientResponse> => {
+export const InvokeLambda = async (
+  functionaName: string,
+  eventReqPramas: EventRequestParams,
+): Promise<NetWorkClientResponse> => {
   logger.log(`Invoking lambda function ${functionaName} ...`);
 
   logger.log('EVENT REQUEST PARAMS');

@@ -12,6 +12,7 @@ import { changeSQSMessageVisibility } from './aws-services/sqs/sqs.util';
 import { CAT, WorkflowExecution } from './graphql/workflow-executions/workflow-execution.entity';
 import { WorkflowExecutionService } from './graphql/workflow-executions/workflow-execution.service';
 import { CreateWorkflowStepExecutionHistoryInput } from './graphql/workflow-steps-executions-history/inputs/create.input';
+import { SaveWorkflowStepExecutionHistoryInput } from './graphql/workflow-steps-executions-history/inputs/save.input';
 import { WorkflowStepExecutionHistory } from './graphql/workflow-steps-executions-history/workflow-steps-wxh.entity';
 import { WorkflowStepExecutionHistoryService } from './graphql/workflow-steps-executions-history/workflow-steps-wxh.service';
 import { WorkflowStepStatus } from './graphql/workflow-steps/enums/workflow-step-status.enum';
@@ -24,7 +25,6 @@ import { ManualApprovalEmailParams } from './utils/activity/manual-approval.util
 import { ExternalActivityTypes, runExternalService } from './utils/external-activity/external-activities.util';
 import { ExternalServiceDetails } from './utils/workflow-types/details.types';
 import { IDetail } from './utils/workflow-types/details.types';
-import { SaveWorkflowStepExecutionHistoryInput } from './graphql/workflow-steps-executions-history/inputs/save.input';
 
 export default class Workflow {
   private logger: Logger;
@@ -112,7 +112,14 @@ export default class Workflow {
       }
 
       if (httpTrigger && httpTrigger.IsHttpTriggered)
-        await this.UpdateHttpStepStatus(OrgId, httpTrigger.httpACT, httpTrigger.HTTP_workflowStepSK, wfExecKeys, httpTrigger.HTTP_WSXH_SK, WLFN);
+        await this.UpdateHttpStepStatus(
+          OrgId,
+          httpTrigger.httpACT,
+          httpTrigger.HTTP_workflowStepSK,
+          wfExecKeys,
+          httpTrigger.HTTP_WSXH_SK,
+          WLFN,
+        );
 
       const { wfExec, wfStepExecHistory } = await this.getCurrentWorkflowExecution(
         OrgId,
@@ -184,13 +191,17 @@ export default class Workflow {
             this.logger.log('Saving workflow execution');
             let STE = { ...state };
             if (act.T === ActivityTypes.WebService) {
-              const result = JSON.parse(actResult?.response);
+              const actResultResponse = actResult?.response;
+              const result = typeof actResultResponse === 'object' ? actResultResponse : JSON.parse(actResultResponse);
               STE = { ...state, [`${act?.MD.Name}`]: result.body };
-            }
-            else if (actResult && typeof actResult === 'object' && !actResult.isError && act.T !== ActivityTypes.Condition) {
+            } else if (
+              actResult &&
+              typeof actResult === 'object' &&
+              !actResult.isError &&
+              act.T !== ActivityTypes.Condition
+            ) {
               STE = { ...state, ...(actResult as any) };
-            }
-           else if (externalService && externalService.results) STE = { ...STE, ...externalService.results };
+            } else if (externalService && externalService.results) STE = { ...STE, ...externalService.results };
 
             const source = Workflow.getSource();
 
@@ -274,13 +285,14 @@ export default class Workflow {
                 const webServiceRes = {
                   Request: JSON.stringify(actResult.request),
                   Result: JSON.stringify(actResult.response),
-                  Error: actResult.details
+                  Error: actResult.details,
                 };
 
-                await this.updateWSXH(wfStepExecHistory, { Status: WorkflowStepStatus.Error, WEB_SERVICE: webServiceRes });
-              } else
-                await this.updateCATStatus(wfStepExecHistory, WorkflowStepStatus.Error);
-
+                await this.updateWSXH(wfStepExecHistory, {
+                  Status: WorkflowStepStatus.Error,
+                  WEB_SERVICE: webServiceRes,
+                });
+              } else await this.updateCATStatus(wfStepExecHistory, WorkflowStepStatus.Error);
             } else {
               if (act.T === ActivityTypes.ManualApproval && !ManualApproval) {
                 if (typeof actResult === 'function') {
@@ -332,12 +344,14 @@ export default class Workflow {
                 const webServiceRes = {
                   Request: JSON.stringify(actResult.request),
                   Result: actResult.response,
-                  Error: 'None'
+                  Error: 'None',
                 };
 
-                await this.updateWSXH(wfStepExecHistory, { Status: WorkflowStepStatus.Finished, WEB_SERVICE: webServiceRes });
-              } else
-                await this.updateCATStatus(wfStepExecHistory, WorkflowStepStatus.Finished);
+                await this.updateWSXH(wfStepExecHistory, {
+                  Status: WorkflowStepStatus.Finished,
+                  WEB_SERVICE: webServiceRes,
+                });
+              } else await this.updateCATStatus(wfStepExecHistory, WorkflowStepStatus.Finished);
             }
           }
         }
@@ -446,14 +460,7 @@ export default class Workflow {
   ) {
     act.Status = WorkflowStepStatus.Finished;
 
-    await this.createStepExecHistory(
-      OrgId,
-      wfExecKeys.PK,
-      WSXH_SK,
-      act,
-      CurrentWorkflowStepSK,
-      WorkflowName,
-    );
+    await this.createStepExecHistory(OrgId, wfExecKeys.PK, WSXH_SK, act, CurrentWorkflowStepSK, WorkflowName);
   }
 
   private async updateParallelStatus(
@@ -549,7 +556,10 @@ export default class Workflow {
     );
   }
 
-  private async updateWSXH(wfStepExecHistory: WorkflowStepExecutionHistory, data: SaveWorkflowStepExecutionHistoryInput) {
+  private async updateWSXH(
+    wfStepExecHistory: WorkflowStepExecutionHistory,
+    data: SaveWorkflowStepExecutionHistoryInput,
+  ) {
     await this.workflowStepExecutionHistoryService.saveWorkflowStepExecutionHistory(
       { PK: wfStepExecHistory.PK, SK: wfStepExecHistory.SK },
       data,

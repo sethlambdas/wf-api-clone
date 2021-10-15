@@ -115,7 +115,12 @@ export default async function webService(payload: any, state?: any) {
     logger.log('ERROR OCCURED:');
     logger.log(err);
     if (err.errorMessage)
-      return { isError: true, details: err.errorMessage, request: err.request ? { ...err.request } : '', response: err.response ? { ...err.response } : '' };
+      return {
+        isError: true,
+        details: err.errorMessage,
+        request: err.request ? { ...err.request } : '',
+        response: err.response ? { ...err.response } : '',
+      };
     return { isError: true, details: err };
   }
 }
@@ -189,7 +194,12 @@ const checkEvaluations = (Evaluations: string, data: any, requestParams: EventRe
   parseEval.forEach(({ fieldName, fieldValue }) => {
     const resultValue = get(result, fieldName);
 
-    if (!resultValue) throw { errorMessage: `"${fieldName}" field not existing in network response`, request: requestParams, response: { ...result } };
+    if (!resultValue)
+      throw {
+        errorMessage: `"${fieldName}" field not existing in network response`,
+        request: requestParams,
+        response: { ...result },
+      };
 
     processEvaluation(fieldName, fieldValue, resultValue, result, requestParams);
   });
@@ -217,6 +227,10 @@ const evalOperations = {
   default: (...args) => {
     const [fieldName, fieldValue, result, data, requestParams] = args;
     if (JSON.stringify(result) !== fieldValue)
-      throw { errorMessage: `${fieldName} Field with value '${fieldValue}' is not equals to actual result '${result}'`, request: requestParams, response: { ...data } };
+      throw {
+        errorMessage: `${fieldName} Field with value '${fieldValue}' is not equals to actual result '${result}'`,
+        request: requestParams,
+        response: { ...data },
+      };
   },
 };

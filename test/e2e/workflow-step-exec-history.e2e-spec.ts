@@ -325,10 +325,9 @@ describe('WorkflowStepExecutionHistoryResolver (e2e)', () => {
       const data = await initiateGraphqlRequest(gql.listWorkflowStepExecutionHistoryOfAnExecution, {
         listWorkflowStepExecutionHistoryOfAnExecutionInput: { workflowExecutionPK },
       });
-  
-      const { WorkflowStepExecutionHistory, TotalRecords } =
-        data.ListWorkflowStepExecutionHistoryOfAnExecution;
-  
+
+      const { WorkflowStepExecutionHistory, TotalRecords } = data.ListWorkflowStepExecutionHistoryOfAnExecution;
+
       expect(WorkflowStepExecutionHistory).not.toBeUndefined();
       expect(WorkflowStepExecutionHistory.length).toEqual(2);
       expect(TotalRecords).toEqual(2);

@@ -47,8 +47,8 @@ export const WorkflowStepExecutionHistorySchema = new Schema(
     },
     WEB_SERVICE: {
       type: Object,
-      schema: WebServiceSchema
-    }
+      schema: WebServiceSchema,
+    },
   },
   {
     timestamps: {

@@ -51,7 +51,9 @@ export class WorkflowExecutionRepository {
         ++index;
       }
     } else {
-      wlfExecNumber = (TotalEXC - (page * pageSize)) + pageSize;
+      const totalPages = page * pageSize;
+      const totalExcPages = TotalEXC - totalPages;
+      wlfExecNumber = totalExcPages + pageSize;
       while (index <= pageSize && wlfExecNumber >= 0) {
         readItems.push({
           PK: `${workflowVersionSK}|WX#${wlfExecNumber}`,
@@ -62,7 +64,6 @@ export class WorkflowExecutionRepository {
         ++index;
       }
     }
-
 
     if (readItems.length > 0) results = await this.runBatchGetItems(readItems);
 

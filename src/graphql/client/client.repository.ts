@@ -10,9 +10,6 @@ const endpoint = ConfigUtil.get('authBeEndpoint') || 'http://localhost:3001/api/
 
 @Injectable()
 export class ClientRepository {
-  // @ts-ignore
-  constructor() {}
-
   async listClients(listClientsInput: ListClientsInput): Promise<Client[]> {
     const payload: IGraphqlPayload = {
       query: LIST_CLIENTS,

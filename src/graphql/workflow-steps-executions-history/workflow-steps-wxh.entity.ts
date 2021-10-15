@@ -51,7 +51,7 @@ export class WorkflowStepExecutionHistory
   END?: boolean;
 
   @Field((type) => WebService, { nullable: true })
-  WEB_SERVICE?: WebService
+  WEB_SERVICE?: WebService;
 }
 
 @ObjectType()
