@@ -106,6 +106,9 @@ export class MD {
   @Field({ nullable: true })
   Interval?: number;
 
+  @Field({ nullable: true })
+  ErrorAction?: string;
+
   // ManualApproval
   @Field((type) => Boolean, { nullable: true })
   Completed?: boolean;

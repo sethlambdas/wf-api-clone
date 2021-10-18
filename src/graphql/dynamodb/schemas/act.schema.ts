@@ -96,6 +96,9 @@ export const MDSchema = new Schema({
   Interval: {
     type: Number,
   },
+  ErrorAction: {
+    type: String,
+  },
   // ManualApproval
   Completed: {
     type: Boolean,
