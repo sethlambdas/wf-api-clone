@@ -35,7 +35,7 @@ export class WorkflowExecutionService {
       PK,
       SK,
       ...inputs,
-      STATUS: inputs.STATUS || WorkflowExecStatus.Running
+      STATUS: inputs.STATUS || WorkflowExecStatus.Running,
     } as WorkflowExecution;
 
     return this.workflowExecutionRepository.createWorkflowExecution(workflowExecution);

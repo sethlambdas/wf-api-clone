@@ -9,9 +9,12 @@ import { ConfigUtil } from '@lambdascrew/utility';
 import { putEventsEB } from './aws-services/event-bridge/event-bridge.util';
 import { WORKFLOW_QUEUE_URL } from './aws-services/sqs/sqs-config.util';
 import { changeSQSMessageVisibility } from './aws-services/sqs/sqs.util';
+import { ErrorAction } from './graphql/common/enums/web-service.enum';
 import { CAT, WorkflowExecution } from './graphql/workflow-executions/workflow-execution.entity';
+import { WorkflowExecStatus } from './graphql/workflow-executions/workflow-execution.enum';
 import { WorkflowExecutionService } from './graphql/workflow-executions/workflow-execution.service';
 import { CreateWorkflowStepExecutionHistoryInput } from './graphql/workflow-steps-executions-history/inputs/create.input';
+import { SaveWorkflowStepExecutionHistoryInput } from './graphql/workflow-steps-executions-history/inputs/save.input';
 import { WorkflowStepExecutionHistory } from './graphql/workflow-steps-executions-history/workflow-steps-wxh.entity';
 import { WorkflowStepExecutionHistoryService } from './graphql/workflow-steps-executions-history/workflow-steps-wxh.service';
 import { WorkflowStepStatus } from './graphql/workflow-steps/enums/workflow-step-status.enum';
@@ -24,9 +27,6 @@ import { ManualApprovalEmailParams } from './utils/activity/manual-approval.util
 import { ExternalActivityTypes, runExternalService } from './utils/external-activity/external-activities.util';
 import { ExternalServiceDetails } from './utils/workflow-types/details.types';
 import { IDetail } from './utils/workflow-types/details.types';
-import { SaveWorkflowStepExecutionHistoryInput } from './graphql/workflow-steps-executions-history/inputs/save.input';
-import { ErrorAction } from './graphql/common/enums/web-service.enum';
-import { WorkflowExecStatus } from './graphql/workflow-executions/workflow-execution.enum';
 
 export default class Workflow {
   private logger: Logger;
@@ -290,24 +290,26 @@ export default class Workflow {
                   Error: actResult.details,
                 };
 
-                await this.updateWSXH(wfStepExecHistory, { Status: WorkflowStepStatus.Error, WEB_SERVICE: webServiceRes });
+                await this.updateWSXH(wfStepExecHistory, {
+                  Status: WorkflowStepStatus.Error,
+                  WEB_SERVICE: webServiceRes,
+                });
 
                 if (act.MD.ErrorAction === ErrorAction.STOP) {
                   this.logger.log(`Stopping workflow execution at ${act.T} of ${act.MD.Name}`);
                   await this.workflowExecutionService.saveWorkflowExecution(wfExecKeys, {
                     STATUS: WorkflowExecStatus.Error,
                   });
-                }
-                else if (act.MD.ErrorAction === ErrorAction.IGNORE) {
+                } else if (act.MD.ErrorAction === ErrorAction.IGNORE) {
                   if (act.END) {
                     this.logger.log('Workflow has finished executing!');
                   } else {
                     await putEventsEB(params);
                   }
                 }
-
-              } else
+              } else {
                 await this.updateCATStatus(wfStepExecHistory, WorkflowStepStatus.Error);
+              }
             } else {
               if (act.T === ActivityTypes.ManualApproval && !ManualApproval) {
                 if (typeof actResult === 'function') {
@@ -454,7 +456,7 @@ export default class Workflow {
         WorkflowVersionKeys,
         STE: '{}',
         WSXH_IDS: [WSXH_SK],
-        STATUS: WorkflowExecStatus.Running
+        STATUS: WorkflowExecStatus.Running,
       });
       wfStepExecHistory = await this.createStepExecHistory(
         OrgId,

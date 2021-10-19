@@ -36,7 +36,7 @@ export const WorkflowExecutionSchema = new Schema(
     },
     STATUS: {
       type: String,
-    }
+    },
   },
   {
     timestamps: {

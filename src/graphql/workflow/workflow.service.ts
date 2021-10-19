@@ -1,4 +1,5 @@
 import { Inject, Injectable, Logger } from '@nestjs/common';
+import { Response as Res } from 'express';
 import { v4 } from 'uuid';
 import {
   formCreateEventParams,
@@ -9,6 +10,7 @@ import {
 import { WORKFLOW_QUEUE_URL } from '../../aws-services/sqs/sqs-config.util';
 import { getSQSQueueAttributes } from '../../aws-services/sqs/sqs.util';
 import { ActivityTypes, TriggerTypes } from '../../utils/activity/activity-registry.util';
+import { resolveMentionedVariables } from '../../utils/activity/web-service.util';
 import { ExternalActivityTypes } from '../../utils/external-activity/external-activities.util';
 import { IDetail } from '../../utils/workflow-types/details.types';
 import Workflow from '../../workflow';
@@ -438,13 +440,21 @@ export class WorkflowService {
     };
   }
 
-  async trigger(params: string[], payload: any): Promise<any> {
+  async trigger(res: Res, params: string[], payload: any): Promise<any> {
     const { workflowActivityId }: any = params;
     if (!workflowActivityId) {
-      return {
-        type: 'failed',
+      const errorData = {
+        result: 'failed',
+        message: 'Workflow activity id does not exist.',
       };
+
+      this.setResponseStatus(res, 500);
+
+      this.setResponseData(res, errorData);
+
+      return res;
     }
+
     const getWorkflowStepByAidInput: GetWorkflowStepByAidInput = {
       AID: `AID#${workflowActivityId}`,
       WorkflowStepPK: 'WV#',
@@ -469,7 +479,7 @@ export class WorkflowService {
         WorkflowVersionKeys: { PK: workflowVersion.PK, SK: workflowVersion.SK },
         STE: '{}',
         WSXH_IDS: [WSXH_SK],
-        STATUS: WorkflowExecStatus.Running
+        STATUS: WorkflowExecStatus.Running,
       });
 
       workflowExecutionPK = wfExec.PK;
@@ -534,11 +544,50 @@ export class WorkflowService {
 
       await putEventsEB(paramsEB);
     }
-    return {
-      type: 'success',
-      metadata: {
-        WorkflowExecutionKeyPK: workflowExecutionPK,
-      },
-    };
+
+    const data = workflowStep?.ACT.MD;
+    const name = data?.Name;
+    const status = data?.Status;
+    const body = data?.Body;
+
+    const result = resolveMentionedVariables(name, body, {
+      data: payload,
+    });
+
+    this.setResponseHeaders(res, {
+      'workflow-execution-key-pk': workflowExecutionPK,
+    });
+
+    this.setResponseStatus(res, status);
+
+    this.setResponseData(res, result);
+
+    return res;
+  }
+
+  private setResponseHeaders(res: Res, customHeaders: any) {
+    const updatedCustomHeaders = customHeaders || {};
+    return res.set({
+      ...updatedCustomHeaders,
+    });
+  }
+
+  private setResponseStatus(res: Res, customStatus: number) {
+    const updatedCustomStatus = customStatus || 200;
+    return res.status(updatedCustomStatus);
+  }
+
+  private setResponseData(res: Res, body: any) {
+    let updatedBody = {};
+    if (body) {
+      if (typeof body === 'object') {
+        updatedBody = body;
+      } else {
+        updatedBody = JSON.parse(body);
+      }
+    }
+    return res.json({
+      ...updatedBody,
+    });
   }
 }

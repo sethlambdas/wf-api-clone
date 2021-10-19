@@ -26,6 +26,9 @@ export const MDSchema = new Schema({
   Body: {
     type: String,
   },
+  Status: {
+    type: Number,
+  },
   // Delay
   Hours: {
     type: String,

@@ -1,5 +1,5 @@
-import { CAT } from 'src/graphql/workflow-executions/workflow-execution.entity';
 import { CompositePrimaryKey } from '../../graphql/common/interfaces/workflow-key.interface';
+import { CAT } from '../../graphql/workflow-executions/workflow-execution.entity';
 import { WorkflowStep } from '../../graphql/workflow-steps/workflow-step.entity';
 
 export interface IDetail {

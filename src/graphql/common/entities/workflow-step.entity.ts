@@ -27,8 +27,12 @@ export class MD {
   @Field({ nullable: true })
   Subject?: string;
 
+  // HTTP
   @Field({ nullable: true })
   Body?: string;
+
+  @Field({ nullable: true })
+  Status?: number;
 
   // Delay & Recurring
   @Field({ nullable: true })

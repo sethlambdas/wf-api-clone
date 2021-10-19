@@ -1,5 +1,5 @@
 export enum ErrorAction {
   IGNORE = 'IGNORE',
   STOP = 'STOP',
-  EXITPATH = 'EXIT-PATH'
+  EXITPATH = 'EXIT-PATH',
 }

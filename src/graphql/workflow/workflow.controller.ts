@@ -1,4 +1,5 @@
-import { Body, Controller, Header, Param, Post } from '@nestjs/common';
+import { Body, Controller, Header, Param, Post, Response } from '@nestjs/common';
+import { Response as Res } from 'express';
 import { WorkflowService } from './workflow.service';
 
 @Controller('workflows')
@@ -7,7 +8,8 @@ export class WorkflowController {
 
   @Post('trigger/:workflowActivityId')
   @Header('Access-Control-Allow-Origin', '*')
-  trigger(@Param() params: string[], @Body() payload: any): Promise<any> {
-    return this.workflowService.trigger(params, payload);
+  @Header('Access-Control-Expose-Headers', 'workflow-execution-key-pk')
+  trigger(@Response() res: Res, @Param() params: string[], @Body() payload: any): Promise<any> {
+    return this.workflowService.trigger(res, params, payload);
   }
 }
