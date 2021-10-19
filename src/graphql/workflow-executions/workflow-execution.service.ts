@@ -5,6 +5,7 @@ import { CreateWorkflowExecutionInput } from './inputs/create-workflow-execution
 import { ListWorkflowExecutionsOfAVersionInput } from './inputs/get-workflow-executions-of-version.input';
 import { SaveWorkflowExecutionInput } from './inputs/save-workflow-execution.input';
 import { ListWorkflowExecution, WorkflowExecution } from './workflow-execution.entity';
+import { WorkflowExecStatus } from './workflow-execution.enum';
 import { WorkflowExecutionRepository } from './workflow-execution.repository';
 
 @Injectable()
@@ -34,6 +35,7 @@ export class WorkflowExecutionService {
       PK,
       SK,
       ...inputs,
+      STATUS: inputs.STATUS || WorkflowExecStatus.Running
     } as WorkflowExecution;
 
     return this.workflowExecutionRepository.createWorkflowExecution(workflowExecution);

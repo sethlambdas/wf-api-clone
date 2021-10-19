@@ -16,6 +16,7 @@ import { ACT as TypeACT, DesignWorkflowInput } from '../common/entities/workflow
 import { CompositePrimaryKeyInput } from '../common/inputs/workflow-key.input';
 import { OrganizationService } from '../organizations/organization.service';
 import { CAT } from '../workflow-executions/workflow-execution.entity';
+import { WorkflowExecStatus } from '../workflow-executions/workflow-execution.enum';
 import { WorkflowExecutionService } from '../workflow-executions/workflow-execution.service';
 import { CreateWorkflowStepInput } from '../workflow-steps/inputs/create-workflow-step.input';
 import { GetWorkflowStepByAidInput } from '../workflow-steps/inputs/get-workflow-step-by-aid.input';
@@ -468,6 +469,7 @@ export class WorkflowService {
         WorkflowVersionKeys: { PK: workflowVersion.PK, SK: workflowVersion.SK },
         STE: '{}',
         WSXH_IDS: [WSXH_SK],
+        STATUS: WorkflowExecStatus.Running
       });
 
       workflowExecutionPK = wfExec.PK;

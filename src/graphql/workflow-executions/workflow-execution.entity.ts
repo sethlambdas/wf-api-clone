@@ -42,6 +42,9 @@ export class WorkflowExecution implements CompositePrimaryKey {
 
   @Field((type) => [PARALLEL], { nullable: true })
   PARALLEL?: PARALLEL[];
+
+  @Field()
+  STATUS: string;
 }
 
 @ObjectType()

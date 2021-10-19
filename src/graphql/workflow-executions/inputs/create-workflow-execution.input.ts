@@ -18,4 +18,7 @@ export class CreateWorkflowExecutionInput {
 
   @Field((type) => [PARALLELInput], { nullable: true })
   PARALLEL?: PARALLELInput[];
+
+  @Field()
+  STATUS: string;
 }

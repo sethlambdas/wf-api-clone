@@ -34,6 +34,9 @@ export const WorkflowExecutionSchema = new Schema(
       required: false,
       schema: [ParallelSchema],
     },
+    STATUS: {
+      type: String,
+    }
   },
   {
     timestamps: {

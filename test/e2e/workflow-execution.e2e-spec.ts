@@ -97,6 +97,7 @@ const createWorkflowExecutionInput: CreateWorkflowExecutionInput = {
   WSXH_IDS: ['WSXH#1'],
   STE: '{}',
   PARALLEL: [],
+  STATUS: 'Running'
 };
 
 const workflowExecutionKeysInput: CompositePrimaryKeyInput = {
@@ -189,6 +190,7 @@ describe('WorkflowExecutionResolver (e2e)', () => {
       WSXH_IDS: ['WSXH#3'],
       STE: '{}',
       PARALLEL: [],
+      STATUS: 'Running'
     };
 
     const executionInput2: CreateWorkflowExecutionInput = {
@@ -196,6 +198,7 @@ describe('WorkflowExecutionResolver (e2e)', () => {
       WSXH_IDS: ['WSXH#4'],
       STE: '{}',
       PARALLEL: [],
+      STATUS: 'Running'
     };
 
     const listWorkflowExecutionsOfAVersionInput: ListWorkflowExecutionsOfAVersionInput = {

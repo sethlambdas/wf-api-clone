@@ -26,6 +26,7 @@ import { ExternalServiceDetails } from './utils/workflow-types/details.types';
 import { IDetail } from './utils/workflow-types/details.types';
 import { SaveWorkflowStepExecutionHistoryInput } from './graphql/workflow-steps-executions-history/inputs/save.input';
 import { ErrorAction } from './graphql/common/enums/web-service.enum';
+import { WorkflowExecStatus } from './graphql/workflow-executions/workflow-execution.enum';
 
 export default class Workflow {
   private logger: Logger;
@@ -291,8 +292,12 @@ export default class Workflow {
 
                 await this.updateWSXH(wfStepExecHistory, { Status: WorkflowStepStatus.Error, WEB_SERVICE: webServiceRes });
 
-                if (act.MD.ErrorAction === ErrorAction.STOP)
+                if (act.MD.ErrorAction === ErrorAction.STOP) {
                   this.logger.log(`Stopping workflow execution at ${act.T} of ${act.MD.Name}`);
+                  await this.workflowExecutionService.saveWorkflowExecution(wfExecKeys, {
+                    STATUS: WorkflowExecStatus.Error,
+                  });
+                }
                 else if (act.MD.ErrorAction === ErrorAction.IGNORE) {
                   if (act.END) {
                     this.logger.log('Workflow has finished executing!');
@@ -345,6 +350,9 @@ export default class Workflow {
               } else if (act.T === ActivityTypes.ParallelEnd) {
                 await this.updateParallelFinished(wfExec, currentParallelIndex, currentParallelIndexes, params);
               } else if (act.END) {
+                await this.workflowExecutionService.saveWorkflowExecution(wfExecKeys, {
+                  STATUS: WorkflowExecStatus.Finished,
+                });
                 this.logger.log('Workflow has finished executing!');
               } else {
                 await putEventsEB(params);
@@ -446,6 +454,7 @@ export default class Workflow {
         WorkflowVersionKeys,
         STE: '{}',
         WSXH_IDS: [WSXH_SK],
+        STATUS: WorkflowExecStatus.Running
       });
       wfStepExecHistory = await this.createStepExecHistory(
         OrgId,
