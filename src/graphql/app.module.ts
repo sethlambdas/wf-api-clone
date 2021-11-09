@@ -9,6 +9,7 @@ import { ConfigUtil } from '@lambdascrew/utility';
 import { ClientModule } from './client/client.module';
 import { AppHealthIndicator } from './health/app.health';
 import { HealthController } from './health/health.controller';
+import { IntegrationAppModule } from './integration-app/integration-app.module';
 import { OrganizationModule } from './organizations/organization.module';
 import { WorkflowExecutionModule } from './workflow-executions/workflow-execution.module';
 import { WorkflowStepExecutionHistoryModule } from './workflow-steps-executions-history/worflow-steps-wxh.module';
@@ -62,6 +63,7 @@ import { WorkflowModule } from './workflow/workflow.module';
     OrganizationModule,
     WorkflowStepExecutionHistoryModule,
     ClientModule,
+    IntegrationAppModule,
   ],
 })
 export class AppModule {}
