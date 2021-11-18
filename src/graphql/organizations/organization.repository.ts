@@ -1,39 +1,112 @@
 import { Injectable } from '@nestjs/common';
-import { InjectModel, Model } from 'nestjs-dynamoose';
-import { v4 } from 'uuid';
 
 import { ConfigUtil } from '@lambdascrew/utility';
 
+import { HttpMethod, IGraphqlPayload, networkClient } from '../../../src/utils/helpers/networkRequest.util';
 import { SimplePrimaryKey } from '../common/interfaces/workflow-key.interface';
-import { CreateOrganizationInput } from './inputs/create-organization.input';
-import { Organization } from './organization.entity';
+import {
+  ICreateOrganizationApiKey,
+  IGetOrganization,
+  IGetOrganizationApiKeyActive,
+  ISaveOrganization,
+  Organization,
+} from './organization.entity';
+import {
+  CREATE_ORGANIZATION_API_KEY,
+  GET_ORGANIZATION,
+  GET_ORGANIZATION_API_KEY_ACTIVE,
+  SAVE_ORGANIZATION,
+} from './organization.gql-queries';
+
+const endpoint = ConfigUtil.get('authBeEndpoint') || 'http://localhost:3001/api/graphql';
 
 @Injectable()
 export class OrganizationRepository {
-  constructor(
-    @InjectModel(ConfigUtil.get('dynamodb.schema.workflowOrganization'))
-    private organzationModel: Model<Organization, SimplePrimaryKey>,
-  ) {}
+  async saveOrganization(organization: Partial<Organization>) {
+    if (process.env.NODE_ENV === 'test') return this.mockOrganization();
 
-  async createOrganization(createOrganizationInput: CreateOrganizationInput) {
-    const { orgName, orgId: id } = createOrganizationInput;
-    const orgId = id || v4();
-    const results = await this.organzationModel.create({
-      PK: `ORG#${orgId}`,
-      ORGNAME: orgName,
-      TotalWLF: 0,
-      TotalUSR: 0,
-      APIKEY: [],
-    });
+    const payload: IGraphqlPayload = {
+      query: SAVE_ORGANIZATION,
+      variables: { saveOrganizationInput: organization },
+    };
 
-    return results;
-  }
+    const response = (await networkClient({
+      method: HttpMethod.POST,
+      url: endpoint,
+      headers: {},
+      queryParams: {},
+      bodyParams: payload,
+    })) as ISaveOrganization;
 
-  async saveOrganization(simplePrimaryKey: SimplePrimaryKey, organization: Partial<Organization>) {
-    return this.organzationModel.update(simplePrimaryKey, organization);
+    return response.data?.SaveOrganization;
   }
 
   async getOrganization(simplePrimaryKey: SimplePrimaryKey) {
-    return this.organzationModel.get(simplePrimaryKey);
+    if (process.env.NODE_ENV === 'test') return this.mockOrganization();
+
+    const payload: IGraphqlPayload = {
+      query: GET_ORGANIZATION,
+      variables: { getOrganizationInput: simplePrimaryKey },
+    };
+
+    const response = (await networkClient({
+      method: HttpMethod.POST,
+      url: endpoint,
+      headers: {},
+      queryParams: {},
+      bodyParams: payload,
+    })) as IGetOrganization;
+
+    return response.data?.GetOrganization;
+  }
+
+  async getOrganizationApiKeyActive(simplePrimaryKey: SimplePrimaryKey) {
+    const payload: IGraphqlPayload = {
+      query: GET_ORGANIZATION_API_KEY_ACTIVE,
+      variables: { getOrganizationApiKeyActiveInput: simplePrimaryKey },
+    };
+
+    const response = (await networkClient({
+      method: HttpMethod.POST,
+      url: endpoint,
+      headers: {},
+      queryParams: {},
+      bodyParams: payload,
+    })) as IGetOrganizationApiKeyActive;
+
+    return response.data?.GetOrganizationApiKeyActive;
+  }
+
+  async createOrganizationApiKey(simplePrimaryKey: SimplePrimaryKey) {
+    const payload: IGraphqlPayload = {
+      query: CREATE_ORGANIZATION_API_KEY,
+      variables: {
+        createOrganizationApiKeyInput: {
+          ...simplePrimaryKey,
+          usagePlanName: ConfigUtil.get('apiGateway.usagePlanName'),
+          restApiName: ConfigUtil.get('apiGateway.restApiName'),
+        },
+      },
+    };
+
+    const response = (await networkClient({
+      method: HttpMethod.POST,
+      url: endpoint,
+      headers: {},
+      queryParams: {},
+      bodyParams: payload,
+    })) as ICreateOrganizationApiKey;
+
+    return response.data?.CreateOrganizationApiKey;
+  }
+
+  async mockOrganization() {
+    return {
+      PK: 'ORG#1234',
+      ORGNAME: 'TestOrgName',
+      TotalUSR: 0,
+      TotalWLF: 1,
+      APIKEY: [],
+    };
   }
 }

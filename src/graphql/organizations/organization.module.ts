@@ -1,12 +1,11 @@
 import { Module } from '@nestjs/common';
-import { DynamoDBModule } from '../dynamodb/dynamodb.module';
+import { OrganizationController } from './organization.controller';
 import { OrganizationRepository } from './organization.repository';
-import { OrganizationResolver } from './organization.resolver';
 import { OrganizationService } from './organization.service';
 
 @Module({
-  imports: [DynamoDBModule],
-  providers: [OrganizationResolver, OrganizationService, OrganizationRepository],
+  controllers: [OrganizationController],
+  providers: [OrganizationService, OrganizationRepository],
   exports: [OrganizationService],
 })
 export class OrganizationModule {}

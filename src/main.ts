@@ -7,7 +7,6 @@ import * as cookieParser from 'cookie-parser';
 import { ConfigUtil } from '@lambdascrew/utility';
 
 import { AppModule } from './graphql/app.module';
-import { OrganizationService } from './graphql/organizations/organization.service';
 import { WorkflowExecutionService } from './graphql/workflow-executions/workflow-execution.service';
 import { WorkflowStepExecutionHistoryService } from './graphql/workflow-steps-executions-history/workflow-steps-wxh.service';
 import { WorkflowStepService } from './graphql/workflow-steps/workflow-step.service';
@@ -29,7 +28,6 @@ async function bootstrap() {
   const workflowExecutionService = app.get(WorkflowExecutionService);
   const workflowStepExecutionHistoryService = app.get(WorkflowStepExecutionHistoryService);
   const workflowVersionService = app.get(WorkflowVersionService);
-  const organizationService = app.get(OrganizationService);
 
   if (process.env.NODE_ENV === 'development') {
     logger.log('Setting up local stack');
@@ -52,12 +50,6 @@ async function bootstrap() {
   const port = ConfigUtil.get('server.port');
   await app.listen(port);
   logger.log(`Application listening on port ${port}`);
-
-  // Create Organization for Testing
-  const organization = await organizationService.getOrganization({ PK: 'ORG#1234' });
-  if (!organization) {
-    await organizationService.createOrganization({ orgName: 'TestOrgName', orgId: '1234' });
-  }
 
   const workflow = new Workflow(
     logger,

@@ -65,7 +65,7 @@ export class WorkflowService {
       const organization = await this.organizationService.getOrganization({ PK: OrgId });
       if (!organization) return { Error: 'Organization not existing' };
       this.logger.log(organization);
-      await this.organizationService.saveOrganization({ PK: OrgId }, { TotalWLF: organization.TotalWLF + 1 });
+      await this.organizationService.saveOrganization({ PK: OrgId, TotalWLF: organization.TotalWLF + 1 });
 
       this.logger.log('CREATING WORKFLOW');
       const workflow = await this.workflowRepository.createWorkflow({

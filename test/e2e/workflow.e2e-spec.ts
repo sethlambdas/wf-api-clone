@@ -1,4 +1,3 @@
-import { CreateOrganizationInput } from '../../src/graphql/organizations/inputs/create-organization.input';
 import { CreateWorkflowStepInput } from '../../src/graphql/workflow-steps/inputs/create-workflow-step.input';
 import { CreateWorkflowInput } from '../../src/graphql/workflow/inputs/create-workflow.input';
 import { GetWorkflowByNameInput } from '../../src/graphql/workflow/inputs/get-workflow-by-name.input';
@@ -16,13 +15,6 @@ import {
 } from '../test-e2e';
 
 const gql = {
-  CreateOrganization: `
-    mutation CreateOrganization($createOrganizationInput: CreateOrganizationInput!) {
-      CreateOrganization(createOrganizationInput: $createOrganizationInput) {
-        PK
-      }
-    }
-  `,
   createWorkflowMutation: `
     mutation CreateWorkflow($createWorkflowInput: CreateWorkflowInput!) {
       CreateWorkflow(createWorkflowInput: $createWorkflowInput) {
@@ -87,10 +79,6 @@ const gql = {
 
 const WorkflowName = 'TestWorkflowName';
 
-const createOrganizationInput: CreateOrganizationInput = {
-  orgName: 'TestOrgName',
-};
-
 const createWorkflowInput: CreateWorkflowInput = {
   OrgId: 'Will Change After Create Organization Test Execute',
   WorkflowName,
@@ -120,7 +108,7 @@ const createWorkflowInput: CreateWorkflowInput = {
 };
 
 const getWorkflowByNameInput: GetWorkflowByNameInput = {
-  OrgId: '',
+  OrgId: 'ORG#1234',
   WorkflowName,
 };
 
@@ -155,7 +143,7 @@ const initiateAWorkflowStepInput: InitiateAWorkflowStepInput = {
 };
 
 const listWorkflowsOfAnOrgInput: ListWorkflowsOfAnOrgInput = {
-  OrgId: '',
+  OrgId: 'ORG#1234',
   page: 1,
   pageSize: 2,
 };
@@ -163,7 +151,7 @@ const listWorkflowsOfAnOrgInput: ListWorkflowsOfAnOrgInput = {
 describe('WorkflowResolver (e2e)', () => {
   const workflowKeysToDelete = [];
   const workflowVersionKeysToDelete = [];
-  let orgId = '';
+  const orgId = 'ORG#1234';
 
   beforeAll(async () => {
     await setUpTesting();
@@ -174,16 +162,15 @@ describe('WorkflowResolver (e2e)', () => {
   });
 
   describe('createWorkflow', () => {
-    it('should create the organization', async () => {
-      const data = await initiateGraphqlRequest(gql.CreateOrganization, { createOrganizationInput });
-      orgId = data.CreateOrganization.PK;
-
-      expect(data.CreateOrganization.PK).not.toBeUndefined();
-    });
-
     it('should create the workflow', async () => {
       createWorkflowInput.OrgId = orgId;
       const data = await initiateGraphqlRequest(gql.createWorkflowMutation, { createWorkflowInput });
+
+      if (data.CreateWorkflow?.IsWorkflowNameExist) {
+        expect(data.CreateWorkflow.WorkflowKeys).toBeNull();
+        expect(data.CreateWorkflow.WorkflowVersionKeys).toBeNull();
+        return;
+      }
 
       expect(data.CreateWorkflow.WorkflowKeys).not.toBeUndefined();
       expect(data.CreateWorkflow.WorkflowVersionKeys).not.toBeUndefined();
@@ -216,8 +203,8 @@ describe('WorkflowResolver (e2e)', () => {
       getWorkflowByNameInput.OrgId = orgId;
       const data = await initiateGraphqlRequest(gql.getWorkflowByName, { getWorkflowByNameInput });
       expect(data.GetWorkflowByName).toEqual({
-        PK: `${orgId}|WLF#1`,
-        SK: 'WLF#1',
+        PK: `${orgId}|WLF#2`,
+        SK: 'WLF#2',
         WLFN: WorkflowName,
         DATA: `WLF#${WorkflowName}`,
       });
@@ -243,35 +230,10 @@ describe('WorkflowResolver (e2e)', () => {
   });
 
   describe('listWorkflowsOfAnOrg', () => {
-    beforeAll(async () => {
-      const {
-        CreateOrganization: { PK },
-      } = await initiateGraphqlRequest(gql.CreateOrganization, {
-        createOrganizationInput: { orgName: 'TestOrgName2' },
-      });
-      await workflowRepository.createWorkflow({ WorkflowName: 'Workflow1', OrgId: PK, WorkflowNumber: 0 });
-      await workflowRepository.createWorkflow({ WorkflowName: 'Workflow2', OrgId: PK, WorkflowNumber: 1 });
-      await organizationService.saveOrganization({ PK }, { TotalWLF: 2 });
-      listWorkflowsOfAnOrgInput.OrgId = PK;
-    });
-
     it('should list workflows of an organization', async () => {
       const data = await initiateGraphqlRequest(gql.listWorkflowsOfAnOrg, { listWorkflowsOfAnOrgInput });
-
-      expect(data.ListWorkflowsOfAnOrg.Workflows.length).toEqual(2);
-      expect(data.ListWorkflowsOfAnOrg.TotalRecords).toEqual(2);
-      expect(data.ListWorkflowsOfAnOrg.Workflows[0]).toEqual({
-        PK: `${listWorkflowsOfAnOrgInput.OrgId}|WLF#1`,
-        SK: 'WLF#1',
-        WLFN: 'Workflow1',
-        DATA: 'WLF#Workflow1',
-      });
-      expect(data.ListWorkflowsOfAnOrg.Workflows[1]).toEqual({
-        PK: `${listWorkflowsOfAnOrgInput.OrgId}|WLF#2`,
-        SK: 'WLF#2',
-        WLFN: 'Workflow2',
-        DATA: 'WLF#Workflow2',
-      });
+      expect(data.ListWorkflowsOfAnOrg.TotalRecords).toEqual(1);
+      expect(data.ListWorkflowsOfAnOrg.Error).toEqual(null);
     });
   });
 });

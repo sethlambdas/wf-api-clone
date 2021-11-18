@@ -1,9 +1,6 @@
 import { CompositePrimaryKeyInput } from '../../src/graphql/common/inputs/workflow-key.input';
-import { CreateOrganizationInput } from '../../src/graphql/organizations/inputs/create-organization.input';
-import { CreateWorkflowExecutionInput } from '../../src/graphql/workflow-executions/inputs/create-workflow-execution.input';
 import { CreateWorkflowStepExecutionHistoryInput } from '../../src/graphql/workflow-steps-executions-history/inputs/create.input';
 import { ListAllManualApprovalInput } from '../../src/graphql/workflow-steps-executions-history/inputs/get-all-approval.input';
-import { ListWorkflowStepExecutionHistoryOfAnExecutionInput } from '../../src/graphql/workflow-steps-executions-history/inputs/list-workflow-execution-step-history-of-execution.input';
 import { SaveWorkflowStepExecutionHistoryInput } from '../../src/graphql/workflow-steps-executions-history/inputs/save.input';
 import { CreateWorkflowInput } from '../../src/graphql/workflow/inputs/create-workflow.input';
 import { CreateWorkflowResponse } from '../../src/graphql/workflow/workflow.entity';
@@ -168,12 +165,8 @@ const saveWorkflowStepExecutionHistoryInput: SaveWorkflowStepExecutionHistoryInp
   Status: 'Finished',
 };
 
-const createOrganizationInput: CreateOrganizationInput = {
-  orgName: 'TestOrgName',
-};
-
 const createWorkflowInput: CreateWorkflowInput = {
-  OrgId: 'Will Change After Create Organization Test Execute',
+  OrgId: 'ORG#1234',
   WorkflowName,
   StartAt: 'node_1',
   States: [
@@ -201,7 +194,7 @@ const createWorkflowInput: CreateWorkflowInput = {
 };
 
 const listAllManualApprovalInput: ListAllManualApprovalInput = {
-  OrgId: '',
+  OrgId: 'ORG#1234',
   Status: 'Started',
   pageSize: 2,
   page: 1,
@@ -276,17 +269,13 @@ describe('WorkflowStepExecutionHistoryResolver (e2e)', () => {
   });
 
   describe('ListAllManualApprovalBasedOnStatus', () => {
-    let OrgId = '';
+    const OrgId = 'ORG#2a61005c-9269-432e-9c78-980f0ce6415f';
     let workflow: any;
 
     const wsxh1 = { ...createWorkflowStepExecutionHistoryInput, T: 'Manual Approval' };
     const wsxh2 = { ...createWorkflowStepExecutionHistoryInput, T: 'Manual Approval' };
 
     beforeAll(async () => {
-      // Create Organization
-      const data1 = await initiateGraphqlRequest(gql.CreateOrganization, { createOrganizationInput });
-      OrgId = data1.CreateOrganization.PK;
-
       createWorkflowInput.OrgId = OrgId;
       listAllManualApprovalInput.OrgId = OrgId;
       wsxh1.OrgId = OrgId;
@@ -297,6 +286,12 @@ describe('WorkflowStepExecutionHistoryResolver (e2e)', () => {
       workflow = data2.CreateWorkflow;
 
       getWorkflow = workflow;
+
+      if (data2.CreateWorkflow?.IsWorkflowNameExist) {
+        expect(data2.CreateWorkflow.WorkflowKeys).toBeNull();
+        expect(data2.CreateWorkflow.WorkflowVersionKeys).toBeNull();
+        return;
+      }
 
       wsxh1.PK = `${workflow.WorkflowVersionKeys.SK}|WX#1`;
       wsxh2.PK = `${workflow.WorkflowVersionKeys.SK}|WX#1`;
@@ -322,6 +317,8 @@ describe('WorkflowStepExecutionHistoryResolver (e2e)', () => {
 
   describe('listWorkflowStepExecutionHistoryOfAnExecution', () => {
     it('should list workflow step execution histories of an execution', async () => {
+      if (!workflowExecutionPK) return;
+
       const data = await initiateGraphqlRequest(gql.listWorkflowStepExecutionHistoryOfAnExecution, {
         listWorkflowStepExecutionHistoryOfAnExecutionInput: { workflowExecutionPK },
       });

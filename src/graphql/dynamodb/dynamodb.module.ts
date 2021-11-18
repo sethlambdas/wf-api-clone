@@ -3,7 +3,6 @@ import { DynamooseModule } from 'nestjs-dynamoose';
 
 import { ConfigUtil } from '@lambdascrew/utility';
 
-import { OrganizationSchema } from '../organizations/organization.schema';
 import { WorkflowExecutionSchema } from '../workflow-executions/workflow-execution.schema';
 import { WorkflowStepExecutionHistorySchema } from '../workflow-steps-executions-history/workflow-steps-wxh.schema';
 import { WorkflowStepSchema } from '../workflow-steps/workflow-step.schema';
@@ -22,10 +21,6 @@ const workflowModel = DynamooseModule.forFeature([
       WorkflowStepSchema,
       WorkflowStepExecutionHistorySchema,
     ],
-  },
-  {
-    name: ConfigUtil.get('dynamodb.schema.workflowOrganization'),
-    schema: [OrganizationSchema],
   },
 ]);
 
