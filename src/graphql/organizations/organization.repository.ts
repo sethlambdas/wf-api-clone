@@ -2,7 +2,7 @@ import { Injectable } from '@nestjs/common';
 
 import { ConfigUtil } from '@lambdascrew/utility';
 
-import { HttpMethod, IGraphqlPayload, networkClient } from '../../../src/utils/helpers/networkRequest.util';
+import { HttpMethod, IGraphqlPayload, networkClient } from '../../utils/helpers/networkRequest.util';
 import { SimplePrimaryKey } from '../common/interfaces/workflow-key.interface';
 import {
   ICreateOrganizationApiKey,
