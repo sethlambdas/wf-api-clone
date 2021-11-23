@@ -12,6 +12,9 @@ export class CreateWorkflowInputRepository {
 
   @Field((type) => Int)
   WorkflowNumber: number;
+
+  @Field()
+  FAID: string;
 }
 
 @InputType()

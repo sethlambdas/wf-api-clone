@@ -72,6 +72,7 @@ export class WorkflowService {
         OrgId,
         WorkflowName,
         WorkflowNumber: organization.TotalWLF,
+        FAID: '',
       });
       this.logger.log(workflow);
       WLFID = workflow.PK;
@@ -172,6 +173,7 @@ export class WorkflowService {
       { PK: workflowVersion.PK, SK: workflowVersion.SK },
       saveWorkflowVersionInput,
     );
+    await this.workflowRepository.saveWorkflow({ PK: WLFID, SK: WLFID.split('|')[1] }, { FAID });
 
     await this.executeWorkflowEB(
       OrgId,
@@ -441,8 +443,9 @@ export class WorkflowService {
   }
 
   async trigger(res: Res, params: string[], payload: any): Promise<any> {
-    const { workflowActivityId }: any = params;
-    if (!workflowActivityId) {
+    const { workflowId }: any = params;
+
+    if (!workflowId) {
       const errorData = {
         result: 'failed',
         message: 'Workflow activity id does not exist.',
@@ -455,8 +458,10 @@ export class WorkflowService {
       return res;
     }
 
+    const workflow = await this.workflowRepository.getWorkflowByKey({ PK: workflowId, SK: workflowId.split('|')[1] });
+
     const getWorkflowStepByAidInput: GetWorkflowStepByAidInput = {
-      AID: `AID#${workflowActivityId}`,
+      AID: workflow.FAID,
       WorkflowStepPK: 'WV#',
     };
     const workflowStep = await this.workflowStepService.getWorkflowStepByAid(getWorkflowStepByAidInput);

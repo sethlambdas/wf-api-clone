@@ -19,6 +19,9 @@ export const WorkflowSchema = new Schema(
     DATA: {
       type: String,
     },
+    FAID: {
+      type: String,
+    }
   },
   {
     timestamps: {

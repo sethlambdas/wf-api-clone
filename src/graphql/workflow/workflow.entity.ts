@@ -41,6 +41,9 @@ export class WorkflowModelRepository implements CompositePrimaryKey {
 
   @Field()
   DATA: string;
+
+  @Field()
+  FAID: string;
 }
 
 @ObjectType()

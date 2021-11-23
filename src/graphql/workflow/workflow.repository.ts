@@ -20,7 +20,7 @@ export class WorkflowRepository {
   ) {}
 
   async createWorkflow(createWorkflowInputRepository: CreateWorkflowInputRepository) {
-    const { WorkflowName, OrgId, WorkflowNumber } = createWorkflowInputRepository;
+    const { WorkflowName, OrgId, WorkflowNumber, FAID } = createWorkflowInputRepository;
 
     const newWorkflowNumber = WorkflowNumber + 1;
 
@@ -29,11 +29,16 @@ export class WorkflowRepository {
       SK: `WLF#${newWorkflowNumber}`,
       DATA: `WLF#${WorkflowName}`,
       WLFN: WorkflowName,
+      FAID,
     };
 
     const results = await this.workflowModel.create(data);
 
     return results;
+  }
+
+  async saveWorkflow(key: CompositePrimaryKeyInput, workflow: Partial<WorkflowModelRepository>) {
+    return this.workflowModel.update(key, workflow);
   }
 
   async getWorkflowByKey(key: CompositePrimaryKeyInput) {

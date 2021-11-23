@@ -6,7 +6,7 @@ import { WorkflowService } from './workflow.service';
 export class WorkflowController {
   constructor(private workflowService: WorkflowService) {}
 
-  @Post('trigger/:workflowActivityId')
+  @Post('trigger/:workflowId')
   @Header('Access-Control-Allow-Origin', '*')
   @Header('Access-Control-Expose-Headers', 'workflow-execution-key-pk')
   trigger(@Response() res: Res, @Param() params: string[], @Body() payload: any): Promise<any> {
