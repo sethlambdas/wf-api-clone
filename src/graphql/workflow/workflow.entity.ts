@@ -1,5 +1,15 @@
-import { Field, Int, ObjectType } from '@nestjs/graphql';
+import { Field, Int, ObjectType, registerEnumType } from '@nestjs/graphql';
 import { CompositePrimaryKey } from '../common/interfaces/workflow-key.interface';
+
+export enum Status {
+  ACTIVE = 'ACTIVE',
+  INACTIVE = 'INACTIVE',
+  DELETED = 'DELETED',
+}
+
+registerEnumType(Status, {
+  name: 'Status',
+});
 
 @ObjectType()
 class PrimaryKey implements CompositePrimaryKey {
@@ -44,6 +54,9 @@ export class WorkflowModelRepository implements CompositePrimaryKey {
 
   @Field()
   FAID: string;
+
+  @Field((type) => Status)
+  STATUS: Status;
 }
 
 @ObjectType()

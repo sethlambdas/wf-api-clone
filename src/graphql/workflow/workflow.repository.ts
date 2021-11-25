@@ -10,7 +10,8 @@ import { CompositePrimaryKey } from '../common/interfaces/workflow-key.interface
 import { CreateWorkflowInputRepository } from './inputs/create-workflow.input';
 import { GetWorkflowByNameInput } from './inputs/get-workflow-by-name.input';
 import { ListWorkflowsOfAnOrgInput } from './inputs/list-workflows.input';
-import { WorkflowModelRepository } from './workflow.entity';
+import { SearchWorkflowsOfAnOrgInput } from './inputs/search-workflows.input';
+import { Status, WorkflowModelRepository } from './workflow.entity';
 
 @Injectable()
 export class WorkflowRepository {
@@ -30,6 +31,7 @@ export class WorkflowRepository {
       DATA: `WLF#${WorkflowName}`,
       WLFN: WorkflowName,
       FAID,
+      STATUS: Status.ACTIVE,
     };
 
     const results = await this.workflowModel.create(data);
@@ -79,6 +81,47 @@ export class WorkflowRepository {
 
     if (results) return results;
     else return [];
+  }
+
+  async searchWorkflowsOfAnOrg(searchWorkflowsOfAnOrgInput: SearchWorkflowsOfAnOrgInput) {
+    const { OrgId, TotalWLF, page, pageSize, search } = searchWorkflowsOfAnOrgInput;
+
+    let results = [];
+    const readItems = [];
+    let wlfNumber = 1;
+    let totalRecords = 0;
+
+    while (wlfNumber <= TotalWLF) {
+      readItems.push({
+        PK: `${OrgId}|WLF#${wlfNumber}`,
+        SK: `WLF#${wlfNumber}`,
+      });
+
+      ++wlfNumber;
+    }
+
+    if (readItems.length > 0) results = await this.runBatchGetItems(readItems);
+
+    results = results.filter((result: WorkflowModelRepository) => {
+      return result.STATUS !== Status.DELETED;
+    });
+
+    if (search) {
+      results = results.filter((result: WorkflowModelRepository) => {
+        return result.WLFN.toLowerCase().indexOf(search.toLowerCase()) > -1;
+      });
+    }
+
+    if (page && pageSize) {
+      const totalPerRecords = results.length / pageSize;
+      totalRecords = Math.floor(totalPerRecords % 1 === 0 ? totalPerRecords : totalPerRecords + 1);
+      results = results.slice((page - 1) * pageSize, page * pageSize);
+    }
+
+    return {
+      Workflows: results,
+      TotalRecords: totalRecords,
+    };
   }
 
   async runBatchGetItems(readItems: any) {

@@ -3,6 +3,8 @@ import { CreateWorkflowInput } from './inputs/create-workflow.input';
 import { GetWorkflowByNameInput } from './inputs/get-workflow-by-name.input';
 import { InitiateAWorkflowStepInput } from './inputs/initiate-step.input';
 import { ListWorkflowsOfAnOrgInput } from './inputs/list-workflows.input';
+import { SaveWorkflowInput } from './inputs/save-workflow.input';
+import { SearchWorkflowsOfAnOrgInput } from './inputs/search-workflows.input';
 import { CreateWorkflowResponse, ListWorkflowsOfAnOrg, WorkflowModelRepository } from './workflow.entity';
 import { WorkflowService } from './workflow.service';
 
@@ -13,6 +15,11 @@ export class WorkflowResolver {
   @Mutation((returns) => CreateWorkflowResponse)
   async CreateWorkflow(@Args('createWorkflowInput') createWorkflowInput: CreateWorkflowInput) {
     return this.workflowService.createWorkflow(createWorkflowInput);
+  }
+
+  @Mutation((returns) => WorkflowModelRepository)
+  async SaveWorkflow(@Args('saveWorkflowInput') saveWorkflowInput: SaveWorkflowInput) {
+    return this.workflowService.saveWorkflow(saveWorkflowInput);
   }
 
   @Mutation((returns) => String)
@@ -30,5 +37,12 @@ export class WorkflowResolver {
   @Query((returns) => ListWorkflowsOfAnOrg)
   async ListWorkflowsOfAnOrg(@Args('listWorkflowsOfAnOrgInput') listWorkflowsOfAnOrgInput: ListWorkflowsOfAnOrgInput) {
     return this.workflowService.listWorkflowsOfAnOrg(listWorkflowsOfAnOrgInput);
+  }
+
+  @Query((returns) => ListWorkflowsOfAnOrg)
+  async SearchWorkflowsOfAnOrg(
+    @Args('searchWorkflowsOfAnOrgInput') searchWorkflowsOfAnOrgInput: SearchWorkflowsOfAnOrgInput,
+  ) {
+    return this.workflowService.searchWorkflowsOfAnOrg(searchWorkflowsOfAnOrgInput);
   }
 }

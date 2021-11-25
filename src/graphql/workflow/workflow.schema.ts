@@ -21,7 +21,10 @@ export const WorkflowSchema = new Schema(
     },
     FAID: {
       type: String,
-    }
+    },
+    STATUS: {
+      type: String,
+    },
   },
   {
     timestamps: {

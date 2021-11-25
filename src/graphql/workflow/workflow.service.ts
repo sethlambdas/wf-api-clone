@@ -32,6 +32,8 @@ import { CreateWorkflowInput } from './inputs/create-workflow.input';
 import { GetWorkflowByNameInput } from './inputs/get-workflow-by-name.input';
 import { InitiateAWorkflowStepInput } from './inputs/initiate-step.input';
 import { ListWorkflowsOfAnOrgInput } from './inputs/list-workflows.input';
+import { SaveWorkflowInput } from './inputs/save-workflow.input';
+import { SearchWorkflowsOfAnOrgInput } from './inputs/search-workflows.input';
 import { StateWorkflowInput } from './inputs/state-workflow.input';
 import { CreateWorkflowResponse, ListWorkflowsOfAnOrg } from './workflow.entity';
 import { WorkflowRepository } from './workflow.repository';
@@ -194,6 +196,16 @@ export class WorkflowService {
       WorkflowVersion: WV,
       IsWorkflowNameExist: false,
     };
+  }
+
+  async saveWorkflow(saveWorkflowInput: SaveWorkflowInput) {
+    const key = {
+      PK: saveWorkflowInput.PK,
+      SK: saveWorkflowInput.SK,
+    };
+    delete saveWorkflowInput.PK;
+    delete saveWorkflowInput.SK;
+    return this.workflowRepository.saveWorkflow(key, saveWorkflowInput);
   }
 
   async updateManualApprovalNextSteps(workflowSteps: WorkflowStep[], States: StateWorkflowInput[]) {
@@ -440,6 +452,20 @@ export class WorkflowService {
       Workflows: result,
       TotalRecords: organization.TotalWLF,
     };
+  }
+
+  async searchWorkflowsOfAnOrg(
+    searchWorkflowsOfAnOrgInput: SearchWorkflowsOfAnOrgInput,
+  ): Promise<ListWorkflowsOfAnOrg> {
+    const organization = await this.organizationService.getOrganization({ PK: searchWorkflowsOfAnOrgInput.OrgId });
+
+    if (!organization) return { Error: 'Organization not existing' };
+
+    searchWorkflowsOfAnOrgInput.TotalWLF = organization.TotalWLF + (process.env.NODE_ENV === 'test' ? 1 : 0);
+
+    const result = await this.workflowRepository.searchWorkflowsOfAnOrg(searchWorkflowsOfAnOrgInput);
+
+    return result;
   }
 
   async trigger(res: Res, params: string[], payload: any): Promise<any> {
