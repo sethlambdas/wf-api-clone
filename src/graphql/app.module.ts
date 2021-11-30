@@ -11,6 +11,7 @@ import { AppHealthIndicator } from './health/app.health';
 import { HealthController } from './health/health.controller';
 import { IntegrationAppModule } from './integration-app/integration-app.module';
 import { OrganizationModule } from './organizations/organization.module';
+import { UserModule } from './users/user.module';
 import { WorkflowExecutionModule } from './workflow-executions/workflow-execution.module';
 import { WorkflowStepExecutionHistoryModule } from './workflow-steps-executions-history/worflow-steps-wxh.module';
 import { WorkflowStepModule } from './workflow-steps/workflow-step.module';
@@ -64,6 +65,7 @@ import { WorkflowModule } from './workflow/workflow.module';
     WorkflowStepExecutionHistoryModule,
     ClientModule,
     IntegrationAppModule,
+    UserModule,
   ],
 })
 export class AppModule {}
