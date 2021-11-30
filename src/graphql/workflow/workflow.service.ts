@@ -70,11 +70,21 @@ export class WorkflowService {
       await this.organizationService.saveOrganization({ PK: OrgId, TotalWLF: organization.TotalWLF + 1 });
 
       this.logger.log('CREATING WORKFLOW');
+      const httpTriggerState = States.find((state) => state.ActivityType === TriggerTypes.HTTP);
+      let workflowTriggerId = '';
+
+      if (httpTriggerState) {
+        const httpUrlArr = httpTriggerState.Variables.Endpoint.split('/');
+        workflowTriggerId = `WLF-UQ#${httpUrlArr[httpUrlArr.length - 1]}`;
+      } else
+        workflowTriggerId = `WLF-UQ#${v4()}`
+
       const workflow = await this.workflowRepository.createWorkflow({
         OrgId,
         WorkflowName,
         WorkflowNumber: organization.TotalWLF,
         FAID: '',
+        UQ_OVL: workflowTriggerId
       });
       this.logger.log(workflow);
       WLFID = workflow.PK;
@@ -484,7 +494,7 @@ export class WorkflowService {
       return res;
     }
 
-    const workflow = await this.workflowRepository.getWorkflowByKey({ PK: workflowId, SK: workflowId.split('|')[1] });
+    const workflow = await this.workflowRepository.getWorkflowByUniqueKey({ UniqueKey: workflowId });
 
     const getWorkflowStepByAidInput: GetWorkflowStepByAidInput = {
       AID: workflow.FAID,

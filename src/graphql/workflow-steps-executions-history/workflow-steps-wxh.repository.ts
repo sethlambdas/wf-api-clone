@@ -39,19 +39,19 @@ export class WorkflowStepExecutionHistoryRepository {
     let results: any;
 
     const query = this.workflowStepExecutionHistoryModel
-      .query({ Status })
+      .query({ UQ_OVL: Status })
       .and()
       .where('SK')
       .beginsWith(allManualApprovalOfOrg)
-      .using(GSI.GetActivityTypeAccordingToStatus)
+      .using(GSI.UniqueKeyOverloading)
       .attributes(['PK', 'SK', 'MD', 'WSID', 'WLFN']);
 
     const { count } = await this.workflowStepExecutionHistoryModel
-      .query({ Status })
+      .query({ UQ_OVL: Status })
       .and()
       .where('SK')
       .beginsWith(allManualApprovalOfOrg)
-      .using(GSI.GetActivityTypeAccordingToStatus)
+      .using(GSI.UniqueKeyOverloading)
       .count()
       .all()
       .exec();

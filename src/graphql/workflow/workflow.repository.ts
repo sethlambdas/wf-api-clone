@@ -11,6 +11,7 @@ import { CreateWorkflowInputRepository } from './inputs/create-workflow.input';
 import { GetWorkflowByNameInput } from './inputs/get-workflow-by-name.input';
 import { ListWorkflowsOfAnOrgInput } from './inputs/list-workflows.input';
 import { SearchWorkflowsOfAnOrgInput } from './inputs/search-workflows.input';
+import { GetWorkflowByUniqueKeyInput } from './inputs/get-workflow-by-unique-key.input';
 import { Status, WorkflowModelRepository } from './workflow.entity';
 
 @Injectable()
@@ -21,7 +22,7 @@ export class WorkflowRepository {
   ) {}
 
   async createWorkflow(createWorkflowInputRepository: CreateWorkflowInputRepository) {
-    const { WorkflowName, OrgId, WorkflowNumber, FAID } = createWorkflowInputRepository;
+    const { WorkflowName, OrgId, WorkflowNumber, FAID, UQ_OVL } = createWorkflowInputRepository;
 
     const newWorkflowNumber = WorkflowNumber + 1;
 
@@ -32,6 +33,7 @@ export class WorkflowRepository {
       WLFN: WorkflowName,
       FAID,
       STATUS: Status.ACTIVE,
+      UQ_OVL,
     };
 
     const results = await this.workflowModel.create(data);
@@ -57,6 +59,19 @@ export class WorkflowRepository {
       .beginsWith(OrgId)
       .using(GSI.DataOverloading)
       .exec();
+  }
+
+  async getWorkflowByUniqueKey(getWorkflowByUniqueKeyInput: GetWorkflowByUniqueKeyInput) {
+    const { UniqueKey } = getWorkflowByUniqueKeyInput;
+    const results = await this.workflowModel
+      .query({ UQ_OVL: `WLF-UQ#${UniqueKey}` })
+      .and()
+      .where('SK')
+      .beginsWith('WLF#')
+      .using(GSI.UniqueKeyOverloading)
+      .exec();
+
+    return results[0]
   }
 
   async listWorkflowsOfAnOrg(listWorkflowsOfAnOrgInput: ListWorkflowsOfAnOrgInput) {

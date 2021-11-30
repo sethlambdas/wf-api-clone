@@ -15,6 +15,9 @@ export class CreateWorkflowInputRepository {
 
   @Field()
   FAID: string;
+
+  @Field()
+  UQ_OVL: string;
 }
 
 @InputType()

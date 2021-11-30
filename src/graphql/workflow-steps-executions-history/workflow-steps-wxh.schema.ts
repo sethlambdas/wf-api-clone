@@ -42,6 +42,9 @@ export const WorkflowStepExecutionHistorySchema = new Schema(
     WSID: {
       type: String,
     },
+    UQ_OVL: {
+      type: String,
+    },
     Status: {
       type: String,
     },

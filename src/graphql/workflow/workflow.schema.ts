@@ -22,6 +22,9 @@ export const WorkflowSchema = new Schema(
     FAID: {
       type: String,
     },
+    UQ_OVL: {
+      type: String,
+    },
     STATUS: {
       type: String,
     },

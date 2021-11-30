@@ -21,12 +21,12 @@ export const SecondaryIndexes = new Schema(
         throughput: 5,
       },
     },
-    Status: {
+    UQ_OVL: {
       type: String,
       index: {
         global: true,
         rangeKey: 'SK',
-        name: `${GSI.GetActivityTypeAccordingToStatus}`,
+        name: `${GSI.UniqueKeyOverloading}`,
         project: true,
         throughput: 5,
       },

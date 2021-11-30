@@ -45,6 +45,9 @@ export class WorkflowStepExecutionHistory
   WSID: string;
 
   @Field()
+  UQ_OVL: string;
+
+  @Field()
   Status: string;
 
   @Field((type) => Boolean, { defaultValue: false })

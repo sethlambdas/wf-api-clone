@@ -40,6 +40,7 @@ export class WorkflowStepExecutionHistoryService {
 
     const workflowStepExecutionHistory = {
       ...inputs,
+      UQ_OVL: inputs.Status
     } as WorkflowStepExecutionHistory;
 
     if (!SK) {
