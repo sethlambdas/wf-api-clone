@@ -1,6 +1,7 @@
 export const REFRESH_TOKEN_QL = `
   query RefreshToken($refreshToken: String) {
     RefreshToken(refreshToken: $refreshToken) {
+      orgId
       accessToken
       refreshTokenGenerate
       cookieOptions {
