@@ -167,7 +167,7 @@ export default class Workflow {
             const parsedSte = JSON.parse(wfExec.STE);
             const state = {
               ...parsedSte,
-              ...({ data: { ...parsedSte.data, ...payload } } || {}),
+              ...(httpTrigger && httpTrigger.IsHttpTriggered ? { [httpTrigger.httpACT.MD.Name]: { ...parsedSte.data, ...payload } } : {}),
             };
 
             this.logger.log('================WF Execution State===============');
