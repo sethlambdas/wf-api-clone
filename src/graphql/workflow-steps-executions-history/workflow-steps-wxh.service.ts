@@ -22,7 +22,6 @@ export class WorkflowStepExecutionHistoryService {
     @Inject(WorkflowStepExecutionHistoryRepository)
     private workflowStepExecutionHistoryRepository: WorkflowStepExecutionHistoryRepository,
     private workflowService: WorkflowService,
-    private workflowExecutionService: WorkflowExecutionService,
     private workflowVersionService: WorkflowVersionService,
   ) {}
 

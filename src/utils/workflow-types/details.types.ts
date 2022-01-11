@@ -3,6 +3,8 @@ import { CAT } from '../../graphql/workflow-executions/workflow-execution.entity
 import { WorkflowStep } from '../../graphql/workflow-steps/workflow-step.entity';
 
 export interface IDetail {
+  isRerun?: boolean;
+  
   httpTrigger?: HttpTrigger;
 
   OrgId: string;

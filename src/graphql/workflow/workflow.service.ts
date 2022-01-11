@@ -417,6 +417,7 @@ export class WorkflowService {
       WorkflowName,
       ActivityType,
       Approve,
+      isRerun,
     } = initiateAWorkflowStepInput;
 
     const workflowStep = await this.workflowStepService.getWorkflowStepByKey(WorkflowStepKeys);
@@ -432,6 +433,7 @@ export class WorkflowService {
       WorkflowStepExecutionHistorySK,
       WLFN: WorkflowName,
       OrgId,
+      isRerun,
       ManualApproval,
     });
 

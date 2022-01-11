@@ -23,4 +23,7 @@ export class InitiateAWorkflowStepInput {
 
   @Field({ nullable: true })
   Approve?: boolean;
+
+  @Field({ nullable: true })
+  isRerun?: boolean;
 }

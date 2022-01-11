@@ -82,6 +82,7 @@ export default class Workflow {
     try {
       const detail: IDetail = this.getDetail(message);
       const {
+        isRerun,
         httpTrigger,
         currentWorkflowStep,
         OrgId,
@@ -105,6 +106,8 @@ export default class Workflow {
       };
 
       const externalService: ExternalServiceDetails = externalServiceDetails;
+      let wfExec: WorkflowExecution;
+      let wfStepExecHistory: WorkflowStepExecutionHistory;
 
       if (currentWorkflowStep && currentWorkflowStep.ACT.END) act.END = currentWorkflowStep.ACT.END;
 
@@ -123,15 +126,27 @@ export default class Workflow {
           WLFN,
         );
 
-      const { wfExec, wfStepExecHistory } = await this.getCurrentWorkflowExecution(
-        OrgId,
-        act,
-        currentWorkflowStep.SK,
-        wfExecKeys,
-        WorkflowVersionKeys,
-        WorkflowStepExecutionHistorySK,
-        WLFN,
-      );
+      if (isRerun) {
+        this.logger.log(`Rerunning: ${act.T} of workflow step "${currentWorkflowStep.SK}" of execution history "${WorkflowStepExecutionHistorySK}"`)
+        const result = await this.rerunWorkflowStepExecutionHistory(wfExecKeys, WorkflowStepExecutionHistorySK);
+        wfExec = result.wfExec;
+        wfStepExecHistory = result.wfStepExecHistory;
+      } else {
+        this.logger.log("CREATING/UPDATING workflow execution & workflow step execution history");
+        const result = await this.getCurrentWorkflowExecution(
+          OrgId,
+          act,
+          currentWorkflowStep.SK,
+          wfExecKeys,
+          WorkflowVersionKeys,
+          WorkflowStepExecutionHistorySK,
+          WLFN,
+        );
+        wfExec = result.wfExec;
+        wfStepExecHistory = result.wfStepExecHistory;
+      }
+          
+      
 
       if ((Object as any).values(ExternalActivityTypes).includes(act.T) && !externalService) {
         const activeWorkflowDetails = {
@@ -467,6 +482,17 @@ export default class Workflow {
         WorkflowName,
       );
     }
+
+    return { wfExec, wfStepExecHistory };
+  }
+
+  private async rerunWorkflowStepExecutionHistory(wfExecKeys: any, WorkflowStepExecutionHistorySK: string) {
+    const wfExec = await this.workflowExecutionService.getWorkflowExecutionByKey(wfExecKeys);
+
+    const wfStepExecHistory = await this.workflowStepExecutionHistoryService.saveWorkflowStepExecutionHistory(
+      { PK: wfExec.PK, SK: WorkflowStepExecutionHistorySK },
+      { Status: WorkflowStepStatus.Started },
+    );
 
     return { wfExec, wfStepExecHistory };
   }
