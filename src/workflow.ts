@@ -144,9 +144,12 @@ export default class Workflow {
         );
         wfExec = result.wfExec;
         wfStepExecHistory = result.wfStepExecHistory;
+
+        if (result.pause) {
+          this.logger.log(`Workflow Execution ${wfExecKeys.PK} is in a Pause state`);
+          return;
+        }
       }
-          
-      
 
       if ((Object as any).values(ExternalActivityTypes).includes(act.T) && !externalService) {
         const activeWorkflowDetails = {
@@ -443,9 +446,22 @@ export default class Workflow {
     const WSXH_SK = `WSXH|${OrgId}|${ActivityType}|${v4()}`;
 
     if (wfExecKeys) {
-      act.Status = WorkflowStepStatus.Started;
-
       wfExec = await this.workflowExecutionService.getWorkflowExecutionByKey(wfExecKeys);
+
+      if (wfExec.STATUS === WorkflowStepStatus.Pause) {
+        act.Status = WorkflowStepStatus.Pause;
+        wfStepExecHistory = await this.createStepExecHistory(
+          OrgId,
+          wfExec.PK,
+          WSXH_SK,
+          act,
+          CurrentWorkflowStepSK,
+          WorkflowName,
+        );
+
+        return { pause: true }
+      };
+      act.Status = WorkflowStepStatus.Started;
 
       wfExec = await this.workflowExecutionService.saveWorkflowExecution(wfExecKeys, {
         WSXH_IDS: [...wfExec.WSXH_IDS, WSXH_SK],
