@@ -49,9 +49,7 @@ export default async function webService(payload: any, state?: any) {
         url: resolveMentionedVariables(WLFN, Endpoint, state),
         method: Method,
       },
-      headers: {
-        Accept: 'application/json',
-      },
+      headers: {},
       queryStrings: {},
       body: {},
       auth: null,
