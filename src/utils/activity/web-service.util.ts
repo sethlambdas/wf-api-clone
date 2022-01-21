@@ -9,6 +9,8 @@ import { EventRequestParams, IFieldValue } from '../workflow-types/lambda.types'
 
 const logger = new Logger('webService');
 
+const credentials: string[] = ['accessToken', 'clientId', 'clientSecret', 'username', 'password'];
+
 export default async function webService(payload: any, state?: any) {
   logger.log('Web Service Activity');
   try {
@@ -164,6 +166,7 @@ export function getMentionedData(name: string, unresolvedString: string, state?:
     let fields = trimWord;
 
     if (trimWord === `http_${name}`) replacement = data;
+    else if (credentials.includes(trimWord)) replacement = `{{${word}}}`;
     else if (trimWord.includes(`http_${name}`)) {
       fields = trimWord.split('.')[1];
       replacement = get(data, fields);

@@ -4,6 +4,10 @@ export const LIST_CLIENTS = `
       PK
       SK
       name
+      headers {
+        fieldName
+        fieldValue
+      }
       secrets {
         rootUrl
       }

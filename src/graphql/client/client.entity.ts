@@ -10,6 +10,12 @@ export enum ClientStatus {
   'DISABLED' = 'DISABLED',
 }
 
+export class HeaderSchema {
+  fieldName?: string;
+
+  fieldValue?: string;
+}
+
 export class SecretsSchema {
   apiKey?: string;
 
@@ -36,6 +42,8 @@ export class Client {
   intAppId: string;
 
   secrets: SecretsSchema;
+
+  headers: HeaderSchema[];
 }
 
 export interface IListClients {
