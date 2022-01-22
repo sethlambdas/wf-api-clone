@@ -29,7 +29,7 @@ export class WorkflowResolver {
     return this.workflowService.initiatAWorkflowStep(initiateAWorkflowStepInput);
   }
 
-  @Query((returns) => WorkflowModelRepository)
+  @Query((returns) => WorkflowModelRepository, { nullable: true })
   async GetWorkflowByName(@Args('getWorkflowByNameInput') getWorkflowByNameInput: GetWorkflowByNameInput) {
     return this.workflowService.getWorkflowByName(getWorkflowByNameInput);
   }

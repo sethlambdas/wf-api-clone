@@ -65,7 +65,7 @@ FROM dev as test
 
 COPY . .
 
-RUN npm audit --audit-level=high
+RUN npm audit --audit-level=critical
 
 # ARG MICROSCANNER_TOKEN
 
