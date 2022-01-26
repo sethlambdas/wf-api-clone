@@ -6,7 +6,7 @@ server:
     limit: '50mb'
 
 externalServices:
-  imapEndpoint: http://localhost:3001
+  imapEndpoint: http://localhost:3003
   ocrEndpoint: http://localhost:3002
 
 aws:

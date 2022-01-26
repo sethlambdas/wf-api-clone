@@ -116,7 +116,7 @@ export default class Workflow {
         return;
       }
 
-      if (httpTrigger && httpTrigger.IsHttpTriggered)
+      if (httpTrigger && httpTrigger.IsHttpTriggered && !externalService )
         await this.UpdateHttpStepStatus(
           OrgId,
           httpTrigger.httpACT,
@@ -150,7 +150,7 @@ export default class Workflow {
           return;
         }
       }
-
+      
       if ((Object as any).values(ExternalActivityTypes).includes(act.T) && !externalService) {
         const activeWorkflowDetails = {
           ...detail,
@@ -160,7 +160,7 @@ export default class Workflow {
         await runExternalService(act, activeWorkflowDetails);
         return;
       }
-
+      
       let currentParallelIndex = (!isNaN(parallelIndex) && parallelIndex) || 0;
       let currentParallelIndexes = parallelIndexes || [];
 
@@ -423,10 +423,8 @@ export default class Workflow {
       WorkflowStepSK: CurrentWorkflowStepSK,
       Status: act.Status,
     };
-
     if (act.MD) inputs.MD = act.MD;
     if (act.END) inputs.END = act.END;
-
     return await this.workflowStepExecutionHistoryService.createWorkflowStepExecutionHistory(inputs);
   }
 
@@ -522,7 +520,6 @@ export default class Workflow {
     WorkflowName: string,
   ) {
     act.Status = WorkflowStepStatus.Finished;
-
     await this.createStepExecHistory(OrgId, wfExecKeys.PK, WSXH_SK, act, CurrentWorkflowStepSK, WorkflowName);
   }
 
