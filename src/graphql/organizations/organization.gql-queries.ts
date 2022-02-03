@@ -19,25 +19,3 @@ export const SAVE_ORGANIZATION = `
     }
   }
 `;
-
-export const CREATE_ORGANIZATION_API_KEY = `
-  mutation CreateOrganizationApiKey($createOrganizationApiKeyInput: CreateOrganizationApiKeyInput!) {
-    CreateOrganizationApiKey(createOrganizationApiKeyInput: $createOrganizationApiKeyInput) {
-      APIKEY {
-        KEY
-        ACTIVE
-      }
-    }
-  }
-`;
-
-export const GET_ORGANIZATION_API_KEY_ACTIVE = `
-  mutation GetOrganizationApiKeyActive($getOrganizationApiKeyActiveInput: GetOrganizationApiKeyActiveInput!) {
-    GetOrganizationApiKeyActive(getOrganizationApiKeyActiveInput: $getOrganizationApiKeyActiveInput) {
-      APIKEY {
-        KEY
-        ACTIVE
-      }
-    }
-  }
-`;

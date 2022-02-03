@@ -17,6 +17,7 @@ import { WorkflowStepExecutionHistoryModule } from './workflow-steps-executions-
 import { WorkflowStepModule } from './workflow-steps/workflow-step.module';
 import { WorkflowVersionModule } from './workflow-versions/workflow-version.module';
 import { WorkflowModule } from './workflow/workflow.module';
+import { ApigwAuthorizerModule } from './apigwAuthorizer/apigw-authorizer.module';
 
 @Module({
   controllers: [HealthController],
@@ -66,6 +67,7 @@ import { WorkflowModule } from './workflow/workflow.module';
     ClientModule,
     IntegrationAppModule,
     UserModule,
+    ApigwAuthorizerModule,
   ],
 })
 export class AppModule {}

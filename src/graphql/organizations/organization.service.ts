@@ -21,12 +21,4 @@ export class OrganizationService {
   async getOrganization(simplePrimaryKey: SimplePrimaryKey) {
     return this.organizationRepository.getOrganization(simplePrimaryKey);
   }
-
-  async createOrganizationApiKey(payload: any) {
-    return this.organizationRepository.createOrganizationApiKey(payload);
-  }
-
-  async getOrganizationApiKeyActive(simplePrimaryKey: SimplePrimaryKey) {
-    return this.organizationRepository.getOrganizationApiKeyActive(simplePrimaryKey);
-  }
 }

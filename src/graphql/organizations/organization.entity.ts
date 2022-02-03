@@ -22,15 +22,3 @@ export interface ISaveOrganization {
     SaveOrganization: Organization;
   };
 }
-
-export interface ICreateOrganizationApiKey {
-  data: {
-    CreateOrganizationApiKey: Organization;
-  };
-}
-
-export interface IGetOrganizationApiKeyActive {
-  data: {
-    GetOrganizationApiKeyActive: Organization;
-  };
-}
