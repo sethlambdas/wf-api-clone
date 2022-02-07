@@ -209,6 +209,12 @@ export class Position {
 }
 
 @ObjectType()
+export class Style {
+  @Field({ nullable: true })
+  stroke: string;
+}
+
+@ObjectType()
 export class DesignWorkflow {
   @Field()
   id: string;
@@ -223,7 +229,7 @@ export class DesignWorkflow {
   type?: string;
 
   @Field({ nullable: true })
-  style?: string;
+  style?: Style;
 
   @Field((type) => Data, { nullable: true })
   data?: Data;
@@ -269,6 +275,9 @@ export class LabelInput extends PickType(Label, ['iconName', 'name'] as const, I
 export class PositionInput extends PickType(Position, ['x', 'y'] as const, InputType) {}
 
 @InputType()
+export class StyleInput extends PickType(Style, ['stroke'] as const, InputType) {}
+
+@InputType()
 export class DataInput extends OmitType(Data, ['label', 'variables'] as const, InputType) {
   @Field((type) => MDInput, { nullable: true })
   variables?: MDInput;
@@ -278,7 +287,11 @@ export class DataInput extends OmitType(Data, ['label', 'variables'] as const, I
 }
 
 @InputType()
-export class DesignWorkflowInput extends OmitType(DesignWorkflow, ['id', 'data', 'position'] as const, InputType) {
+export class DesignWorkflowInput extends OmitType(
+  DesignWorkflow,
+  ['id', 'data', 'position', 'style'] as const,
+  InputType,
+) {
   @Field()
   id: string;
 
@@ -287,6 +300,9 @@ export class DesignWorkflowInput extends OmitType(DesignWorkflow, ['id', 'data',
 
   @Field((type) => PositionInput, { nullable: true })
   position?: PositionInput;
+
+  @Field((type) => StyleInput, { nullable: true })
+  style?: StyleInput;
 }
 
 @InputType()

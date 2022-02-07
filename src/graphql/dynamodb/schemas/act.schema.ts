@@ -174,6 +174,12 @@ export const LabelSchema = new Schema({
   },
 });
 
+export const StyleSchema = new Schema({
+  stroke: {
+    type: String,
+  },
+});
+
 export const DataSchema = new Schema({
   label: {
     type: Object,
@@ -218,7 +224,8 @@ export const DesignWorkflowSchema = new Schema({
     type: String,
   },
   style: {
-    type: String,
+    type: Object,
+    schema: StyleSchema,
   },
   data: {
     type: Object,
