@@ -17,7 +17,7 @@ export async function mailgunSendEmail(payload: { Email: string; Body: string; S
   const data = {
     from: ConfigUtil.get('mailgun.fromEmail'),
     to: Email,
-    cc: ConfigUtil.get('mailgun.ccEmail'),
+    // cc: ConfigUtil.get('mailgun.ccEmail'), gets an error if included
     subject: Subject,
     html: Body,
   };

@@ -68,8 +68,8 @@ lambda:
 
 mailgun:
   test: false
-  apiKey: '2346287e8a0e68a2f4d426cb6c74d01b-73e57fef-1687955e'
-  domain: 'sandboxbf87ded23ebb4b8d800d5c56edaadc3c.mailgun.org'
-  fromEmail: 'sourceEmail@gmail.com'
+  apiKey: 'ba8388311d8f3e35419b2f73b2933f08-d2cc48bc-e9e59ed8'
+  domain: 'sandbox9f94ce022345440d9288de6b451d87a8.mailgun.org'
+  fromEmail: 'CoWo Team <support@cowo.io>'
   toEmail: 'printerEmail@gmail.com'
   ccEmail: 'ccEmail@gmail.com'
