@@ -5,6 +5,9 @@ server:
   payload:
     limit: '50mb'
 
+workflow:
+  domain: http://localhost:8081
+
 externalServices:
   imapEndpoint: http://localhost:3003
   ocrEndpoint: http://localhost:3002

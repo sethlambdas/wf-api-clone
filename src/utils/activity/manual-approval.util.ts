@@ -30,7 +30,7 @@ export default async function manualApproval(payload: any, state?: any) {
       logger.error('No email specified.');
       throw new Error();
     }
-    const origin = ConfigUtil.get('server.origin');
+    const origin = ConfigUtil.get('workflow.domain');
     const executeManualApprovalEB = async (manualApprovalEmailParams: ManualApprovalEmailParams) => {
       const ActivityType = encodeURIComponent(ActivityTypes.ManualApproval);
       const mapManualApprovalEmailParams = mapValues(manualApprovalEmailParams, (value) => {
