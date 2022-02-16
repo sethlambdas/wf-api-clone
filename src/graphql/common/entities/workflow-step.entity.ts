@@ -102,6 +102,15 @@ export class MD {
   FileFilter?: string;
 
   @Field({ nullable: true })
+  FileTypeOption?: string;
+
+  @Field({ nullable: true })
+  MultipartContentType?: string;
+
+  @Field({ nullable: true })
+  MultipartMetaData?: string;
+
+  @Field({ nullable: true })
   Evaluations?: string;
 
   @Field({ nullable: true })

@@ -26,6 +26,9 @@ export default async function webService(payload: any, state?: any) {
       ClientSK,
       Files,
       FileFilter,
+      FileTypeOption,
+      MultipartContentType,
+      MultipartMetaData,
       Evaluations,
       Retries,
       Interval,
@@ -58,6 +61,9 @@ export default async function webService(payload: any, state?: any) {
       file: {
         files: null,
         filefilter: null,
+        FileTypeOption: null,
+        MultipartContentType: null,
+        MultipartMetaData: null,
       },
       retry: {
         retries: Retries || 3,
@@ -95,6 +101,9 @@ export default async function webService(payload: any, state?: any) {
       eventReqPramas.file = {
         files: parsedFilesArr.length === 0 ? null : parsedFilesArr,
         filefilter: fileFilters.length === 0 ? null : fileFilters,
+        FileTypeOption: FileTypeOption || null,
+        MultipartContentType: MultipartContentType || null,
+        MultipartMetaData: MultipartMetaData || null,
       };
     }
 

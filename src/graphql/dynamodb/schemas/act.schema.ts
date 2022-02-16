@@ -90,6 +90,15 @@ export const MDSchema = new Schema({
   FileFilter: {
     type: String,
   },
+  FileTypeOption: {
+    type: String,
+  },
+  MultipartContentType: {
+    type: String,
+  },
+  MultipartMetaData: {
+    type: String,
+  },
   Evaluations: {
     type: String,
   },

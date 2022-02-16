@@ -13,6 +13,9 @@ export interface EventRequestParams {
   file: {
     files: { name: string; url: string }[];
     filefilter: string[];
+    FileTypeOption: string;
+    MultipartContentType: string;
+    MultipartMetaData: string;
   };
   retry: {
     retries: number;
