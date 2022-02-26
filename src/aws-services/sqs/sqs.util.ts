@@ -71,7 +71,7 @@ export async function getSQSQueueAttributes(QueueUrl: string) {
   try {
     logger.log('Getting SQS Queue Attributes');
 
-    const queue = await SQS.getQueueAttributes({ QueueUrl }).promise();
+    const queue = await SQS.getQueueAttributes({ QueueUrl, AttributeNames: ['All'] }).promise();
 
     logger.log(queue);
     return queue;
