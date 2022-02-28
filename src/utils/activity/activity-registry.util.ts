@@ -17,7 +17,7 @@ interface ActivityRegistry {
 
 export enum TriggerTypes {
   HTTP = 'HTTP',
-  Recurring = 'Recurring',
+  Timed = 'Timed',
 }
 
 export enum ActivityTypes {

@@ -4,8 +4,10 @@ import { WorkflowStep } from '../../graphql/workflow-steps/workflow-step.entity'
 
 export interface IDetail {
   isRerun?: boolean;
-  
+
   httpTrigger?: HttpTrigger;
+
+  timedTrigger?: any;
 
   OrgId: string;
 

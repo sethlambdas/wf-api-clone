@@ -36,13 +36,6 @@ export const MDSchema = new Schema({
   Minutes: {
     type: String,
   },
-  Seconds: {
-    type: String,
-  },
-  // ExactTime
-  Date: {
-    type: String,
-  },
   // Conditional
   Choice: {
     type: Array,
@@ -143,6 +136,25 @@ export const MDSchema = new Schema({
     type: String,
   },
   OrgId: {
+    type: String,
+  },
+  // TimedTrigger
+  ScheduleType: {
+    type: String,
+  },
+  // TimedTrigger-Interval
+  RateValue: {
+    type: String,
+  },
+  RateUnit: {
+    type: String,
+  },
+  // TimedTrigger-ExactTime
+  ExactTime: {
+    type: String,
+  },
+  // TimedTrigger-Cron
+  Cron: {
     type: String,
   },
   // External Services

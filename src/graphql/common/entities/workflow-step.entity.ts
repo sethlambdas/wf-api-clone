@@ -34,24 +34,37 @@ export class MD {
   @Field({ nullable: true })
   Status?: number;
 
-  // Delay & Recurring
+  // Timed
+  @Field({ nullable: true })
+  ScheduleType?: string;
+
+  // Timed-Interval
+  @Field({ nullable: true })
+  RateValue?: string;
+
+  // Timed-Interval
+  @Field({ nullable: true })
+  RateUnit?: string;
+
+  // Timed-ExactTime
+  @Field({ nullable: true })
+  ExactTime?: string;
+
+  // Timed-Cron
+  @Field({ nullable: true })
+  Cron?: string;
+
+  // Delay
   @Field({ nullable: true })
   Days?: string;
 
-  // Delay & Recurring
+  // Delay
   @Field({ nullable: true })
   Hours?: string;
 
-  // Delay & Recurring
+  // Delay
   @Field({ nullable: true })
   Minutes?: string;
-
-  @Field({ nullable: true })
-  Seconds?: string;
-
-  // ExactTime
-  @Field({ nullable: true })
-  Date?: string;
 
   // Conditional
   @Field((type) => [ChoiceWorkflow], { nullable: true })

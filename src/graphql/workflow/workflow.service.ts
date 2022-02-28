@@ -1,5 +1,7 @@
 import { Inject, Injectable, Logger } from '@nestjs/common';
 import { Response as Res } from 'express';
+import * as moment from 'moment';
+import { startCase } from 'lodash';
 import { v4 } from 'uuid';
 import {
   formCreateEventParams,
@@ -76,15 +78,14 @@ export class WorkflowService {
       if (httpTriggerState) {
         const httpUrlArr = httpTriggerState.Variables.Endpoint.split('/');
         workflowTriggerId = `WLF-UQ#${httpUrlArr[httpUrlArr.length - 1]}`;
-      } else
-        workflowTriggerId = `WLF-UQ#${v4()}`
+      } else workflowTriggerId = `WLF-UQ#${v4()}`;
 
       const workflow = await this.workflowRepository.createWorkflow({
         OrgId,
         WorkflowName,
         WorkflowNumber: organization.TotalWLF,
         FAID: '',
-        UQ_OVL: workflowTriggerId
+        UQ_OVL: workflowTriggerId,
       });
       this.logger.log(workflow);
       WLFID = workflow.PK;
@@ -357,53 +358,78 @@ export class WorkflowService {
         WorkflowStepPK: workflowStep.PK,
       });
       const getDetail = {
-        ...getWorkflowStep,
+        currentWorkflowStep: getWorkflowStep,
         WLFN: WorkflowName,
         WorkflowVersionKeys: workflowVersionsKeys,
         OrgId,
+        timedTrigger: { ACT: workflowStep.ACT, SK: workflowStep.SK },
       };
       if ((Object as any).values(TriggerTypes).includes(workflowStep.ACT.T)) {
-        const { Days, Hours, Minutes } = workflowStep.ACT.MD;
-        let cron: string;
-        if (Hours || Days || Minutes) {
-          cron = `${Minutes ? `*/${Minutes}` : '*'} ${Hours ? `*/${Hours}` : '*'} ${Days ? `*/${Days}` : '*'} * *`;
-        }
-        if (cron) {
-          const replaceSourceName = (text: string) => {
-            return text.replace(/\s/g, '').replace(/\*/g, '.').replace(/\//g, '_');
-          };
-          const source = replaceSourceName(`Recurring[${cron}]`);
-          const Name = replaceSourceName(`Recurring[${cron}]Rule`);
-          const EventPattern = `{"source": ["${source}"]}`;
-          const ScheduleExpression = `cron(${cron})`;
+        const { ScheduleType, RateValue, RateUnit, ExactTime, Cron } = workflowStep.ACT.MD;
 
-          const putRuleParams = {
-            Name,
-            EventPattern,
-            ScheduleExpression,
-          };
-          await putRuleEB(putRuleParams);
+        let Name: string;
+        let ScheduleExpression: string;
 
-          const Id = '1';
-          const {
-            Attributes: { QueueArn: queueArn },
-          } = await getSQSQueueAttributes(WORKFLOW_QUEUE_URL);
-          const Arn = queueArn;
-          const Input = JSON.stringify({
-            delayedDetail: getDetail,
-          });
-          const putTargetsParams = {
-            Rule: Name,
-            Targets: [
-              {
-                Id,
-                Arn,
-                Input,
-              },
-            ],
-          };
-          await putTargetsEB(putTargetsParams);
+        if (ScheduleType === 'Interval') {
+          let rateExpression: string;
+          if (RateUnit === 'Days') {
+            rateExpression = `${RateValue} ${RateValue === '1' ? 'day' : 'days'}`;
+          }
+          if (RateUnit === 'Hours') {
+            rateExpression = `${RateValue} ${RateValue === '1' ? 'hour' : 'hours'}`;
+          }
+          if (RateUnit === 'Minutes') {
+            rateExpression = `${RateValue} ${RateValue === '1' ? 'minute' : 'minutes'}`;
+          }
+
+          Name = `Timed[${getWorkflowStep.SK}]Rule`;
+          ScheduleExpression = `rate(${rateExpression})`;
         }
+
+        if (ScheduleType === 'Cron') {
+          Name = `Timed[${getWorkflowStep.SK}]Rule`;
+          ScheduleExpression = `cron(${Cron})`;
+        }
+
+        if (ScheduleType === 'Exact') {
+          const date = moment(ExactTime).utc();
+          const hours = date.hours();
+          const minutes = date.minutes();
+          const dayOfMonth = date.date();
+          const month = date.month() + 1;
+          const year = date.year();
+
+          Name = `Timed${getWorkflowStep.SK}Rule`;
+          ScheduleExpression = `cron(${minutes} ${hours} ${dayOfMonth} ${month} ? ${year})`;
+        }
+
+        const putRuleParams = {
+          Name,
+          ScheduleExpression,
+        };
+        await putRuleEB(putRuleParams);
+
+        const Id = '1';
+        const {
+          Attributes: { QueueArn: queueArn },
+        } = await getSQSQueueAttributes(WORKFLOW_QUEUE_URL);
+        const Arn = queueArn;
+        const Input = JSON.stringify({
+          delayedDetail: getDetail,
+        });
+
+        const putTargetsParams = {
+          Rule: Name,
+          Targets: [
+            {
+              Id,
+              Arn,
+              Input,
+            },
+          ],
+        };
+
+        await putTargetsEB(putTargetsParams);
       }
     }
   }

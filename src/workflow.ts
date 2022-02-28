@@ -87,7 +87,8 @@ export default class Workflow {
         currentWorkflowStep,
         OrgId,
         WorkflowVersionKeys,
-        wfExecKeys,
+        timedTrigger,
+        wfExecKeys: WorkflowExecKeys,
         WorkflowStepExecutionHistorySK,
         WLFN,
         ManualApproval,
@@ -96,6 +97,8 @@ export default class Workflow {
         payload,
         externalServiceDetails,
       }: IDetail = detail;
+
+      let wfExecKeys = WorkflowExecKeys;
 
       const act: CAT = {
         T: currentWorkflowStep?.ACT.T,
@@ -116,7 +119,21 @@ export default class Workflow {
         return;
       }
 
-      if (httpTrigger && httpTrigger.IsHttpTriggered && !externalService )
+      if (timedTrigger) {
+        const WSXH_SK = `WSXH|${OrgId}|Timed|${v4()}`;
+        const wfExec = await this.workflowExecutionService.createWorkflowExecution({
+          WorkflowVersionKeys: { PK: WorkflowVersionKeys.PK, SK: WorkflowVersionKeys.SK },
+          STE: '{}',
+          WSXH_IDS: [WSXH_SK],
+          STATUS: WorkflowExecStatus.Running,
+        });
+
+        wfExecKeys = { PK: wfExec.PK, SK: wfExec.SK };
+
+        await this.UpdateTimedTriggerStepStatus(OrgId, timedTrigger.ACT, timedTrigger.SK, wfExecKeys, WSXH_SK, WLFN);
+      }
+
+      if (httpTrigger && httpTrigger.IsHttpTriggered && !externalService)
         await this.UpdateHttpStepStatus(
           OrgId,
           httpTrigger.httpACT,
@@ -127,12 +144,14 @@ export default class Workflow {
         );
 
       if (isRerun) {
-        this.logger.log(`Rerunning: ${act.T} of workflow step "${currentWorkflowStep.SK}" of execution history "${WorkflowStepExecutionHistorySK}"`)
+        this.logger.log(
+          `Rerunning: ${act.T} of workflow step "${currentWorkflowStep.SK}" of execution history "${WorkflowStepExecutionHistorySK}"`,
+        );
         const result = await this.rerunWorkflowStepExecutionHistory(wfExecKeys, WorkflowStepExecutionHistorySK);
         wfExec = result.wfExec;
         wfStepExecHistory = result.wfStepExecHistory;
       } else {
-        this.logger.log("CREATING/UPDATING workflow execution & workflow step execution history");
+        this.logger.log('CREATING/UPDATING workflow execution & workflow step execution history');
         const result = await this.getCurrentWorkflowExecution(
           OrgId,
           act,
@@ -150,7 +169,7 @@ export default class Workflow {
           return;
         }
       }
-      
+
       if ((Object as any).values(ExternalActivityTypes).includes(act.T) && !externalService) {
         const activeWorkflowDetails = {
           ...detail,
@@ -160,7 +179,7 @@ export default class Workflow {
         await runExternalService(act, activeWorkflowDetails);
         return;
       }
-      
+
       let currentParallelIndex = (!isNaN(parallelIndex) && parallelIndex) || 0;
       let currentParallelIndexes = parallelIndexes || [];
 
@@ -185,7 +204,9 @@ export default class Workflow {
             const parsedSte = JSON.parse(wfExec.STE);
             const state = {
               ...parsedSte,
-              ...(httpTrigger && httpTrigger.IsHttpTriggered ? { [httpTrigger.httpACT.MD.Name]: { ...parsedSte.data, ...payload } } : {}),
+              ...(httpTrigger && httpTrigger.IsHttpTriggered
+                ? { [httpTrigger.httpACT.MD.Name]: { ...parsedSte.data, ...payload } }
+                : {}),
             };
 
             this.logger.log('================WF Execution State===============');
@@ -457,8 +478,8 @@ export default class Workflow {
           WorkflowName,
         );
 
-        return { pause: true }
-      };
+        return { pause: true };
+      }
       act.Status = WorkflowStepStatus.Started;
 
       wfExec = await this.workflowExecutionService.saveWorkflowExecution(wfExecKeys, {
@@ -512,6 +533,18 @@ export default class Workflow {
   }
 
   private async UpdateHttpStepStatus(
+    OrgId: string,
+    act: CAT,
+    CurrentWorkflowStepSK: string,
+    wfExecKeys: any,
+    WSXH_SK: string,
+    WorkflowName: string,
+  ) {
+    act.Status = WorkflowStepStatus.Finished;
+    await this.createStepExecHistory(OrgId, wfExecKeys.PK, WSXH_SK, act, CurrentWorkflowStepSK, WorkflowName);
+  }
+
+  private async UpdateTimedTriggerStepStatus(
     OrgId: string,
     act: CAT,
     CurrentWorkflowStepSK: string,
