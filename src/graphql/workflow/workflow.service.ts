@@ -382,12 +382,12 @@ export class WorkflowService {
             rateExpression = `${RateValue} ${RateValue === '1' ? 'minute' : 'minutes'}`;
           }
 
-          Name = `Timed[${getWorkflowStep.SK}]Rule`;
+          Name = `Timed.${getWorkflowStep.SK.replace('#', '')}.Rule`;
           ScheduleExpression = `rate(${rateExpression})`;
         }
 
         if (ScheduleType === 'Cron') {
-          Name = `Timed[${getWorkflowStep.SK}]Rule`;
+          Name = `Timed.${getWorkflowStep.SK.replace('#', '')}.Rule`;
           ScheduleExpression = `cron(${Cron})`;
         }
 
@@ -399,7 +399,7 @@ export class WorkflowService {
           const month = date.month() + 1;
           const year = date.year();
 
-          Name = `Timed${getWorkflowStep.SK}Rule`;
+          Name = `Timed.${getWorkflowStep.SK.replace('#', '')}.Rule`;
           ScheduleExpression = `cron(${minutes} ${hours} ${dayOfMonth} ${month} ? ${year})`;
         }
 
