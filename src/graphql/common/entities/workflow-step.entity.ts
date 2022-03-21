@@ -34,10 +34,6 @@ export class MD {
   @Field({ nullable: true })
   Status?: number;
 
-  // Timed
-  @Field({ nullable: true })
-  ScheduleType?: string;
-
   // Timed-Interval
   @Field({ nullable: true })
   RateValue?: string;
@@ -169,6 +165,10 @@ export class MD {
   @Field({ nullable: true })
   OrgId?: string;
 
+  // TIMED
+  @Field({ nullable: true })
+  ScheduleType?: string;
+
   // External Services
   @Field({ nullable: true })
   ExternalServiceAction?: string;
@@ -192,6 +192,10 @@ export class MD {
   // OCR
   @Field({ nullable: true })
   TesseractConfig?: string;
+
+  // RCE
+  @Field({ nullable: true })
+  code?: string;
 }
 
 @ObjectType()

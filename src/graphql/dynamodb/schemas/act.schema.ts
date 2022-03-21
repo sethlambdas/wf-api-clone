@@ -184,6 +184,10 @@ export const MDSchema = new Schema({
   TesseractConfig: {
     type: String,
   },
+  // RCE
+  code: {
+    type: String,
+  },
 });
 
 export const LabelSchema = new Schema({

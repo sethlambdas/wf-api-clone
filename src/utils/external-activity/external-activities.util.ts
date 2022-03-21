@@ -5,6 +5,7 @@ import Workflow from '../../workflow';
 export enum ExternalActivityTypes {
   EmailIngestion = 'Email Ingestion',
   OCR = 'OCR',
+  RCE = 'RCE'
 }
 
 export const runExternalService = async (act: CAT, activeWorkflowDetails: any) => {
