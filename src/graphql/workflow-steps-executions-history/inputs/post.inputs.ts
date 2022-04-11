@@ -25,6 +25,9 @@ export class CreateWorkflowStepExecutionHistoryInput extends OmitType(ACTInput, 
   @Field()
   Status: string;
 
+  @Field()
+  UQ_OVL: string;
+
   @Field((type) => Boolean, { defaultValue: false })
   END?: boolean;
 

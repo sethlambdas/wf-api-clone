@@ -12,3 +12,9 @@ export class ListAllManualApprovalInput extends PartialType(PaginationInput) {
   @Field({ nullable: true })
   LastKey?: string;
 }
+
+@InputType()
+export class ListWorkflowStepExecutionHistoryOfAnExecutionInput extends PartialType(PaginationInput) {
+  @Field({ nullable: true })
+  workflowExecutionPK?: string;
+}

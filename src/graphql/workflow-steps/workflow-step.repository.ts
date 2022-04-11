@@ -6,13 +6,14 @@ import { ConfigUtil } from '@lambdascrew/utility';
 import { GSI } from '../common/enums/gsi-names.enum';
 import { CompositePrimaryKeyInput } from '../common/inputs/workflow-key.input';
 import { CompositePrimaryKey } from '../common/interfaces/workflow-key.interface';
-import { GetWorkflowStepByAidInput } from './inputs/get-workflow-step-by-aid.input';
+
+import { GetWorkflowStepByAidInput } from './inputs/get.inputs';
 import { WorkflowStep } from './workflow-step.entity';
 
 @Injectable()
 export class WorkflowStepRepository {
   constructor(
-    @InjectModel(ConfigUtil.get('dynamodb.schema.workflow'))
+    @InjectModel(ConfigUtil.get('dynamodb.schema.workflowVersions'))
     private workflowStepModel: Model<WorkflowStep, CompositePrimaryKey>,
   ) {}
 

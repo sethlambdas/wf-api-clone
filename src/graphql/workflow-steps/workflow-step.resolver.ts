@@ -1,8 +1,10 @@
 import { Args, Mutation, Query, Resolver } from '@nestjs/graphql';
+
 import { CompositePrimaryKeyInput } from '../common/inputs/workflow-key.input';
-import { CreateWorkflowStepInput } from './inputs/create-workflow-step.input';
-import { GetWorkflowStepByAidInput } from './inputs/get-workflow-step-by-aid.input';
-import { SaveWorkflowStepInput } from './inputs/save-workflow-step.input';
+
+import { CreateWorkflowStepInput } from './inputs/post.inputs';
+import { GetWorkflowStepByAidInput } from './inputs/get.inputs';
+import { SaveWorkflowStepInput } from './inputs/put.inputs';
 import { WorkflowStep } from './workflow-step.entity';
 import { WorkflowStepService } from './workflow-step.service';
 

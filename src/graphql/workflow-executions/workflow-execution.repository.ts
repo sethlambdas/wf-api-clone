@@ -5,13 +5,14 @@ import { ConfigUtil } from '@lambdascrew/utility';
 
 import { CompositePrimaryKeyInput } from '../common/inputs/workflow-key.input';
 import { CompositePrimaryKey } from '../common/interfaces/workflow-key.interface';
-import { ListWorkflowExecutionsOfAVersionInput } from './inputs/get-workflow-executions-of-version.input';
+
+import { ListWorkflowExecutionsOfAVersionInput } from './inputs/get.inputs';
 import { WorkflowExecution } from './workflow-execution.entity';
 
 @Injectable()
 export class WorkflowExecutionRepository {
   constructor(
-    @InjectModel(ConfigUtil.get('dynamodb.schema.workflow'))
+    @InjectModel(ConfigUtil.get('dynamodb.schema.workflowExecutions'))
     private workflowExecutionModel: Model<WorkflowExecution, CompositePrimaryKey>,
   ) {}
 

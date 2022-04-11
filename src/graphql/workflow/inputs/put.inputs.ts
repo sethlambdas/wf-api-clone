@@ -1,5 +1,9 @@
-import { Field, InputType } from '@nestjs/graphql';
-import { VariableWorkflowInput } from './variable-workflow.input';
+import { Field, InputType, PartialType } from '@nestjs/graphql';
+import { VariableWorkflowInput } from './common.inputs';
+import { WorkflowModelRepository } from '../workflow.entity';
+
+@InputType()
+export class SaveWorkflowInput extends PartialType(WorkflowModelRepository, InputType) {}
 
 @InputType()
 export class StateWorkflowInput {

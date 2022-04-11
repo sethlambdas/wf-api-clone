@@ -1,8 +1,10 @@
-import { CompositePrimaryKeyInput } from '../../src/graphql/common/inputs/workflow-key.input';
-import { CreateWorkflowStepInput } from '../../src/graphql/workflow-steps/inputs/create-workflow-step.input';
-import { GetWorkflowStepByAidInput } from '../../src/graphql/workflow-steps/inputs/get-workflow-step-by-aid.input';
-import { SaveWorkflowStepInput } from '../../src/graphql/workflow-steps/inputs/save-workflow-step.input';
 import { initiateGraphqlRequest, setUpTesting, tearDownTesting } from '../test-e2e';
+
+import { CompositePrimaryKeyInput } from '../../src/graphql/common/inputs/workflow-key.input';
+
+import { CreateWorkflowStepInput } from '../../src/graphql/workflow-steps/inputs/post.inputs';
+import { GetWorkflowStepByAidInput } from '../../src/graphql/workflow-steps/inputs/get.inputs';
+import { SaveWorkflowStepInput } from '../../src/graphql/workflow-steps/inputs/put.inputs';
 
 const gql = {
   createWorkflowStepMutation: `

@@ -1,17 +1,15 @@
 import { Injectable } from '@nestjs/common';
 import _ from 'lodash';
 import { InjectModel, Model } from 'nestjs-dynamoose';
-
 import { ConfigUtil } from '@lambdascrew/utility';
 
 import { GSI } from '../common/enums/gsi-names.enum';
-import { CompositePrimaryKeyInput } from '../common/inputs/workflow-key.input';
 import { CompositePrimaryKey } from '../common/interfaces/workflow-key.interface';
-import { CreateWorkflowInputRepository } from './inputs/create-workflow.input';
-import { GetWorkflowByNameInput } from './inputs/get-workflow-by-name.input';
-import { ListWorkflowsOfAnOrgInput } from './inputs/list-workflows.input';
-import { SearchWorkflowsOfAnOrgInput } from './inputs/search-workflows.input';
-import { GetWorkflowByUniqueKeyInput } from './inputs/get-workflow-by-unique-key.input';
+import { CompositePrimaryKeyInput } from '../common/inputs/workflow-key.input';
+import { PrefixWorkflowKeys } from './workflows.enum';
+
+import { CreateWorkflowInputRepository } from './inputs/post.inputs';
+import { GetWorkflowsOfAnOrgInput, GetWorkflowByUniqueKeyInput } from './inputs/get.inputs';
 import { Status, WorkflowModelRepository } from './workflow.entity';
 
 @Injectable()
@@ -22,14 +20,12 @@ export class WorkflowRepository {
   ) {}
 
   async createWorkflow(createWorkflowInputRepository: CreateWorkflowInputRepository) {
-    const { WorkflowName, OrgId, WorkflowNumber, FAID, UQ_OVL } = createWorkflowInputRepository;
-
-    const newWorkflowNumber = WorkflowNumber + 1;
+    const { WorkflowName, OrgId, WorkflowBatchNumber, FAID, UQ_OVL } = createWorkflowInputRepository;
 
     const data = {
-      PK: `${OrgId}|WLF#${newWorkflowNumber}`,
-      SK: `WLF#${newWorkflowNumber}`,
-      DATA: `WLF#${WorkflowName}`,
+      PK: this.formWorkflowTablePK(OrgId, WorkflowBatchNumber),
+      SK: this.formWorkflowTableSK(WorkflowName),
+      DATA: this.formWorkflowTableSK(WorkflowName),
       WLFN: WorkflowName,
       FAID,
       STATUS: Status.ACTIVE,
@@ -50,14 +46,13 @@ export class WorkflowRepository {
     return results;
   }
 
-  async getWorkflowByName(getWorkflowByNameInput: GetWorkflowByNameInput) {
-    const { WorkflowName, OrgId } = getWorkflowByNameInput;
+  async getCurrentWorkflowsOfBatch(orgId: string, batchNumber: number) {
     return this.workflowModel
-      .query({ DATA: `WLF#${WorkflowName}` })
+      .query({ PK: `${orgId}|${PrefixWorkflowKeys.PK}#${batchNumber}` })
       .and()
-      .where('PK')
-      .beginsWith(OrgId)
-      .using(GSI.DataOverloading)
+      .where('SK')
+      .beginsWith('WLF#')
+      .count()
       .exec();
   }
 
@@ -74,77 +69,94 @@ export class WorkflowRepository {
     return results[0]
   }
 
-  async listWorkflowsOfAnOrg(listWorkflowsOfAnOrgInput: ListWorkflowsOfAnOrgInput) {
-    const { OrgId, TotalWLF, page, pageSize } = listWorkflowsOfAnOrgInput;
+  async getWorkflowByName(orgId: string, workflowName: string, TotalWLFBatches: number): Promise<WorkflowModelRepository> {
+    const result = await new Promise(async (resolve) => {
+      let searchNumber = 0; 
 
-    let results: any;
-    const readItems = [];
-    let wlfNumber = pageSize * page - pageSize + 1;
-    let index = 1;
+      const retrievedMatchedItems = async (startLoop: number, endLoop: number) => {
+        for (let currentBatchNumber = startLoop; currentBatchNumber <= endLoop; currentBatchNumber++) {
+          if (searchNumber === 2) return;
+          
+          const result = await this.workflowModel.get({ PK: this.formWorkflowTablePK(orgId, currentBatchNumber), SK: this.formWorkflowTableSK(workflowName) });
 
-    while (index <= pageSize && wlfNumber <= TotalWLF) {
-      readItems.push({
-        PK: `${OrgId}|WLF#${wlfNumber}`,
-        SK: `WLF#${wlfNumber}`,
-      });
+          if (result) {
+            searchNumber = 2;
+            return resolve(result)
+          };
+        }
+        
+        searchNumber += 1;
+        if (searchNumber === 2 || TotalWLFBatches === 1) resolve(null);
+      }
 
-      ++wlfNumber;
-      ++index;
-    }
+      if (TotalWLFBatches > 1) {
+        const half = Math.floor(TotalWLFBatches / 2);
+        retrievedMatchedItems(1, half);
+        retrievedMatchedItems(half + 1, TotalWLFBatches);
+      } else 
+        retrievedMatchedItems(1, 1);
+      
+    }) as WorkflowModelRepository;
 
-    if (readItems.length > 0) results = await this.runBatchGetItems(readItems);
-
-    if (results) return results;
-    else return [];
+    return result;
   }
 
-  async searchWorkflowsOfAnOrg(searchWorkflowsOfAnOrgInput: SearchWorkflowsOfAnOrgInput) {
-    const { OrgId, TotalWLF, page, pageSize, search } = searchWorkflowsOfAnOrgInput;
-
-    let results = [];
-    const readItems = [];
-    let wlfNumber = 1;
-    let totalRecords = 0;
-
-    while (wlfNumber <= TotalWLF) {
-      readItems.push({
-        PK: `${OrgId}|WLF#${wlfNumber}`,
-        SK: `WLF#${wlfNumber}`,
-      });
-
-      ++wlfNumber;
-    }
-
-    if (readItems.length > 0) results = await this.runBatchGetItems(readItems);
-
-    results = results.filter((result: WorkflowModelRepository) => {
-      return result.STATUS !== Status.DELETED;
-    });
+  async getWorkflowsOfAnOrg(getWorkflowsOfAnOrg: GetWorkflowsOfAnOrgInput & { TotalWLFBatches: number}) {
+    const { orgId, page, search, TotalWLFBatches } = getWorkflowsOfAnOrg;
 
     if (search) {
-      results = results.filter((result: WorkflowModelRepository) => {
-        return result.WLFN.toLowerCase().indexOf(search.toLowerCase()) > -1;
-      });
+      const result = await this.searchWorklowsWithFilter(orgId, TotalWLFBatches, search);
+      return result;
     }
 
-    if (page && pageSize) {
-      const totalPerRecords = results.length / pageSize;
-      totalRecords = Math.floor(totalPerRecords % 1 === 0 ? totalPerRecords : totalPerRecords + 1);
-      results = results.slice((page - 1) * pageSize, page * pageSize);
-    }
-
-    return {
-      Workflows: results,
-      TotalRecords: totalRecords,
-    };
+    return this.workflowModel
+      .query({ PK: this.formWorkflowTablePK(orgId,page) })
+      .and()
+      .where('SK')
+      .beginsWith('WLF#')
+      .exec();
   }
 
-  async runBatchGetItems(readItems: any) {
-    const response1 = await this.workflowModel.batchGet(readItems);
-    if (response1.unprocessedKeys.length > 0) {
-      const response2 = await this.runBatchGetItems(response1.unprocessedKeys);
-      return [...response1, ...response2];
+  private async searchWorklowsWithFilter(orgId: string, TotalWLFBatches: number, search: string) {
+    let searchNumber = 0;
+    let results = [];
+    
+    const retrievedMatchedItems = async (startLoop: number, endLoop: number, resolve: (value: unknown) => void) => {
+      let matchedItems = [];
+
+      for (let currentBatchNumber = startLoop; currentBatchNumber <= endLoop; currentBatchNumber++) {
+        const records = await this.workflowModel
+          .query({ PK: this.formWorkflowTablePK(orgId, currentBatchNumber) })
+          .and()
+          .where('SK')
+          .beginsWith(this.formWorkflowTableSK(search))
+          .exec();
+        
+        matchedItems = [...matchedItems, ...records];
+      }
+
+      results = [...results, ...matchedItems];
+      searchNumber += 1;
+      if (searchNumber === 2 || TotalWLFBatches === 1) return resolve(null);
     }
-    return [...response1];
+
+    await new Promise((resolve) => {
+      if (TotalWLFBatches > 1) {
+        const half = Math.floor(TotalWLFBatches / 2);
+        retrievedMatchedItems(1, half, resolve);
+        retrievedMatchedItems(half + 1, TotalWLFBatches, resolve);
+      } else 
+        retrievedMatchedItems(1, 1, resolve);
+    })
+
+    return results;
+  }
+
+  private formWorkflowTablePK(orgId: string, WorkflowBatchNumber: number) {
+    return `${orgId}|${PrefixWorkflowKeys.PK}#${WorkflowBatchNumber}`;
+  }
+
+  private formWorkflowTableSK(WorkflowName: string) {
+    return `${PrefixWorkflowKeys.SK}#${WorkflowName}`;
   }
 }

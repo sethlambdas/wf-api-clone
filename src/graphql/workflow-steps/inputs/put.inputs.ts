@@ -1,5 +1,6 @@
 import { InputType, PartialType } from '@nestjs/graphql';
-import { CreateWorkflowStepInput } from './create-workflow-step.input';
+
+import { CreateWorkflowStepInput } from './post.inputs';
 
 @InputType()
 export class SaveWorkflowStepInput extends PartialType(CreateWorkflowStepInput) {}

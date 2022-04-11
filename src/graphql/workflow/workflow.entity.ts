@@ -57,6 +57,12 @@ export class WorkflowModelRepository implements CompositePrimaryKey {
 
   @Field((type) => Status)
   STATUS: Status;
+
+  @Field()
+  UQ_OVL: string;
+
+  @Field({ nullable: true })
+  Error?: string
 }
 
 @ObjectType()
@@ -66,6 +72,18 @@ export class ListWorkflowsOfAnOrg {
 
   @Field((type) => Int, { nullable: true })
   TotalRecords?: number;
+
+  @Field({ nullable: true })
+  Error?: string;
+}
+
+@ObjectType()
+export class GetWorkflowsOfAnOrg {
+  @Field((type) => [WorkflowModelRepository], { nullable: true })
+  Workflows?: WorkflowModelRepository[];
+
+  @Field((type) => Int, { nullable: true })
+  TotalPages?: number;
 
   @Field({ nullable: true })
   Error?: string;

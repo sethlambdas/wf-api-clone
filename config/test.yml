@@ -4,6 +4,8 @@ dynamodb:
   schema:
     workflow: 'workflow_test'
     workflowOrganization: 'workflow_organizations_test'
+    workflowVersions: 'workflow-versions_test'
+    workflowExecutions: 'workflow-executions_test'
 
 jwt:
   secret: 'topSecretTest51'

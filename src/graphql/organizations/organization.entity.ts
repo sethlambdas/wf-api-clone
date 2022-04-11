@@ -6,7 +6,7 @@ export class APIKey {
 export class Organization {
   PK: string;
   ORGNAME: string;
-  TotalWLF: number;
+  TotalWLFBatches: number;
   TotalUSR: number;
   APIKEY: APIKey[];
 }

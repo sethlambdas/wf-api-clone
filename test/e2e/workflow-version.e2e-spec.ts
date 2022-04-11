@@ -1,12 +1,15 @@
 import { v4 } from 'uuid';
+
+import { initiateGraphqlRequest, setUpTesting, tearDownTesting } from '../test-e2e';
+
 import { SortDir } from '../../src/graphql/common/enums/sort-dir.enum';
 import { CompositePrimaryKeyInput } from '../../src/graphql/common/inputs/workflow-key.input';
-import { CreateWorkflowStepInput } from '../../src/graphql/workflow-steps/inputs/create-workflow-step.input';
-import { CreateWorkflowVersionInput } from '../../src/graphql/workflow-versions/inputs/create-workflow-version.input';
-import { GetWorkflowVersionDetailsInput } from '../../src/graphql/workflow-versions/inputs/get-workflow-version-details.input';
-import { ListAllWorkflowVersionsOfWorkflowInput } from '../../src/graphql/workflow-versions/inputs/read-queries.inputs';
-import { SaveWorkflowVersionInput } from '../../src/graphql/workflow-versions/inputs/save-workflow-version.input';
-import { initiateGraphqlRequest, setUpTesting, tearDownTesting } from '../test-e2e';
+
+import { CreateWorkflowStepInput } from '../../src/graphql/workflow-steps/inputs/post.inputs';
+
+import { CreateWorkflowVersionInput } from '../../src/graphql/workflow-versions/inputs/post.inputs';
+import { GetWorkflowVersionDetailsInput, ListAllWorkflowVersionsOfWorkflowInput } from '../../src/graphql/workflow-versions/inputs/get.inputs';
+import { SaveWorkflowVersionInput } from '../../src/graphql/workflow-versions/inputs/put.inputs';
 
 const gql = {
   createWorkflowVersionMutation: `

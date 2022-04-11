@@ -4,7 +4,7 @@ export const GET_ORGANIZATION = `
       PK
       ORGNAME
       TotalUSR
-      TotalWLF
+      TotalWLFBatches
     }
   }
 `;
@@ -15,7 +15,7 @@ export const SAVE_ORGANIZATION = `
       PK
       ORGNAME
       TotalUSR
-      TotalWLF
+      TotalWLFBatches
     }
   }
 `;

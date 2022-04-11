@@ -7,6 +7,7 @@ server:
 
 workflow:
   domain: http://localhost:8081
+  batchLimit: 10
 
 externalServices:
   imapEndpoint: http://localhost:3003
@@ -22,6 +23,8 @@ dynamodb:
   local: 'http://localhost:4566'
   schema:
     workflow: 'workflow'
+    workflowVersions: 'workflow-versions'
+    workflowExecutions: 'workflow-executions'
 
 jwt:
   secret: 'TokenSecret'

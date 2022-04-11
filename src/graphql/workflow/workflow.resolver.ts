@@ -1,11 +1,9 @@
 import { Args, Mutation, Query, Resolver } from '@nestjs/graphql';
-import { CreateWorkflowInput } from './inputs/create-workflow.input';
-import { GetWorkflowByNameInput } from './inputs/get-workflow-by-name.input';
-import { InitiateAWorkflowStepInput } from './inputs/initiate-step.input';
-import { ListWorkflowsOfAnOrgInput } from './inputs/list-workflows.input';
-import { SaveWorkflowInput } from './inputs/save-workflow.input';
-import { SearchWorkflowsOfAnOrgInput } from './inputs/search-workflows.input';
-import { CreateWorkflowResponse, ListWorkflowsOfAnOrg, WorkflowModelRepository } from './workflow.entity';
+
+import { CreateWorkflowInput, InitiateAWorkflowStepInput } from './inputs/post.inputs';
+import { GetWorkflowByNameInput, GetWorkflowsOfAnOrgInput } from './inputs/get.inputs';
+import { SaveWorkflowInput } from './inputs/put.inputs';
+import { CreateWorkflowResponse, GetWorkflowsOfAnOrg, WorkflowModelRepository } from './workflow.entity';
 import { WorkflowService } from './workflow.service';
 
 @Resolver()
@@ -34,15 +32,8 @@ export class WorkflowResolver {
     return this.workflowService.getWorkflowByName(getWorkflowByNameInput);
   }
 
-  @Query((returns) => ListWorkflowsOfAnOrg)
-  async ListWorkflowsOfAnOrg(@Args('listWorkflowsOfAnOrgInput') listWorkflowsOfAnOrgInput: ListWorkflowsOfAnOrgInput) {
-    return this.workflowService.listWorkflowsOfAnOrg(listWorkflowsOfAnOrgInput);
-  }
-
-  @Query((returns) => ListWorkflowsOfAnOrg)
-  async SearchWorkflowsOfAnOrg(
-    @Args('searchWorkflowsOfAnOrgInput') searchWorkflowsOfAnOrgInput: SearchWorkflowsOfAnOrgInput,
-  ) {
-    return this.workflowService.searchWorkflowsOfAnOrg(searchWorkflowsOfAnOrgInput);
+  @Query((returns) => GetWorkflowsOfAnOrg)
+  async GetWorkflowsOfAnOrg(@Args('getWorkflowsOfAnOrgInput') getWorkflowsOfAnOrgInput: GetWorkflowsOfAnOrgInput) {
+    return this.workflowService.getWorkflowOfAnOrg(getWorkflowsOfAnOrgInput);
   }
 }

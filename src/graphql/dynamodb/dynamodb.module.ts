@@ -8,17 +8,29 @@ import { WorkflowStepExecutionHistorySchema } from '../workflow-steps-executions
 import { WorkflowStepSchema } from '../workflow-steps/workflow-step.schema';
 import { WorkflowVersionSchema } from '../workflow-versions/workflow-version.schema';
 import { WorkflowSchema } from '../workflow/workflow.schema';
-import { SecondaryIndexes } from './schemas/secondary-index.schema';
+import { workflowSecondaryIndexes, workflowVersionsSecondaryIndexes, workflowExecutionsSecondaryIndexes } from './schemas/secondary-index.schema';
 
 const workflowModel = DynamooseModule.forFeature([
   {
     name: ConfigUtil.get('dynamodb.schema.workflow'),
     schema: [
-      SecondaryIndexes,
+      workflowSecondaryIndexes,
       WorkflowSchema,
+    ],
+  },
+  {
+    name: ConfigUtil.get('dynamodb.schema.workflowVersions'),
+    schema: [
+      workflowVersionsSecondaryIndexes,
       WorkflowVersionSchema,
-      WorkflowExecutionSchema,
       WorkflowStepSchema,
+    ],
+  },
+  {
+    name: ConfigUtil.get('dynamodb.schema.workflowExecutions'),
+    schema: [
+      workflowExecutionsSecondaryIndexes,
+      WorkflowExecutionSchema,
       WorkflowStepExecutionHistorySchema,
     ],
   },

@@ -1,6 +1,6 @@
 import { Field, InputType, PartialType } from '@nestjs/graphql';
 import { CompositePrimaryKeyInput } from '../../common/inputs/workflow-key.input';
-import { PARALLEL } from '../../workflow-executions/workflow-execution.entity';
+import { PARALLEL } from '../workflow-execution.entity';
 
 @InputType()
 class PARALLELInput extends PartialType(PARALLEL, InputType) {}

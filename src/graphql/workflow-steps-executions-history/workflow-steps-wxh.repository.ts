@@ -6,14 +6,14 @@ import { ConfigUtil } from '@lambdascrew/utility';
 import { GSI } from '../common/enums/gsi-names.enum';
 import { CompositePrimaryKeyInput } from '../common/inputs/workflow-key.input';
 import { CompositePrimaryKey } from '../common/interfaces/workflow-key.interface';
-import { ListAllManualApprovalInput } from './inputs/get-all-approval.input';
-import { ListWorkflowStepExecutionHistoryOfAnExecutionInput } from './inputs/list-workflow-execution-step-history-of-execution.input';
+
+import { ListAllManualApprovalInput, ListWorkflowStepExecutionHistoryOfAnExecutionInput } from './inputs/get.inputs';
 import { WorkflowStepExecutionHistory } from './workflow-steps-wxh.entity';
 
 @Injectable()
 export class WorkflowStepExecutionHistoryRepository {
   constructor(
-    @InjectModel(ConfigUtil.get('dynamodb.schema.workflow'))
+    @InjectModel(ConfigUtil.get('dynamodb.schema.workflowExecutions'))
     private workflowStepExecutionHistoryModel: Model<WorkflowStepExecutionHistory, CompositePrimaryKey>,
   ) {}
 

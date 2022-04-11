@@ -1,5 +1,11 @@
 import { Field, InputType, PartialType } from '@nestjs/graphql';
-import { ListDynamoSearchInput } from '../../dynamodb/inputs/list-dynamo-search.input';
+import { ListDynamoSearchInput } from '../../dynamodb/inputs/get.inputs';
+
+@InputType()
+export class GetWorkflowVersionDetailsInput {
+  @Field()
+  WorkflowVersionSK: string;
+}
 
 @InputType()
 export class ListAllWorkflowVersionsOfWorkflowInput extends PartialType(ListDynamoSearchInput) {

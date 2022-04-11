@@ -1,9 +1,8 @@
 import { Injectable } from '@nestjs/common';
-
 import { ConfigUtil } from '@lambdascrew/utility';
 
 import { HttpMethod, IGraphqlPayload, networkClient } from '../../utils/helpers/networkRequest.util';
-import { ListIntegrationAppsInput } from './inputs/list-integration-app.input';
+import { ListIntegrationAppsInput } from './inputs/get.inputs';
 import { IListIntegrationApps, IntegrationApp } from './integration-app.entity';
 import { LIST_INTEGRATION_APPS } from './integration-app.gql-queries';
 

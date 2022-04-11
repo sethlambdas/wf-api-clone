@@ -10,22 +10,24 @@ export const WorkflowSchema = new Schema(
       type: String,
       rangeKey: true,
     },
-    WLFN: {
-      type: String,
-    },
-    R: {
-      type: String,
-    },
-    DATA: {
-      type: String,
-    },
     FAID: {
+      type: String,
+    },
+    STATUS: {
+      type: String,
+    },
+    WLFN: {
       type: String,
     },
     UQ_OVL: {
       type: String,
     },
-    STATUS: {
+
+    // to be decided
+    R: {
+      type: String,
+    },
+    DATA: {
       type: String,
     },
   },

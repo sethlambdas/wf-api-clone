@@ -1,9 +1,13 @@
 import { v4 } from 'uuid';
+
 import { CompositePrimaryKeyInput } from '../../src/graphql/common/inputs/workflow-key.input';
-import { CreateWorkflowExecutionInput } from '../../src/graphql/workflow-executions/inputs/create-workflow-execution.input';
-import { ListWorkflowExecutionsOfAVersionInput } from '../../src/graphql/workflow-executions/inputs/get-workflow-executions-of-version.input';
-import { SaveWorkflowExecutionInput } from '../../src/graphql/workflow-executions/inputs/save-workflow-execution.input';
-import { CreateWorkflowVersionInput } from '../../src/graphql/workflow-versions/inputs/create-workflow-version.input';
+
+import { CreateWorkflowExecutionInput } from '../../src/graphql/workflow-executions/inputs/post.inputs';
+import { ListWorkflowExecutionsOfAVersionInput } from '../../src/graphql/workflow-executions/inputs/get.inputs';
+import { SaveWorkflowExecutionInput } from '../../src/graphql/workflow-executions/inputs/put.inputs';
+
+import { CreateWorkflowVersionInput } from '../../src/graphql/workflow-versions/inputs/post.inputs';
+
 import { initiateGraphqlRequest, setUpTesting, tearDownTesting } from '../test-e2e';
 
 const gql = {

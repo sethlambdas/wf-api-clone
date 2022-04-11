@@ -1,8 +1,9 @@
 import { Inject, Injectable, Logger } from '@nestjs/common';
 import { Response as Res } from 'express';
 import * as moment from 'moment';
-import { startCase } from 'lodash';
 import { v4 } from 'uuid';
+import { ConfigUtil } from '@lambdascrew/utility';
+
 import {
   formCreateEventParams,
   putEventsEB,
@@ -16,29 +17,31 @@ import { resolveMentionedVariables } from '../../utils/activity/web-service.util
 import { ExternalActivityTypes } from '../../utils/external-activity/external-activities.util';
 import { IDetail } from '../../utils/workflow-types/details.types';
 import Workflow from '../../workflow';
+
 import { ACT as TypeACT, DesignWorkflowInput } from '../common/entities/workflow-step.entity';
 import { CompositePrimaryKeyInput } from '../common/inputs/workflow-key.input';
-import { OrganizationService } from '../organizations/organization.service';
+
 import { CAT } from '../workflow-executions/workflow-execution.entity';
 import { WorkflowExecStatus } from '../workflow-executions/workflow-execution.enum';
-import { WorkflowExecutionService } from '../workflow-executions/workflow-execution.service';
-import { CreateWorkflowStepInput } from '../workflow-steps/inputs/create-workflow-step.input';
-import { GetWorkflowStepByAidInput } from '../workflow-steps/inputs/get-workflow-step-by-aid.input';
-import { SaveWorkflowStepInput } from '../workflow-steps/inputs/save-workflow-step.input';
+
 import { WorkflowStep } from '../workflow-steps/workflow-step.entity';
-import { WorkflowStepService } from '../workflow-steps/workflow-step.service';
-import { CreateWorkflowVersionInput } from '../workflow-versions/inputs/create-workflow-version.input';
-import { SaveWorkflowVersionInput } from '../workflow-versions/inputs/save-workflow-version.input';
-import { WorkflowVersionService } from '../workflow-versions/workflow-version.service';
-import { CreateWorkflowInput } from './inputs/create-workflow.input';
-import { GetWorkflowByNameInput } from './inputs/get-workflow-by-name.input';
-import { InitiateAWorkflowStepInput } from './inputs/initiate-step.input';
-import { ListWorkflowsOfAnOrgInput } from './inputs/list-workflows.input';
-import { SaveWorkflowInput } from './inputs/save-workflow.input';
-import { SearchWorkflowsOfAnOrgInput } from './inputs/search-workflows.input';
-import { StateWorkflowInput } from './inputs/state-workflow.input';
-import { CreateWorkflowResponse, ListWorkflowsOfAnOrg } from './workflow.entity';
+import { CreateWorkflowStepInput } from '../workflow-steps/inputs/post.inputs';
+import { GetWorkflowStepByAidInput } from '../workflow-steps/inputs/get.inputs';
+import { SaveWorkflowStepInput } from '../workflow-steps/inputs/put.inputs';
+
+import { CreateWorkflowVersionInput } from '../workflow-versions/inputs/post.inputs';
+import { SaveWorkflowVersionInput } from '../workflow-versions/inputs/put.inputs';
+
+import { CreateWorkflowResponse, GetWorkflowsOfAnOrg, Status, WorkflowModelRepository } from './workflow.entity';
+import { CreateWorkflowInput, InitiateAWorkflowStepInput } from './inputs/post.inputs';
+import { GetWorkflowByNameInput, GetWorkflowsOfAnOrgInput } from './inputs/get.inputs';
+import { StateWorkflowInput, SaveWorkflowInput } from './inputs/put.inputs';
+
 import { WorkflowRepository } from './workflow.repository';
+import { OrganizationService } from '../organizations/organization.service';
+import { WorkflowVersionService } from '../workflow-versions/workflow-version.service';
+import { WorkflowStepService } from '../workflow-steps/workflow-step.service';
+import { WorkflowExecutionService } from '../workflow-executions/workflow-execution.service';
 
 @Injectable()
 export class WorkflowService {
@@ -60,16 +63,24 @@ export class WorkflowService {
     let FAID = '';
     const workflowStepInputs: CreateWorkflowStepInput[] = [];
     let executeWorkflowStepKey: { PK: string; SK: string };
+    const workflowNameAsSK = `WLF#${WorkflowName}`;
 
     if (!WorkflowId) {
-      const getWorkflowName = await this.getWorkflowByName({ WorkflowName, OrgId });
-      if (getWorkflowName) return { IsWorkflowNameExist: true };
-
       this.logger.log(`FINDING FOR ORGANIZATION: ${OrgId}`);
       const organization = await this.organizationService.getOrganization({ PK: OrgId });
       if (!organization) return { Error: 'Organization not existing' };
+
+      const getWorkflowName = await this.workflowRepository.getWorkflowByName(OrgId, WorkflowName, organization.TotalWLFBatches);
+      if (getWorkflowName) return { IsWorkflowNameExist: true };
+
       this.logger.log(organization);
-      await this.organizationService.saveOrganization({ PK: OrgId, TotalWLF: organization.TotalWLF + 1 });
+      const currentBatchWLFCount = await this.workflowRepository.getCurrentWorkflowsOfBatch(OrgId, organization.TotalWLFBatches);
+      let TotalWLFBatches = organization.TotalWLFBatches;
+
+      if (currentBatchWLFCount.count >= ConfigUtil.get('workflow.batchLimit')) {
+        TotalWLFBatches += 1;
+        await this.organizationService.saveOrganization({ PK: OrgId, TotalWLFBatches });
+      }
 
       this.logger.log('CREATING WORKFLOW');
       const httpTriggerState = States.find((state) => state.ActivityType === TriggerTypes.HTTP);
@@ -83,10 +94,11 @@ export class WorkflowService {
       const workflow = await this.workflowRepository.createWorkflow({
         OrgId,
         WorkflowName,
-        WorkflowNumber: organization.TotalWLF,
+        WorkflowBatchNumber: TotalWLFBatches,
         FAID: '',
         UQ_OVL: workflowTriggerId,
       });
+
       this.logger.log(workflow);
       WLFID = workflow.PK;
     } else {
@@ -186,7 +198,7 @@ export class WorkflowService {
       { PK: workflowVersion.PK, SK: workflowVersion.SK },
       saveWorkflowVersionInput,
     );
-    await this.workflowRepository.saveWorkflow({ PK: WLFID, SK: WLFID.split('|')[1] }, { FAID });
+    await this.workflowRepository.saveWorkflow({ PK: WLFID, SK: workflowNameAsSK }, { FAID });
 
     await this.executeWorkflowEB(
       OrgId,
@@ -198,7 +210,7 @@ export class WorkflowService {
     return {
       WorkflowKeys: {
         PK: WLFID,
-        SK: WLFID.split('|', 2)[1],
+        SK: workflowNameAsSK,
       },
       WorkflowVersionKeys: {
         PK: workflowVersion.PK,
@@ -472,38 +484,33 @@ export class WorkflowService {
     return this.workflowRepository.getWorkflowByKey(workflowKeysInput);
   }
 
-  async getWorkflowByName(getWorkflowByNameInput: GetWorkflowByNameInput) {
-    const result = await this.workflowRepository.getWorkflowByName(getWorkflowByNameInput);
-    return result[0];
-  }
+  async getWorkflowByName(getWorkflowByNameInput: GetWorkflowByNameInput): Promise<WorkflowModelRepository> {
+    const { OrgId, WorkflowName } = getWorkflowByNameInput;
 
-  async listWorkflowsOfAnOrg(listWorkflowsOfAnOrgInput: ListWorkflowsOfAnOrgInput): Promise<ListWorkflowsOfAnOrg> {
-    const organization = await this.organizationService.getOrganization({ PK: listWorkflowsOfAnOrgInput.OrgId });
+    const organization = await this.organizationService.getOrganization({ PK: OrgId });
+    if (!organization) return { 
+      PK: '',
+      SK: '',
+      WLFN: '',
+      DATA: '',
+      FAID: '',
+      STATUS: Status.INACTIVE,
+      UQ_OVL: '',
+      Error: 'Organization not existing'
+     };
 
-    if (!organization) return { Error: 'Organization not existing' };
-
-    listWorkflowsOfAnOrgInput.TotalWLF = organization.TotalWLF;
-
-    const result: any = await this.workflowRepository.listWorkflowsOfAnOrg(listWorkflowsOfAnOrgInput);
-
-    return {
-      Workflows: result,
-      TotalRecords: organization.TotalWLF,
-    };
-  }
-
-  async searchWorkflowsOfAnOrg(
-    searchWorkflowsOfAnOrgInput: SearchWorkflowsOfAnOrgInput,
-  ): Promise<ListWorkflowsOfAnOrg> {
-    const organization = await this.organizationService.getOrganization({ PK: searchWorkflowsOfAnOrgInput.OrgId });
-
-    if (!organization) return { Error: 'Organization not existing' };
-
-    searchWorkflowsOfAnOrgInput.TotalWLF = organization.TotalWLF + (process.env.NODE_ENV === 'test' ? 1 : 0);
-
-    const result = await this.workflowRepository.searchWorkflowsOfAnOrg(searchWorkflowsOfAnOrgInput);
-
+    const result = await this.workflowRepository.getWorkflowByName(OrgId, WorkflowName, organization.TotalWLFBatches);
+    
     return result;
+  }
+
+  async getWorkflowOfAnOrg(getWorkflowsOfAnOrg: GetWorkflowsOfAnOrgInput): Promise<GetWorkflowsOfAnOrg> {
+    const organization = await this.organizationService.getOrganization({ PK: getWorkflowsOfAnOrg.orgId });
+    if (!organization) return { Error: 'Organization not existing' };
+
+    const result = await this.workflowRepository.getWorkflowsOfAnOrg({ ...getWorkflowsOfAnOrg, TotalWLFBatches: organization.TotalWLFBatches });
+    
+    return { Workflows: result, TotalPages: getWorkflowsOfAnOrg.search ? 0 : organization.TotalWLFBatches };
   }
 
   async trigger(res: Res, params: string[], payload: any): Promise<any> {
@@ -579,14 +586,9 @@ export class WorkflowService {
 
         const WorkflowPKSplit = workflowVersion.PK.split('|');
         const OrgId = WorkflowPKSplit[0];
-        const WorkflowSK = WorkflowPKSplit[1];
-        const getWorkflow = await this.workflowRepository.getWorkflowByKey({
-          PK: workflowVersion.PK,
-          SK: WorkflowSK,
-        });
         const detail: IDetail = {
           currentWorkflowStep: getWorkflowStep,
-          WLFN: getWorkflow.WLFN,
+          WLFN: workflow.WLFN,
           WorkflowVersionKeys: {
             PK: workflowVersion.PK,
             SK: workflowVersion.SK,

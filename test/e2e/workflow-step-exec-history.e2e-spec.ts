@@ -1,10 +1,12 @@
-import { CompositePrimaryKeyInput } from '../../src/graphql/common/inputs/workflow-key.input';
-import { CreateWorkflowStepExecutionHistoryInput } from '../../src/graphql/workflow-steps-executions-history/inputs/create.input';
-import { ListAllManualApprovalInput } from '../../src/graphql/workflow-steps-executions-history/inputs/get-all-approval.input';
-import { SaveWorkflowStepExecutionHistoryInput } from '../../src/graphql/workflow-steps-executions-history/inputs/save.input';
-import { CreateWorkflowInput } from '../../src/graphql/workflow/inputs/create-workflow.input';
-import { CreateWorkflowResponse } from '../../src/graphql/workflow/workflow.entity';
 import { initiateGraphqlRequest, setUpTesting, tearDownTesting } from '../test-e2e';
+
+import { CompositePrimaryKeyInput } from '../../src/graphql/common/inputs/workflow-key.input';
+import { CreateWorkflowInput } from '../../src/graphql/workflow/inputs/post.inputs';
+import { CreateWorkflowResponse } from '../../src/graphql/workflow/workflow.entity';
+
+import { CreateWorkflowStepExecutionHistoryInput } from '../../src/graphql/workflow-steps-executions-history/inputs/post.inputs';
+import { ListAllManualApprovalInput } from '../../src/graphql/workflow-steps-executions-history/inputs/get.inputs';
+import { SaveWorkflowStepExecutionHistoryInput } from '../../src/graphql/workflow-steps-executions-history/inputs/put.inputs';
 
 const gql = {
   CreateOrganization: `
@@ -154,6 +156,7 @@ const createWorkflowStepExecutionHistoryInput: CreateWorkflowStepExecutionHistor
   WorkflowStepSK: 'WS#1234',
   WLFN: WorkflowName,
   Status: 'Started',
+  UQ_OVL: 'Started',
 };
 
 const workflowStepExecutionHistoryKeyInput: CompositePrimaryKeyInput = {

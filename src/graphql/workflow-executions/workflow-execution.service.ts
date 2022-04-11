@@ -1,11 +1,13 @@
 import { Inject, Injectable } from '@nestjs/common';
+
 import { CompositePrimaryKeyInput } from '../common/inputs/workflow-key.input';
 import { WorkflowVersionService } from '../workflow-versions/workflow-version.service';
-import { CreateWorkflowExecutionInput } from './inputs/create-workflow-execution.input';
-import { ListWorkflowExecutionsOfAVersionInput } from './inputs/get-workflow-executions-of-version.input';
-import { SaveWorkflowExecutionInput } from './inputs/save-workflow-execution.input';
-import { ListWorkflowExecution, WorkflowExecution } from './workflow-execution.entity';
+
 import { WorkflowExecStatus } from './workflow-execution.enum';
+import { CreateWorkflowExecutionInput } from './inputs/post.inputs';
+import { ListWorkflowExecutionsOfAVersionInput } from './inputs/get.inputs';
+import { SaveWorkflowExecutionInput } from './inputs/put.inputs';
+import { ListWorkflowExecution, WorkflowExecution } from './workflow-execution.entity';
 import { WorkflowExecutionRepository } from './workflow-execution.repository';
 
 @Injectable()

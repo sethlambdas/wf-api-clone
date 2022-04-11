@@ -1,6 +1,7 @@
 import { Field, InputType, Int } from '@nestjs/graphql';
 import { DesignWorkflowInput } from '../../common/entities/workflow-step.entity';
-import { StateWorkflowInput } from './state-workflow.input';
+import { CompositePrimaryKeyInput } from '../../common/inputs/workflow-key.input';
+import { StateWorkflowInput } from './put.inputs';
 
 @InputType()
 export class CreateWorkflowInputRepository {
@@ -11,7 +12,7 @@ export class CreateWorkflowInputRepository {
   WorkflowName: string;
 
   @Field((type) => Int)
-  WorkflowNumber: number;
+  WorkflowBatchNumber: number;
 
   @Field()
   FAID: string;
@@ -39,4 +40,31 @@ export class CreateWorkflowInput {
 
   @Field((type) => [StateWorkflowInput])
   States: StateWorkflowInput[];
+}
+
+@InputType()
+export class InitiateAWorkflowStepInput {
+  @Field()
+  WorkflowStepKeys: CompositePrimaryKeyInput;
+
+  @Field()
+  WorkflowExecutionKeys: CompositePrimaryKeyInput;
+
+  @Field()
+  WorkflowStepExecutionHistorySK: string;
+
+  @Field()
+  OrgId: string;
+
+  @Field()
+  WorkflowName: string;
+
+  @Field()
+  ActivityType: string;
+
+  @Field({ nullable: true })
+  Approve?: boolean;
+
+  @Field({ nullable: true })
+  isRerun?: boolean;
 }

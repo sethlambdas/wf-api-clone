@@ -1,12 +1,13 @@
 import { Inject, Injectable } from '@nestjs/common';
 import { v4 } from 'uuid';
+
 import { ACT as TypeACT, DesignWorkflow } from '../common/entities/workflow-step.entity';
 import { CompositePrimaryKey } from '../common/interfaces/workflow-key.interface';
 import { WorkflowStepService } from '../workflow-steps/workflow-step.service';
-import { CreateWorkflowVersionInput } from './inputs/create-workflow-version.input';
-import { GetWorkflowVersionDetailsInput } from './inputs/get-workflow-version-details.input';
-import { ListAllWorkflowVersionsOfWorkflowInput } from './inputs/read-queries.inputs';
-import { SaveWorkflowVersionInput } from './inputs/save-workflow-version.input';
+
+import { CreateWorkflowVersionInput } from './inputs/post.inputs';
+import { GetWorkflowVersionDetailsInput, ListAllWorkflowVersionsOfWorkflowInput } from './inputs/get.inputs';
+import { SaveWorkflowVersionInput } from './inputs/put.inputs';
 import { ListWorkflowVersions, WorkflowVersion, WorkflowVersionDetails } from './workflow-version.entity';
 import { WorkflowVersionRepository } from './workflow-version.repository';
 

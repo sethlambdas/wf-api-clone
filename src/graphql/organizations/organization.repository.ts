@@ -54,7 +54,7 @@ export class OrganizationRepository {
       PK: 'ORG#1234',
       ORGNAME: 'TestOrgName',
       TotalUSR: 0,
-      TotalWLF: 1,
+      TotalWLFBatches: 1,
       APIKEY: [],
     };
   }

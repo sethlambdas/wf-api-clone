@@ -1,11 +1,3 @@
-import { CreateWorkflowStepInput } from '../../src/graphql/workflow-steps/inputs/create-workflow-step.input';
-import { CreateWorkflowInput } from '../../src/graphql/workflow/inputs/create-workflow.input';
-import { GetWorkflowByNameInput } from '../../src/graphql/workflow/inputs/get-workflow-by-name.input';
-import { InitiateAWorkflowStepInput } from '../../src/graphql/workflow/inputs/initiate-step.input';
-import { ListWorkflowsOfAnOrgInput } from '../../src/graphql/workflow/inputs/list-workflows.input';
-import { SaveWorkflowInput } from '../../src/graphql/workflow/inputs/save-workflow.input';
-import { SearchWorkflowsOfAnOrgInput } from '../../src/graphql/workflow/inputs/search-workflows.input';
-import { Status } from '../../src/graphql/workflow/workflow.entity';
 import {
   initiateGraphqlRequest,
   organizationService,
@@ -16,6 +8,13 @@ import {
   workflowStepService,
   workflowVersionService,
 } from '../test-e2e';
+
+import { CreateWorkflowStepInput } from '../../src/graphql/workflow-steps/inputs/post.inputs';
+
+import { CreateWorkflowInput, InitiateAWorkflowStepInput } from '../../src/graphql/workflow/inputs/post.inputs';
+import { GetWorkflowByNameInput, GetWorkflowsOfAnOrgInput } from '../../src/graphql/workflow/inputs/get.inputs';
+import { SaveWorkflowInput } from '../../src/graphql/workflow/inputs/put.inputs';
+import { Status } from '../../src/graphql/workflow/workflow.entity';
 
 const gql = {
   createWorkflowMutation: `
@@ -64,30 +63,16 @@ const gql = {
       InitiateAWorkflowStep (initiateAWorkflowStepInput: $initiateAWorkflowStepInput)
     }
   `,
-  listWorkflowsOfAnOrg: `
-    query ListWorkflowsOfAnOrg($listWorkflowsOfAnOrgInput: ListWorkflowsOfAnOrgInput!) {
-      ListWorkflowsOfAnOrg(listWorkflowsOfAnOrgInput: $listWorkflowsOfAnOrgInput) {
+  getWorkflowsOfAnOrg: `
+    query GetWorkflowsOfAnOrg($getWorkflowsOfAnOrgInput: GetWorkflowsOfAnOrgInput!) {
+      GetWorkflowsOfAnOrg(getWorkflowsOfAnOrgInput: $getWorkflowsOfAnOrgInput) {
         Workflows {
           PK
           SK
           WLFN
-          DATA
+          UQ_OVL
         }
-        TotalRecords
-        Error
-      }
-    }
-  `,
-  searchWorkflowsOfAnOrg: `
-    query SearchWorkflowsOfAnOrg($searchWorkflowsOfAnOrgInput: SearchWorkflowsOfAnOrgInput!) {
-      SearchWorkflowsOfAnOrg(searchWorkflowsOfAnOrgInput: $searchWorkflowsOfAnOrgInput) {
-        Workflows {
-          PK
-          SK
-          WLFN
-          DATA
-        }
-        TotalRecords
+        TotalPages
         Error
       }
     }
@@ -171,17 +156,15 @@ const initiateAWorkflowStepInput: InitiateAWorkflowStepInput = {
   Approve: true,
 };
 
-const listWorkflowsOfAnOrgInput: ListWorkflowsOfAnOrgInput = {
-  OrgId: 'ORG#1234',
-  page: 1,
-  pageSize: 2,
+const getWorkflowsOfAnOrgInput: GetWorkflowsOfAnOrgInput = {
+  orgId: 'ORG#1234',
+  page: 1
 };
 
-const searchWorkflowsOfAnOrgInput: SearchWorkflowsOfAnOrgInput = {
-  search: WorkflowName,
-  OrgId: 'ORG#1234',
+const getWorkflowsOfAnOrgWithFilterInput: GetWorkflowsOfAnOrgInput = {
+  orgId: 'ORG#1234',
   page: 1,
-  pageSize: 2,
+  search: WorkflowName
 };
 
 const saveWorkflowInput: SaveWorkflowInput = {
@@ -247,21 +230,11 @@ describe('WorkflowResolver (e2e)', () => {
       saveWorkflowInput.PK = data.GetWorkflowByName.PK;
       saveWorkflowInput.SK = data.GetWorkflowByName.SK;
       expect(data.GetWorkflowByName).toEqual({
-        PK: `${orgId}|WLF#2`,
-        SK: 'WLF#2',
+        PK: `${orgId}|WLF-BATCH#1`,
+        SK: `WLF#${WorkflowName}`,
         WLFN: WorkflowName,
         DATA: `WLF#${WorkflowName}`,
       });
-    });
-  });
-
-  describe('searchWorkflowsOfAnOrg', () => {
-    it('should search workflows of an organization', async () => {
-      const data = await initiateGraphqlRequest(gql.searchWorkflowsOfAnOrg, { searchWorkflowsOfAnOrgInput });
-      expect(data.SearchWorkflowsOfAnOrg.Workflows[0].SK).toEqual('WLF#2');
-      expect(data.SearchWorkflowsOfAnOrg.Workflows[0].WLFN).toEqual(WorkflowName);
-      expect(data.SearchWorkflowsOfAnOrg.TotalRecords).toEqual(1);
-      expect(data.SearchWorkflowsOfAnOrg.Error).toEqual(null);
     });
   });
 
@@ -292,11 +265,19 @@ describe('WorkflowResolver (e2e)', () => {
     });
   });
 
-  describe('listWorkflowsOfAnOrg', () => {
+  describe('getWorkflowsOfAnOrg', () => {
     it('should list workflows of an organization', async () => {
-      const data = await initiateGraphqlRequest(gql.listWorkflowsOfAnOrg, { listWorkflowsOfAnOrgInput });
-      expect(data.ListWorkflowsOfAnOrg.TotalRecords).toEqual(1);
-      expect(data.ListWorkflowsOfAnOrg.Error).toEqual(null);
+      const data = await initiateGraphqlRequest(gql.getWorkflowsOfAnOrg, { getWorkflowsOfAnOrgInput });
+      expect(data.GetWorkflowsOfAnOrg.Workflows.length).toEqual(1);
+      expect(data.GetWorkflowsOfAnOrg.Error).toEqual(null);
+    });
+  });
+
+  describe('getWorkflowsOfAnOrg', () => {
+    it('should list workflows of an organization with search filter', async () => {
+      const data = await initiateGraphqlRequest(gql.getWorkflowsOfAnOrg, { getWorkflowsOfAnOrgInput: getWorkflowsOfAnOrgWithFilterInput });
+      expect(data.GetWorkflowsOfAnOrg.Workflows.length).toEqual(1);
+      expect(data.GetWorkflowsOfAnOrg.Error).toEqual(null);
     });
   });
 });

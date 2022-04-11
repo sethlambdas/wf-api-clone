@@ -1,13 +1,13 @@
 import { Inject, Injectable } from '@nestjs/common';
 import { v4 } from 'uuid';
+
 import { CompositePrimaryKeyInput } from '../common/inputs/workflow-key.input';
-import { WorkflowExecutionService } from '../workflow-executions/workflow-execution.service';
 import { WorkflowVersionService } from '../workflow-versions/workflow-version.service';
 import { WorkflowService } from '../workflow/workflow.service';
-import { CreateWorkflowStepExecutionHistoryInput } from './inputs/create.input';
-import { ListAllManualApprovalInput } from './inputs/get-all-approval.input';
-import { ListWorkflowStepExecutionHistoryOfAnExecutionInput } from './inputs/list-workflow-execution-step-history-of-execution.input';
-import { SaveWorkflowStepExecutionHistoryInput } from './inputs/save.input';
+
+import { CreateWorkflowStepExecutionHistoryInput } from './inputs/post.inputs';
+import { ListAllManualApprovalInput, ListWorkflowStepExecutionHistoryOfAnExecutionInput } from './inputs/get.inputs';
+import { SaveWorkflowStepExecutionHistoryInput } from './inputs/put.inputs';
 import {
   GetAllManualApproval,
   ListAllManualApprovalResponse,
@@ -39,7 +39,6 @@ export class WorkflowStepExecutionHistoryService {
 
     const workflowStepExecutionHistory = {
       ...inputs,
-      UQ_OVL: inputs.Status
     } as WorkflowStepExecutionHistory;
 
     if (!SK) {
