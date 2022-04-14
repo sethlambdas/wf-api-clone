@@ -3,3 +3,7 @@ export enum WorkflowExecStatus {
   Finished = 'Finished',
   Error = 'Error',
 }
+
+export enum PrefixWorkflowExecutionKeys {
+  SK = 'WX'
+}

@@ -11,6 +11,9 @@ export class GetWorkflowVersionDetailsInput {
 export class ListAllWorkflowVersionsOfWorkflowInput extends PartialType(ListDynamoSearchInput) {
   @Field()
   WorkflowPK: string;
+  
+  @Field()
+  WorkflowName: string;
 
   @Field({ nullable: true })
   LastKey?: string;

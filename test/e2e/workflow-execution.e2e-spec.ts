@@ -88,9 +88,11 @@ const gql = {
 };
 
 const OrgId = 'ORG#1234';
+const workflowName = 'testworkflowname';
 
 const createWorkflowVersionInput: CreateWorkflowVersionInput = {
-  WLFID: `${OrgId}|WLF#1`,
+  WorkflowPK: `${OrgId}|WLF-BATCH#1`,
+  WorkflowName: workflowName,
   WV: 1,
   FAID: '[1, 2, 3]',
   CID: v4(),

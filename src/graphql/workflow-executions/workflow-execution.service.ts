@@ -30,8 +30,8 @@ export class WorkflowExecutionService {
 
     await this.workflowVersionService.saveWorkflowVersion(WorkflowVersionKeys, { TotalEXC: newTotalEXC });
 
-    const PK = `${WorkflowVersionKeys.SK}|WX#${newTotalEXC}`;
-    const SK = `WX#${newTotalEXC}`;
+    const PK = this.workflowExecutionRepository.formWorkflowExecutionTablePK(WorkflowVersionKeys.SK, newTotalEXC);
+    const SK = this.workflowExecutionRepository.formWorkflowExecutionTableSK(newTotalEXC);
 
     const workflowExecution = {
       PK,

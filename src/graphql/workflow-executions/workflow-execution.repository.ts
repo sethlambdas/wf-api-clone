@@ -8,6 +8,7 @@ import { CompositePrimaryKey } from '../common/interfaces/workflow-key.interface
 
 import { ListWorkflowExecutionsOfAVersionInput } from './inputs/get.inputs';
 import { WorkflowExecution } from './workflow-execution.entity';
+import { PrefixWorkflowExecutionKeys } from './workflow-execution.enum';
 
 @Injectable()
 export class WorkflowExecutionRepository {
@@ -44,8 +45,8 @@ export class WorkflowExecutionRepository {
       wlfExecNumber = pageSize * page - pageSize + 1;
       while (index <= pageSize && wlfExecNumber <= TotalEXC) {
         readItems.push({
-          PK: `${workflowVersionSK}|WX#${wlfExecNumber}`,
-          SK: `WX#${wlfExecNumber}`,
+          PK: this.formWorkflowExecutionTablePK(workflowVersionSK, wlfExecNumber),
+          SK: this.formWorkflowExecutionTableSK(wlfExecNumber),
         });
 
         ++wlfExecNumber;
@@ -57,8 +58,8 @@ export class WorkflowExecutionRepository {
       wlfExecNumber = totalExcPages + pageSize;
       while (index <= pageSize && wlfExecNumber >= 0) {
         readItems.push({
-          PK: `${workflowVersionSK}|WX#${wlfExecNumber}`,
-          SK: `WX#${wlfExecNumber}`,
+          PK: this.formWorkflowExecutionTablePK(workflowVersionSK, wlfExecNumber),
+          SK: this.formWorkflowExecutionTableSK(wlfExecNumber),
         });
 
         --wlfExecNumber;
@@ -79,5 +80,13 @@ export class WorkflowExecutionRepository {
       return [...response1, ...response2];
     }
     return [...response1];
+  }
+
+  formWorkflowExecutionTablePK(workflowVersionSK: string, execNum: number) {
+    return `${workflowVersionSK}|${PrefixWorkflowExecutionKeys.SK}#${execNum}`;
+  }
+
+  formWorkflowExecutionTableSK(execNum: number) {
+    return `${PrefixWorkflowExecutionKeys.SK}#${execNum}`;
   }
 }

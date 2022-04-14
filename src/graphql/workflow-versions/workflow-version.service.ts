@@ -20,11 +20,10 @@ export class WorkflowVersionService {
   ) {}
 
   async createWorkflowVersion(createWorkflowVersionInput: CreateWorkflowVersionInput) {
-    const { WLFID, CID, WV, FAID } = createWorkflowVersionInput;
-    const WVID = v4();
-    const SK = `WV#${WVID}`;
+    const { WorkflowPK, WorkflowName, CID, WV, FAID } = createWorkflowVersionInput;
+    const SK = this.workflowVersionRepository.formWorkflowVersionsTableSK(v4());
     const workflowVersion = {
-      PK: WLFID,
+      PK: this.workflowVersionRepository.formWorkflowVersionsTablePK(WorkflowPK, WorkflowName),
       SK,
       CID,
       WV,

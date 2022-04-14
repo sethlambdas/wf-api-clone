@@ -111,9 +111,12 @@ const gql = {
 };
 
 const OrgId = 'ORG#1234';
+const workflowBatch = 'WLF-BATCH#1';
+const workflowName = 'TestWorkflowName';
 
 const createWorkflowVersionInput: CreateWorkflowVersionInput = {
-  WLFID: `${OrgId}|WLF#1`,
+  WorkflowPK: `${OrgId}|${workflowBatch}`,
+  WorkflowName: workflowName,
   WV: 1,
   FAID: '[1, 2, 3]',
   CID: v4(),
@@ -138,6 +141,8 @@ const getWorkflowVersionDetailsInput: GetWorkflowVersionDetailsInput = {
   WorkflowVersionSK: createWorkflowStepInput.WorkflowVersionSK,
 };
 
+const expectWorkflowVersionPK = `${createWorkflowVersionInput.WorkflowPK}||WLF#${createWorkflowVersionInput.WorkflowName}`;
+
 describe('WorkflowVersionResolver (e2e)', () => {
   beforeAll(async () => {
     await setUpTesting();
@@ -151,7 +156,7 @@ describe('WorkflowVersionResolver (e2e)', () => {
     it('should create the workflow version', async () => {
       const data = await initiateGraphqlRequest(gql.createWorkflowVersionMutation, { createWorkflowVersionInput });
 
-      expect(data.CreateWorkflowVersion.PK).toEqual(createWorkflowVersionInput.WLFID);
+      expect(data.CreateWorkflowVersion.PK).toEqual(expectWorkflowVersionPK);
       expect(data.CreateWorkflowVersion.WV).toEqual(createWorkflowVersionInput.WV);
       expect(data.CreateWorkflowVersion.FAID).toEqual(createWorkflowVersionInput.FAID);
       expect(data.CreateWorkflowVersion.CID).toEqual(createWorkflowVersionInput.CID);
@@ -166,7 +171,7 @@ describe('WorkflowVersionResolver (e2e)', () => {
     it('should get the specific workflow version', async () => {
       const data = await initiateGraphqlRequest(gql.getWorkflowVersionByKey, { workflowVersionKeysInput });
 
-      expect(data.GetWorkflowVersionByKey.PK).toEqual(createWorkflowVersionInput.WLFID);
+      expect(data.GetWorkflowVersionByKey.PK).toEqual(expectWorkflowVersionPK);
       expect(data.GetWorkflowVersionByKey.WV).toEqual(createWorkflowVersionInput.WV);
       expect(data.GetWorkflowVersionByKey.FAID).toEqual(createWorkflowVersionInput.FAID);
       expect(data.GetWorkflowVersionByKey.CID).toEqual(createWorkflowVersionInput.CID);
@@ -288,23 +293,28 @@ describe('WorkflowVersionResolver (e2e)', () => {
     let wlfVersion1: any;
     let wlfVersion2: any;
     const OrganizationId = 'ORG#6789';
+    const workflowName = 'testworkflowname';
+    const wlfPK = `${OrganizationId}|WLF-BATCH#1`;
 
     const inputs1: CreateWorkflowVersionInput = {
-      WLFID: `${OrganizationId}|WLF#1`,
+      WorkflowPK: wlfPK,
+      WorkflowName: workflowName,
       WV: 1,
       FAID: '[1, 2, 3]',
       CID: v4(),
     };
 
     const inputs2: CreateWorkflowVersionInput = {
-      WLFID: `${OrganizationId}|WLF#1`,
+      WorkflowPK: wlfPK,
+      WorkflowName: workflowName,
       WV: 2,
       FAID: '[1, 2, 3]',
       CID: v4(),
     };
 
     const listAllWorkflowVersionsOfWorkflowInput: ListAllWorkflowVersionsOfWorkflowInput = {
-      WorkflowPK: inputs1.WLFID,
+      WorkflowPK: wlfPK,
+      WorkflowName: workflowName,
       page: 1,
       pageSize: 2,
       sortBy: ['WV'],

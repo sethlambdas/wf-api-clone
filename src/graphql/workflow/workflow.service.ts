@@ -57,15 +57,19 @@ export class WorkflowService {
   ) {}
 
   async createWorkflow(createWorkflowInput: CreateWorkflowInput): Promise<CreateWorkflowResponse> {
-    const { WorkflowId, Design, StartAt, States, WorkflowName, OrgId } = createWorkflowInput;
+    const { WorkflowPK, Design, StartAt, States, WorkflowName, OrgId } = createWorkflowInput;
     let WV = 1;
-    let WLFID = '';
     let FAID = '';
+    let wlfPK = '';
     const workflowStepInputs: CreateWorkflowStepInput[] = [];
     let executeWorkflowStepKey: { PK: string; SK: string };
     const workflowNameAsSK = `WLF#${WorkflowName}`;
 
-    if (!WorkflowId) {
+    if (WorkflowPK && WorkflowName) {
+      const { TotalRecords } = await this.workflowVersionService.listAllWorkflowVersionsOfWorkflow({ WorkflowPK, WorkflowName });
+      wlfPK = WorkflowPK;
+      WV = TotalRecords + 1;
+    } else {
       this.logger.log(`FINDING FOR ORGANIZATION: ${OrgId}`);
       const organization = await this.organizationService.getOrganization({ PK: OrgId });
       if (!organization) return { Error: 'Organization not existing' };
@@ -98,17 +102,9 @@ export class WorkflowService {
         FAID: '',
         UQ_OVL: workflowTriggerId,
       });
-
-      this.logger.log(workflow);
-      WLFID = workflow.PK;
-    } else {
-      WLFID = WorkflowId;
-      const { TotalRecords } = await this.workflowVersionService.listAllWorkflowVersionsOfWorkflow({
-        WorkflowPK: WLFID,
-        page: 1,
-        pageSize: 10,
-      });
-      WV = TotalRecords + 1;
+      
+      this.logger.log('Workflow created');
+      wlfPK = workflow.PK;
     }
 
     const activityTypesExists = States.every((state) => {
@@ -117,13 +113,12 @@ export class WorkflowService {
         .includes(state.ActivityType);
     });
 
-    if (!activityTypesExists) {
-      throw new Error('Not every activity type exists.');
-    }
+    if (!activityTypesExists) throw new Error('Not every activity type exists.');
 
-    this.logger.log('CREATING WORKFLOW VERSION');
+    this.logger.log('CREATING WORKFLOW VERSION')
     const createWorkflowVersionInput: CreateWorkflowVersionInput = {
-      WLFID,
+      WorkflowPK: wlfPK,
+      WorkflowName,
       CID: v4(),
       WV,
       FAID: '',
@@ -198,7 +193,7 @@ export class WorkflowService {
       { PK: workflowVersion.PK, SK: workflowVersion.SK },
       saveWorkflowVersionInput,
     );
-    await this.workflowRepository.saveWorkflow({ PK: WLFID, SK: workflowNameAsSK }, { FAID });
+    await this.workflowRepository.saveWorkflow({ PK: wlfPK, SK: workflowNameAsSK }, { FAID });
 
     await this.executeWorkflowEB(
       OrgId,
@@ -209,7 +204,7 @@ export class WorkflowService {
 
     return {
       WorkflowKeys: {
-        PK: WLFID,
+        PK: wlfPK,
         SK: workflowNameAsSK,
       },
       WorkflowVersionKeys: {

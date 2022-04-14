@@ -70,6 +70,7 @@ export class WorkflowStepExecutionHistoryService {
     listAllManualApprovalInput: ListAllManualApprovalInput,
   ): Promise<ListAllManualApprovalResponse> {
     const manualApprovals: GetAllManualApproval[] = [];
+
     const { results, TotalRecords } = await this.workflowStepExecutionHistoryRepository.listAllManualApproval(
       listAllManualApprovalInput,
     );
@@ -83,7 +84,7 @@ export class WorkflowStepExecutionHistoryService {
       });
 
       const workflowVersion = await this.workflowVersionService.getWorkflowVersionByKey({
-        PK: workflow.PK,
+        PK: `${workflow.PK}||${workflow.SK}`,
         SK: workflowVersionSK,
       });
 

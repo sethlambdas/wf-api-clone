@@ -30,7 +30,7 @@ export class CreateWorkflowInput {
   WorkflowName: string;
 
   @Field({ nullable: true })
-  WorkflowId?: string;
+  WorkflowPK?: string;
 
   @Field((type) => [DesignWorkflowInput], { nullable: true })
   Design?: DesignWorkflowInput[];

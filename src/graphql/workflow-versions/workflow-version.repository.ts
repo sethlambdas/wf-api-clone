@@ -9,6 +9,7 @@ import { CompositePrimaryKey } from '../common/interfaces/workflow-key.interface
 
 import { ListAllWorkflowVersionsOfWorkflowInput } from './inputs/get.inputs';
 import { WorkflowVersion } from './workflow-version.entity';
+import { PrefixWorkflowVersionKeys } from './workflow-version.enum';
 
 @Injectable()
 export class WorkflowVersionRepository {
@@ -28,13 +29,13 @@ export class WorkflowVersionRepository {
   async listAllWorkflowVersionsOfWorkflow(
     listAllWorkflowVersionsOfWorkflowInput: ListAllWorkflowVersionsOfWorkflowInput,
   ) {
-    const { WorkflowPK, page, pageSize, sortBy, sortDir } = listAllWorkflowVersionsOfWorkflowInput;
+    const { WorkflowPK, WorkflowName, page, pageSize, sortBy, sortDir } = listAllWorkflowVersionsOfWorkflowInput;
 
     const workflowVersions = await this.workflowVersionModel
-      .query({ PK: WorkflowPK })
+      .query({ PK: this.formWorkflowVersionsTablePK(WorkflowPK, WorkflowName) })
       .and()
       .where('SK')
-      .beginsWith(`WV#`)
+      .beginsWith(`${PrefixWorkflowVersionKeys.SK}#`)
       .exec();
 
     const paginatedWorkflowVersions = getPaginatedData(workflowVersions, sortBy, sortDir, page, pageSize);
@@ -62,5 +63,13 @@ export class WorkflowVersionRepository {
       .beginsWith(PK)
       .using(GSI.DataOverloading)
       .exec();
+  }
+  
+  formWorkflowVersionsTablePK(workflowPK: string, workflowName: string) {
+    return `${workflowPK}||WLF#${workflowName}`;
+  }
+
+  formWorkflowVersionsTableSK(id: string) {
+    return `${PrefixWorkflowVersionKeys.SK}#${id}`;
   }
 }
