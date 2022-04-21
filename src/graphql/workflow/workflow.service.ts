@@ -612,11 +612,10 @@ export class WorkflowService {
     }
 
     const data = workflowStep?.ACT.MD;
-    const name = data?.Name;
     const status = data?.Status;
     const body = data?.Body;
 
-    const result = resolveMentionedVariables(name, body, {
+    const result = resolveMentionedVariables(body, {
       data: payload,
     });
 

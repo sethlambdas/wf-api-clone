@@ -3,8 +3,8 @@ import { Logger } from '@nestjs/common';
 import { get } from 'lodash';
 
 import { InvokeLambda } from '../../aws-services/aws-lambda/lambda.util';
-import { HttpMethod } from '../../graphql/common/enums/general.enum';
-import { replaceAt } from '../helpers/string-helpers.util';
+import { HttpMethod } from '../../graphql/common/enums/general.enum'
+import { getMentionedData } from '../helpers/string-helpers.util';
 import { EventRequestParams, IFieldValue } from '../workflow-types/lambda.types';
 
 const logger = new Logger('webService');
@@ -15,7 +15,6 @@ export default async function webService(payload: any, state?: any) {
   logger.log('Web Service Activity');
   try {
     const {
-      WLFN,
       Method,
       Endpoint,
       Name,
@@ -47,11 +46,11 @@ export default async function webService(payload: any, state?: any) {
       throw new Error();
     }
 
-    const resolvedBody = resolveMentionedVariables(WLFN, Body, state);
+    const resolvedBody = resolveMentionedVariables(Body, state);
 
     const eventReqPramas: EventRequestParams = {
       endpoint: {
-        url: resolveMentionedVariables(WLFN, Endpoint, state),
+        url: resolveMentionedVariables(Endpoint, state),
         method: Method,
       },
       headers: {},
@@ -79,19 +78,19 @@ export default async function webService(payload: any, state?: any) {
 
     if (Headers) {
       const parsedHeaders = Headers && JSON.parse(Headers);
-      eventReqPramas.headers = { ...eventReqPramas.headers, ...resolveFieldValues(parsedHeaders, WLFN, state) };
+      eventReqPramas.headers = { ...eventReqPramas.headers, ...resolveFieldValues(parsedHeaders, state) };
     }
 
     if (QueryStrings) {
       const parsedQueryStrings = QueryStrings && JSON.parse(QueryStrings);
       eventReqPramas.queryStrings = {
         ...eventReqPramas.queryStrings,
-        ...resolveFieldValues(parsedQueryStrings, WLFN, state),
+        ...resolveFieldValues(parsedQueryStrings, state),
       };
     }
 
     if (Files) {
-      const fileLinks = getMentionedData(Name, Files, state);
+      const fileLinks = getMentionedData(Files, state);
       const parsedFilesArr = fileLinks && JSON.parse(fileLinks);
 
       const fileFilters: string[] = (FileFilter as string).split(',').map((value) => {
@@ -134,67 +133,21 @@ export default async function webService(payload: any, state?: any) {
   }
 }
 
-const resolveFieldValues = (fieldValues: IFieldValue[], WLFN: string, state: any) => {
+const resolveFieldValues = (fieldValues: IFieldValue[], state: any) => {
   const object: any = {};
   fieldValues.forEach(({ fieldName, fieldValue }) => {
-    object[fieldName] = resolveMentionedVariables(WLFN, fieldValue, state);
+    object[fieldName] = resolveMentionedVariables(fieldValue, state);
   });
 
   return object;
 };
 
-export function resolveMentionedVariables(WLFN: string, unresolvedString: string, state?: any) {
+export function resolveMentionedVariables(unresolvedString: string, state?: any) {
   if (!unresolvedString) {
     return '';
   }
 
-  let workflowNameArr = WLFN.split(' ');
-  workflowNameArr = workflowNameArr.filter((value) => {
-    return value !== '' ? true : false;
-  });
-  const workflowName = workflowNameArr.join('_').toLowerCase();
-
-  return getMentionedData(workflowName, unresolvedString, state);
-}
-
-export function getMentionedData(name: string, unresolvedString: string, state?: any) {
-  const { data } = state;
-
-  const regexBrackets = /{{(.*?)}}/gm;
-  let resolvedString = unresolvedString;
-  while (true) {
-    const match = regexBrackets.exec(resolvedString);
-    if (!match) {
-      break;
-    }
-    const { 0: origWord, 1: word, index } = match;
-    const lastIndex = index + origWord.length;
-    const trimWord = word.trim();
-
-    let replacement: any;
-    let fields = trimWord;
-
-    if (trimWord === `http_${name}`) replacement = data;
-    else if (credentials.includes(trimWord)) replacement = `{{${word}}}`;
-    else if (trimWord.includes(`http_${name}`)) {
-      fields = trimWord.split('.')[1];
-      replacement = get(data, fields);
-    } else {
-      replacement = get(state, trimWord);
-    }
-
-    resolvedString = replaceAt(
-      resolvedString,
-      index,
-      lastIndex,
-      typeof replacement === 'object' ? JSON.stringify(replacement) : replacement,
-    );
-  }
-
-  logger.log('RESOLVED STRING');
-  logger.log(resolvedString);
-
-  return resolvedString;
+  return getMentionedData(unresolvedString, state);
 }
 
 const checkEvaluations = (Evaluations: string, data: any, requestParams: EventRequestParams) => {
