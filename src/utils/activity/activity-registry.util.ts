@@ -30,6 +30,7 @@ export enum ActivityTypes {
   ManualApproval = 'Manual Approval',
   ParallelStart = 'Parallel Start',
   ParallelEnd = 'Parallel End',
+  End = 'End',
 }
 
 const activityRegistry: ActivityRegistry = {

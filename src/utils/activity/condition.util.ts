@@ -14,21 +14,19 @@ export default async function condition(payload: any, state?: any) {
         logger.error('Invalid operation');
         throw new Error();
       }
-
-      console.log('======HERE=======');
-      console.log(Variable);
-      console.log(state);
+      
       const stateVariable: any = resolveValueOfVariableFromState(Variable, state);
 
       const variableData = (isNaN(stateVariable) && JSON.stringify(stateVariable)) || stateVariable;
       const rightHandData = (isNaN(RightHand) && JSON.stringify(RightHand)) || RightHand;
-      const evaluate = eval(`${variableData} ${Operator} ${rightHandData}`);
+      const evaluate = eval(`'${variableData}' ${Operator} '${rightHandData}'`);
 
       if (evaluate) return Next;
     }
 
     return DefaultNext;
   } catch (err) {
+    logger.log('ERROR:');
     logger.log(err);
   }
 }

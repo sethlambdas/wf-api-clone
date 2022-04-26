@@ -51,9 +51,6 @@ export function resolveValueOfVariableFromState(variable: string, state? :any) {
   const { 0: origWord, 1: word, index } = match;
   const trimWord = word.trim();
 
-  console.log('TRIM WORD');
-  console.log(trimWord);
-
   let replacement: any;
 
   if (credentials.includes(trimWord)) replacement = `{{${word}}}`;

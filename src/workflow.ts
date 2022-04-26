@@ -108,6 +108,14 @@ export default class Workflow {
         Status: '',
       };
 
+      if (act.T === ActivityTypes.End) {
+        await this.workflowExecutionService.saveWorkflowExecution(wfExecKeys, {
+          STATUS: WorkflowExecStatus.Finished,
+        });
+        this.logger.log('Workflow has finished executing!');
+        return;
+      }
+
       const externalService: ExternalServiceDetails = externalServiceDetails;
       let wfExec: WorkflowExecution;
       let wfStepExecHistory: WorkflowStepExecutionHistory;
@@ -189,7 +197,7 @@ export default class Workflow {
           this.logger.log(act?.T);
           this.logger.log('================Activity Type===============');
 
-          if (activityRegistry[act?.T] || externalService.isDone) {
+          if (activityRegistry[act?.T] || (externalService && externalService.isDone)) {
             const nextActIds = currentWorkflowStep.NAID;
             const parallelStatus = await this.updateParallelStatus(
               wfExec,
@@ -391,12 +399,7 @@ export default class Workflow {
                 }
               } else if (act.T === ActivityTypes.ParallelEnd) {
                 await this.updateParallelFinished(wfExec, currentParallelIndex, currentParallelIndexes, params);
-              } else if (act.END) {
-                await this.workflowExecutionService.saveWorkflowExecution(wfExecKeys, {
-                  STATUS: WorkflowExecStatus.Finished,
-                });
-                this.logger.log('Workflow has finished executing!');
-              } else {
+              }  else {
                 await putEventsEB(params);
               }
 
