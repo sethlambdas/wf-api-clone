@@ -114,6 +114,12 @@ export class MD {
   FileTypeOption?: string;
 
   @Field({ nullable: true })
+  webServiceDownloadFile?: boolean;
+
+  @Field({ nullable: true })
+  targetFileName?: string;
+
+  @Field({ nullable: true })
   MultipartContentType?: string;
 
   @Field({ nullable: true })

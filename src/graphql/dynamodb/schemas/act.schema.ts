@@ -92,6 +92,12 @@ export const MDSchema = new Schema({
   MultipartMetaData: {
     type: String,
   },
+  webServiceDownloadFile: {
+    type: Boolean,
+  },
+  targetFileName: {
+    type: String,
+  },
   Evaluations: {
     type: String,
   },

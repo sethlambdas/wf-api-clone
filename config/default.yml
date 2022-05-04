@@ -19,6 +19,9 @@ aws:
   region: 'ap-southeast-2'
   local: 'http://localhost:4566'
 
+s3:
+  bucket: 'sample'
+
 dynamodb:
   local: 'http://localhost:4566'
   schema:

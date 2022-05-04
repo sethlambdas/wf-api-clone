@@ -31,6 +31,8 @@ export default async function webService(payload: any, state?: any) {
       Evaluations,
       Retries,
       Interval,
+      webServiceDownloadFile,
+      targetFileName
     } = payload;
 
     logger.log('WEB SERVICE PAYLOAD');
@@ -76,6 +78,8 @@ export default async function webService(payload: any, state?: any) {
         client_sk: ClientSK,
       };
 
+    if (!!webServiceDownloadFile) eventReqPramas.headers = { ...eventReqPramas.headers, webServiceDownloadFile };
+
     if (Headers) {
       const parsedHeaders = Headers && JSON.parse(Headers);
       eventReqPramas.headers = { ...eventReqPramas.headers, ...resolveFieldValues(parsedHeaders, state) };
@@ -109,7 +113,7 @@ export default async function webService(payload: any, state?: any) {
     if ([HttpMethod.POST, HttpMethod.PUT, HttpMethod.PATCH].includes(Method))
       eventReqPramas.body = (resolvedBody && JSON.parse(resolvedBody)) || {};
 
-    const data = await InvokeLambda(ConfigUtil.get('lambda.webServiceFunctionName'), eventReqPramas);
+    const data = await InvokeLambda(ConfigUtil.get('lambda.webServiceFunctionName'), eventReqPramas, webServiceDownloadFile || false, targetFileName);
 
     const requestParams: any = { ...eventReqPramas };
     delete requestParams.auth;
