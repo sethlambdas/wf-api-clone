@@ -21,6 +21,7 @@ aws:
 
 s3:
   bucket: 'sample'
+  expiresIn: 86400
 
 dynamodb:
   local: 'http://localhost:4566'

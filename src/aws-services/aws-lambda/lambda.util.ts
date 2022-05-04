@@ -38,10 +38,9 @@ export const InvokeLambda = async (
       const result = JSON.parse(response.Payload as any);
       const url = await UploadFileToS3(Buffer.from(result.body.data), targetFileName);
 
-      const specialResponse = JSON.stringify({
-        ...result,
-        downloadedFileLink: url
-      });
+      result.body = [{ url, name: targetFileName  }];
+
+      const specialResponse = JSON.stringify({ ...result });
 
       return specialResponse as any;
     }
