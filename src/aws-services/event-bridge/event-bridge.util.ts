@@ -81,6 +81,32 @@ export async function putTargetsEB(putTargetsParams: PutTargetsInput) {
   }
 }
 
+export async function disableRule(params: { Name: string }) {
+  try {
+    logger.log('Disabling Rule on EventBridge');
+
+    await EB.disableRule(params).promise();
+
+    return true;
+  } catch (err) {
+    logger.error(`Error, ${err}`);
+    return false;
+  }
+}
+
+export async function enableRule(params: { Name: string }) {
+  try {
+    logger.log('Enabling Rule on EventBridge');
+
+    await EB.enableRule(params).promise();
+
+    return true;
+  } catch (err) {
+    logger.error(`Error, ${err}`);
+    return false;
+  }
+}
+
 export function formCreateEventParams(detail: IDetail) {
   const Entries = [
     {

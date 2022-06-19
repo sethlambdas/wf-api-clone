@@ -20,9 +20,11 @@ export class WorkflowRepository {
   ) {}
 
   async createWorkflow(createWorkflowInputRepository: CreateWorkflowInputRepository) {
-    const { WorkflowName, OrgId, WorkflowBatchNumber, FAID, UQ_OVL } = createWorkflowInputRepository;
+    const { WorkflowName, OrgId, WorkflowBatchNumber, FAID, UQ_OVL, TriggerStatus, TimeTriggerRuleName } = createWorkflowInputRepository;
 
-    const data = {
+    console.log('CREATE WORKFLOW', TriggerStatus);
+
+    const data: WorkflowModelRepository = {
       PK: this.formWorkflowTablePK(OrgId, WorkflowBatchNumber),
       SK: this.formWorkflowTableSK(WorkflowName),
       DATA: this.formWorkflowTableSK(WorkflowName),
@@ -30,7 +32,10 @@ export class WorkflowRepository {
       FAID,
       STATUS: Status.ACTIVE,
       UQ_OVL,
+      TriggerStatus, 
     };
+
+    if (TimeTriggerRuleName) data.TimeTriggerRuleName = TimeTriggerRuleName;
 
     const results = await this.workflowModel.create(data);
 

@@ -61,6 +61,12 @@ export class WorkflowModelRepository implements CompositePrimaryKey {
   @Field()
   UQ_OVL: string;
 
+  @Field()
+  TriggerStatus: string;
+
+  @Field({ nullable: true })
+  TimeTriggerRuleName?: string;
+
   @Field({ nullable: true })
   Error?: string
 }

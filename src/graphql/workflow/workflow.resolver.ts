@@ -5,6 +5,7 @@ import { GetWorkflowByNameInput, GetWorkflowsOfAnOrgInput } from './inputs/get.i
 import { SaveWorkflowInput } from './inputs/put.inputs';
 import { CreateWorkflowResponse, GetWorkflowsOfAnOrg, WorkflowModelRepository } from './workflow.entity';
 import { WorkflowService } from './workflow.service';
+import { CompositePrimaryKeyInput } from '../common/inputs/workflow-key.input';
 
 @Resolver()
 export class WorkflowResolver {
@@ -27,6 +28,21 @@ export class WorkflowResolver {
     return this.workflowService.initiatAWorkflowStep(initiateAWorkflowStepInput);
   }
 
+  @Mutation((returns) => Boolean)
+  async DisableWorkflowTrigger(@Args('workflowKeysInput') workflowKeysInput: CompositePrimaryKeyInput) {
+    return this.workflowService.disableWorkflowTrigger(workflowKeysInput);
+  }
+
+  @Mutation((returns) => Boolean)
+  async EnableWorkflowTrigger(@Args('workflowKeysInput') workflowKeysInput: CompositePrimaryKeyInput) {
+    return this.workflowService.enableWorkflowTrigger(workflowKeysInput);
+  }
+
+  @Query((returns) => WorkflowModelRepository, { nullable: true })
+  async GetWorkflowByKey(@Args('workflowKeysInput') workflowKeysInput: CompositePrimaryKeyInput) {
+    return this.workflowService.getWorkflowByKey(workflowKeysInput);
+  }
+  
   @Query((returns) => WorkflowModelRepository, { nullable: true })
   async GetWorkflowByName(@Args('getWorkflowByNameInput') getWorkflowByNameInput: GetWorkflowByNameInput) {
     return this.workflowService.getWorkflowByName(getWorkflowByNameInput);

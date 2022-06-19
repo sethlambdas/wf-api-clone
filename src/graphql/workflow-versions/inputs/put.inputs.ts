@@ -1,4 +1,5 @@
 import { Field, InputType, Int, PartialType } from '@nestjs/graphql';
+import { CompositePrimaryKeyInput } from '../../common/inputs/workflow-key.input';
 import { CreateWorkflowVersionInput } from './post.inputs';
 
 @InputType()

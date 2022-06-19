@@ -5,6 +5,8 @@ import { v4 } from 'uuid';
 import { ConfigUtil } from '@lambdascrew/utility';
 
 import {
+  disableRule,
+  enableRule,
   formCreateEventParams,
   putEventsEB,
   putRuleEB,
@@ -101,6 +103,7 @@ export class WorkflowService {
         WorkflowBatchNumber: TotalWLFBatches,
         FAID: '',
         UQ_OVL: workflowTriggerId,
+        TriggerStatus: 'enabled',
       });
       
       this.logger.log('Workflow created');
@@ -198,6 +201,7 @@ export class WorkflowService {
     await this.executeWorkflowEB(
       OrgId,
       WorkflowName,
+      { PK: wlfPK, SK: workflowNameAsSK },
       { PK: workflowVersion.PK, SK: workflowVersion.SK },
       executeWorkflowStepKey,
     );
@@ -344,6 +348,7 @@ export class WorkflowService {
   async executeWorkflowEB(
     OrgId: string,
     WorkflowName: string,
+    workflowKeys: { PK: string; SK: string },
     workflowVersionsKeys: { PK: string; SK: string },
     executeWorkflowStepKey: { PK: string; SK: string },
   ) {
@@ -415,6 +420,8 @@ export class WorkflowService {
           ScheduleExpression,
         };
         await putRuleEB(putRuleParams);
+
+        this.workflowRepository.saveWorkflow(workflowKeys, { TimeTriggerRuleName: Name });
 
         const Id = '1';
         const {
@@ -491,6 +498,7 @@ export class WorkflowService {
       FAID: '',
       STATUS: Status.INACTIVE,
       UQ_OVL: '',
+      TriggerStatus: '',
       Error: 'Organization not existing'
      };
 
@@ -525,6 +533,20 @@ export class WorkflowService {
     }
 
     const workflow = await this.workflowRepository.getWorkflowByUniqueKey({ UniqueKey: workflowId });
+
+    if (workflow.TriggerStatus === 'disabled') {
+      this.logger.log('Workflow trigger is disabled');
+      const errorData = {
+        result: 'failed',
+        message: 'Workflow trigger is disabled',
+      };
+
+      this.setResponseStatus(res, 200);
+
+      this.setResponseData(res, errorData);
+
+      return res;
+    }
 
     const getWorkflowStepByAidInput: GetWorkflowStepByAidInput = {
       AID: workflow.FAID,
@@ -628,6 +650,30 @@ export class WorkflowService {
     this.setResponseData(res, result);
 
     return res;
+  }
+
+  async disableWorkflowTrigger(workflowKeysInput: CompositePrimaryKeyInput) {
+    try {
+      const workflow = await this.getWorkflowByKey(workflowKeysInput);
+
+      await this.saveWorkflow({ ...workflowKeysInput, TriggerStatus: 'disabled' });
+      if (workflow.TimeTriggerRuleName) await disableRule({ Name: workflow.TimeTriggerRuleName });
+      return true;
+    } catch (err) {
+      return false;
+    }
+  }
+
+  async enableWorkflowTrigger(workflowKeysInput: CompositePrimaryKeyInput) {
+    try {
+      const workflow = await this.getWorkflowByKey(workflowKeysInput);
+
+      await this.saveWorkflow({ ...workflowKeysInput, TriggerStatus: 'enabled' });
+      if (workflow.TimeTriggerRuleName) await enableRule({ Name: workflow.TimeTriggerRuleName });
+      return true;
+    } catch (err) {
+      return false;
+    }
   }
 
   private setResponseHeaders(res: Res, customHeaders: any) {

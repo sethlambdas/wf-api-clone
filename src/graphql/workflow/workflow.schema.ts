@@ -22,7 +22,12 @@ export const WorkflowSchema = new Schema(
     UQ_OVL: {
       type: String,
     },
-
+    TriggerStatus: {
+      type: String,
+    },
+    TimeTriggerRuleName: {
+      type: String,
+    },
     // to be decided
     R: {
       type: String,

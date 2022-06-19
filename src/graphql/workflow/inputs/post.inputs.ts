@@ -19,6 +19,12 @@ export class CreateWorkflowInputRepository {
 
   @Field()
   UQ_OVL: string;
+
+  @Field()
+  TriggerStatus: string;
+
+  @Field({ nullable: true })
+  TimeTriggerRuleName?: string;
 }
 
 @InputType()
