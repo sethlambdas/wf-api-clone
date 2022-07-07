@@ -28,6 +28,7 @@ export enum ActivityTypes {
   AssignData = 'Assign Data',
   MergeData = 'Merge Data',
   ManualApproval = 'Manual Approval',
+  SubWorkflow = 'SubWorkflow',
   ParallelStart = 'Parallel Start',
   ParallelEnd = 'Parallel End',
   End = 'End',

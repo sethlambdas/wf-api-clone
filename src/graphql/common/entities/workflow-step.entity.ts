@@ -2,6 +2,15 @@
 import { Field, Float, InputType, Int, ObjectType, OmitType, PartialType, PickType } from '@nestjs/graphql';
 
 // Object Types
+@ObjectType()
+export class CompositeKeys {
+  @Field({ nullable: true })
+  PK?: string;
+
+  @Field({ nullable: true })
+  SK?: string;
+}
+
 
 @ObjectType()
 export class ChoiceWorkflow {
@@ -202,6 +211,10 @@ export class MD {
   // RCE
   @Field({ nullable: true })
   code?: string;
+
+  // SubWorkflow
+  @Field((type) => CompositeKeys, { nullable: true })
+  WorkflowKeys?: CompositeKeys;
 }
 
 @ObjectType()
@@ -294,10 +307,16 @@ export class ACT {
 export class ChoiceWorkflowInput extends PartialType(ChoiceWorkflow, InputType) {}
 
 @InputType()
-export class MDInput extends OmitType(MD, ['Choice'] as const, InputType) {
+export class CompositeKeysInput extends PartialType(CompositeKeys, InputType) {}
+
+@InputType()
+export class MDInput extends OmitType(MD, ['Choice', 'WorkflowKeys'] as const, InputType) {
   // Conditional
   @Field((type) => [ChoiceWorkflowInput], { nullable: true })
   Choice?: ChoiceWorkflowInput[];
+
+  @Field((type) => CompositeKeysInput, { nullable: true })
+  WorkflowKeys?: CompositeKeysInput;
 }
 
 @InputType()

@@ -32,6 +32,19 @@ export interface IDetail {
   parallelIndexes?: number[];
 
   payload?: any;
+
+  parentWSXH?: {
+    keys: CompositePrimaryKey;
+    nextParentWSXHParams: EventParams;
+  }
+}
+
+export interface EventParams {
+  Entries: {
+    Detail: string;
+    DetailType: string;
+    Source: string;
+  }[]
 }
 
 export interface HttpTrigger {

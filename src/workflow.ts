@@ -12,7 +12,7 @@ import { ErrorAction } from './graphql/common/enums/web-service.enum';
 import activityRegistry, { ActivityTypes, TriggerTypes } from './utils/activity/activity-registry.util';
 import { ManualApprovalEmailParams } from './utils/activity/manual-approval.util';
 import { ExternalActivityTypes, runExternalService } from './utils/external-activity/external-activities.util';
-import { ExternalServiceDetails } from './utils/workflow-types/details.types';
+import { EventParams, ExternalServiceDetails } from './utils/workflow-types/details.types';
 import { IDetail } from './utils/workflow-types/details.types';
 
 import { CAT, WorkflowExecution } from './graphql/workflow-executions/workflow-execution.entity';
@@ -27,6 +27,7 @@ import { WorkflowStep } from './graphql/workflow-steps/workflow-step.entity';
 import { WorkflowStepService } from './graphql/workflow-steps/workflow-step.service';
 import { WorkflowVersionService } from './graphql/workflow-versions/workflow-version.service';
 import { WorkflowService } from './graphql/workflow/workflow.service';
+import { CompositePrimaryKey } from './graphql/common/interfaces/workflow-key.interface';
 
 export default class Workflow {
   private logger: Logger;
@@ -96,6 +97,7 @@ export default class Workflow {
         parallelIndexes,
         payload,
         externalServiceDetails,
+        parentWSXH,
       }: IDetail = detail;
 
       let wfExecKeys = WorkflowExecKeys;
@@ -112,6 +114,12 @@ export default class Workflow {
         await this.workflowExecutionService.saveWorkflowExecution(wfExecKeys, {
           STATUS: WorkflowExecStatus.Finished,
         });
+
+        if (parentWSXH) {
+          await this.updateWSXHByKey(parentWSXH.keys, WorkflowStepStatus.Finished);
+          await putEventsEB(parentWSXH.nextParentWSXHParams);
+        }
+        
         this.logger.log('Workflow has finished executing!');
         return;
       }
@@ -196,8 +204,7 @@ export default class Workflow {
           this.logger.log('================Activity Type===============');
           this.logger.log(act?.T);
           this.logger.log('================Activity Type===============');
-
-          if (activityRegistry[act?.T] || (externalService && externalService.isDone)) {
+          if (activityRegistry[act?.T] || (externalService && externalService.isDone) || act?.T === ActivityTypes.SubWorkflow) {
             const nextActIds = currentWorkflowStep.NAID;
             const parallelStatus = await this.updateParallelStatus(
               wfExec,
@@ -272,6 +279,8 @@ export default class Workflow {
                 OrgId,
                 previousStepResults: currentWlfStepResults,
               };
+
+              if (parentWSXH) details.parentWSXH = parentWSXH;
 
               params.Entries.push({
                 Detail: JSON.stringify(details),
@@ -359,7 +368,14 @@ export default class Workflow {
                 await this.updateCATStatus(wfStepExecHistory, WorkflowStepStatus.Error);
               }
             } else {
-              if (act.T === ActivityTypes.ManualApproval && !ManualApproval) {
+              if (act.T === ActivityTypes.SubWorkflow) {
+                await this.runSubWorkflow(
+                  act.MD.WorkflowKeys as any,
+                  { PK: wfStepExecHistory.PK, SK: wfStepExecHistory.SK },
+                   params
+                );
+                return;
+              } else if (act.T === ActivityTypes.ManualApproval && !ManualApproval) {
                 if (typeof actResult === 'function') {
                   const workflow = await this.workflowService.getWorkflowByName({
                     WorkflowName: WLFN,
@@ -663,6 +679,101 @@ export default class Workflow {
       { PK: wfStepExecHistory.PK, SK: wfStepExecHistory.SK },
       data,
     );
+  }
+
+  private async updateWSXHByKey(keys: CompositePrimaryKey, status: WorkflowStepStatus) {
+    await this.workflowStepExecutionHistoryService.saveWorkflowStepExecutionHistory(
+      keys,
+      { Status: status, UQ_OVL: status },
+    );
+  }
+
+  private async runSubWorkflow(subWorkflowKeys: CompositePrimaryKey, parentWSXHKeys: CompositePrimaryKey, nextParentWSXHParams: EventParams) {
+    this.logger.log('RUN SUB WORKFLOW');
+    const workflow = await this.workflowService.getWorkflowByKey(subWorkflowKeys);
+
+    const workflowStep = await this.workflowStepService.getWorkflowStepByAid({
+      AID: workflow.FAID,
+      WorkflowStepPK: 'WV#',
+    });
+
+    const paramsEB = {
+      Entries: [],
+    }
+
+    if (workflowStep.NAID.length > 0) {
+      const workflowVersion = await this.workflowVersionService.getWorkflowVersionBySK({
+        PK: 'ORG#',
+        SK: workflowStep.PK
+      });
+      
+      const WSXH_SK = `WSXH|${workflowStep.ACT.MD.OrgId}|HTTP|${v4()}`;
+
+      const wfExec = await this.workflowExecutionService.createWorkflowExecution({
+        WorkflowVersionKeys: { PK: workflowVersion.PK, SK: workflowVersion.SK },
+        STE: '{}',
+        WSXH_IDS: [WSXH_SK],
+        STATUS: WorkflowExecStatus.Running,
+      });
+
+      const httpACT: CAT = {
+        T: workflowStep?.ACT.T,
+        NM: workflowStep?.ACT.NM,
+        MD: workflowStep?.ACT.MD,
+        WSID: workflowStep.SK,
+        Status: '',
+      };
+
+      const httpTrigger = {
+        IsHttpTriggered: true,
+        httpACT,
+        HTTP_WSXH_SK: WSXH_SK,
+        HTTP_workflowStepSK: workflowStep.SK,
+      };
+
+      let i = 0;
+
+      for (const nextActId of workflowStep.NAID) {
+        this.logger.log('Next Activity ID: ', nextActId);
+        const getWorkflowStep = await this.workflowStepService.getWorkflowStepByAid({
+          AID: nextActId,
+          WorkflowStepPK: workflowStep.PK,
+        });
+
+        const WorkflowPKSplit = workflowVersion.PK.split('|');
+        const OrgId = WorkflowPKSplit[0];
+        const detail: IDetail = {
+          currentWorkflowStep: getWorkflowStep,
+          WLFN: workflow.WLFN,
+          WorkflowVersionKeys: {
+            PK: workflowVersion.PK,
+            SK: workflowVersion.SK,
+          },
+          wfExecKeys: {
+            PK: wfExec.PK,
+            SK: wfExec.SK,
+          },
+          OrgId,
+          parentWSXH: {
+            keys: parentWSXHKeys,
+            nextParentWSXHParams,
+          },
+        };
+
+        if (i === 0) {
+          detail.httpTrigger = { ...httpTrigger };
+          ++i;
+        }
+
+        paramsEB.Entries.push({
+          Detail: JSON.stringify(detail),
+          DetailType: Workflow.getDetailType(),
+          Source: Workflow.getSource(),
+        });
+      }
+
+      await putEventsEB(paramsEB);
+    }
   }
 
   private async handleRetries(message: SQS.Message) {

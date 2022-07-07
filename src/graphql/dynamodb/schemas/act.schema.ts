@@ -15,6 +15,15 @@ export const ChoiceWorkflowSchema = new Schema({
   },
 });
 
+export const CompositeKeys = new Schema({
+  PK: {
+    type: String,
+  },
+  SK: {
+    type: String,
+  },
+});
+
 export const MDSchema = new Schema({
   // Email or ManualApproval
   Email: {
@@ -194,6 +203,11 @@ export const MDSchema = new Schema({
   code: {
     type: String,
   },
+  // SubWorkflow
+  WorkflowKeys: {
+    type: Object,
+    schema: CompositeKeys
+  }
 });
 
 export const LabelSchema = new Schema({
