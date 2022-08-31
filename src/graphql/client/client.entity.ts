@@ -1,53 +1,74 @@
-export enum AuthType {
-  'APIKey' = 'API-KEY',
-  'BASIC' = 'BASIC',
-  'OAUTH' = 'OAUTH',
-  'COOKIE' = 'COOKIE',
-}
+import { Field, ObjectType } from '@nestjs/graphql';
 
-export enum ClientStatus {
-  'ACTIVE' = 'ACTIVE',
-  'DISABLED' = 'DISABLED',
-}
+import { AuthType, ClientStatus } from '@graphql:common/enums/authentication.enum';
+import { CompositePrimaryKey } from '@graphql:common/interfaces/dynamodb-keys.interface';
+import { Header } from '../integration-app/integration-app.entity';
 
-export class HeaderSchema {
-  fieldName?: string;
-
-  fieldValue?: string;
-}
-
+@ObjectType()
 export class SecretsSchema {
+  @Field({ nullable: true })
   apiKey?: string;
 
+  @Field({ nullable: true })
   clientId?: string;
 
+  @Field({ nullable: true })
   clientSecret?: string;
 
+  @Field({ nullable: true })
   username?: string;
 
+  @Field({ nullable: true })
   password?: string;
+
+  @Field({ nullable: true })
+  organisation?: string;
+
+  @Field({ nullable: true })
+  hostId?: string;
+
+  @Field({ nullable: true })
+  rootUrl?: string;
+
+  @Field({ nullable: true })
+  cookie?: string;
 }
 
-export class Client {
+@ObjectType()
+export class MetadataSchema {
+  @Field({ nullable: true })
+  shopifyStore?: string;
+}
+
+@ObjectType()
+export class Client implements CompositePrimaryKey {
+  @Field()
   PK: string;
 
+  @Field()
   SK: string;
 
+  @Field()
   name: string;
 
+  @Field((type) => AuthType)
   type: AuthType;
 
+  @Field((type) => ClientStatus)
   status: ClientStatus;
 
+  @Field()
   intAppId: string;
 
+  @Field((type) => SecretsSchema)
   secrets: SecretsSchema;
 
-  headers: HeaderSchema[];
-}
+  @Field((type) => [String], { nullable: true })
+  scopes?: string[];
 
-export interface IListClients {
-  data: {
-    ListClients: Client[];
-  };
+  @Field((type) => MetadataSchema, { nullable: true })
+  metadata?: MetadataSchema;
+
+  @Field((type) => [Header], { nullable: true })
+  headers?: Header[];
 }

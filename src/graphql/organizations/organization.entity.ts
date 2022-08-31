@@ -1,24 +1,17 @@
-export class APIKey {
-  KEY: string;
-  ACTIVE: boolean;
-}
+import { SimplePrimaryKey } from '@graphql:common/interfaces/dynamodb-keys.interface';
+import { Field, Int, ObjectType } from '@nestjs/graphql';
 
-export class Organization {
+@ObjectType()
+export class Organization implements SimplePrimaryKey {
+  @Field()
   PK: string;
+
+  @Field()
   ORGNAME: string;
+
+  @Field((type) => Int)
   TotalWLFBatches: number;
+
+  @Field((type) => Int)
   TotalUSR: number;
-  APIKEY: APIKey[];
-}
-
-export interface IGetOrganization {
-  data: {
-    GetOrganization: Organization;
-  };
-}
-
-export interface ISaveOrganization {
-  data: {
-    SaveOrganization: Organization;
-  };
 }

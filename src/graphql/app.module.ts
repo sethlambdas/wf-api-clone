@@ -18,6 +18,12 @@ import { WorkflowStepModule } from './workflow-steps/workflow-step.module';
 import { WorkflowVersionModule } from './workflow-versions/workflow-version.module';
 import { WorkflowModule } from './workflow/workflow.module';
 import { ApigwAuthorizerModule } from './apigwAuthorizer/apigw-authorizer.module';
+import { ApigwAuthorizerModule as ApigwAuthorizerAuthBEModule } from './apigw-authorizer/apigw-authorizer.module';
+import { HealthResolver } from './health copy/health.resolver';
+import { ClientTokenModule } from './client-token/client-token.module';
+import { OAuthModule } from './oauth/oauth.module';
+import { EntityCountModule } from './entity-count/entitiy-count.module';
+import { DocuwareModule } from './docuware/docuware.module';
 
 @Module({
   controllers: [HealthController],
@@ -67,7 +73,13 @@ import { ApigwAuthorizerModule } from './apigwAuthorizer/apigw-authorizer.module
     ClientModule,
     IntegrationAppModule,
     UserModule,
-    ApigwAuthorizerModule,
+    ApigwAuthorizerModule, 
+    ApigwAuthorizerAuthBEModule,   
+    HealthResolver,        
+    ClientTokenModule,
+    OAuthModule,
+    EntityCountModule,
+    DocuwareModule,            
   ],
 })
 export class AppModule {}

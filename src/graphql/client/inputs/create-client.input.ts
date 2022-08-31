@@ -1,0 +1,47 @@
+import { Field, InputType, PartialType } from '@nestjs/graphql';
+
+import { AuthType, ClientStatus } from '@graphql:common/enums/authentication.enum';
+import { MetadataSchema, SecretsSchema } from '../client.entity';
+import { HeaderInput } from '../../integration-app/inputs/create-integration-app.inputs';
+
+@InputType()
+export class SecretsInput extends PartialType(SecretsSchema, InputType) {}
+
+@InputType()
+export class MetadataInput extends PartialType(MetadataSchema, InputType) {}
+
+@InputType()
+export class CreateClientInput {
+  @Field()
+  appClient: string;
+
+  @Field()
+  orgId: string;
+
+  @Field()
+  integrationType: string;
+
+  @Field()
+  name: string;
+
+  @Field((type) => AuthType)
+  type: AuthType;
+
+  @Field((type) => ClientStatus)
+  status: ClientStatus;
+
+  @Field()
+  intAppId: string;
+
+  @Field((type) => SecretsInput)
+  secrets: SecretsInput;
+
+  @Field({ nullable: true })
+  scopes?: string;
+
+  @Field((type) => MetadataInput, { nullable: true })
+  metadata?: MetadataInput;
+
+  @Field((type) => [HeaderInput], { nullable: true })
+  headers?: HeaderInput[];
+}

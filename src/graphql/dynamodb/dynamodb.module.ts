@@ -9,6 +9,13 @@ import { WorkflowStepSchema } from '../workflow-steps/workflow-step.schema';
 import { WorkflowVersionSchema } from '../workflow-versions/workflow-version.schema';
 import { WorkflowSchema } from '../workflow/workflow.schema';
 import { workflowSecondaryIndexes, workflowVersionsSecondaryIndexes, workflowExecutionsSecondaryIndexes } from './schemas/secondary-index.schema';
+import { IntegrationAppsSchema } from '../integration-app/integration-app.schema';
+import { ApigwAuthorizerSchema } from '../apigw-authorizer/apigw-authorizer.schema';
+import { ClientTokenSchema } from '../client-token/client-token.schema';
+import { ClientSchema } from '../client/client.schema';
+import { EntityCountSchema } from '../entity-count/entitiy-count.schema';
+import { UserSchema } from '../users/user.schema';
+import { OrganizationSchema } from '../organizations/organization.schema';
 
 const workflowModel = DynamooseModule.forFeature([
   {
@@ -33,6 +40,26 @@ const workflowModel = DynamooseModule.forFeature([
       WorkflowExecutionSchema,
       WorkflowStepExecutionHistorySchema,
     ],
+  },
+  {
+    name: ConfigUtil.get('dynamodb.schema.integrations'),
+    schema: [IntegrationAppsSchema, ClientSchema, EntityCountSchema],
+  },
+  {
+    name: ConfigUtil.get('dynamodb.schema.integrationTokens'),
+    schema: [ClientTokenSchema],
+  },
+  {
+    name: ConfigUtil.get('dynamodb.schema.authOrganizations'),
+    schema: [OrganizationSchema],
+  },
+  {
+    name: ConfigUtil.get('dynamodb.schema.authUsers'),
+    schema: [UserSchema],
+  },
+  {
+    name: ConfigUtil.get('dynamodb.schema.apigwAuthorizer'),
+    schema: [ApigwAuthorizerSchema],
   },
 ]);
 

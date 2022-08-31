@@ -76,7 +76,7 @@ export async function getSQSQueueAttributes(QueueUrl: string) {
     logger.log(queue);
     return queue;
   } catch (err) {
-    logger.error(`Error, ${err}`);
+    logger.error(`Error1, ${err}`);
   }
 }
 
@@ -120,7 +120,7 @@ export async function createSQSQueue(createParams?: CreateSQSQueueInput, errorTa
     logger.log(queue);
     return queue;
   } catch (err) {
-    logger.error(`Error, ${err}`);
+    logger.error(`Error0, ${err}`);
   }
 }
 

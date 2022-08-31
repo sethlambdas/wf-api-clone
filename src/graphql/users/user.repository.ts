@@ -1,16 +1,39 @@
 import { Injectable } from '@nestjs/common';
+import { InjectModel, Model } from 'nestjs-dynamoose';
 
 import { ConfigUtil } from '@lambdascrew/utility';
 
-import { HttpMethod, IGraphqlPayload, networkClient } from '../../utils/helpers/networkRequest.util';
-
-import { IRefreshToken, ISignOut, RefreshToken } from './user.entity';
-import { LOGOUT_QL, REFRESH_TOKEN_QL } from './user.gql-queries';
+import { GSI } from '../common/enums/gsi-names.enum';
+import { SimplePrimaryKey } from '@graphql:common/interfaces/dynamodb-keys.interface';
+import { IRefreshToken, ISignOut, RefreshToken, User } from './user.entity';
+import { HttpMethod, IGraphqlPayload, networkClient } from 'utils/helpers/networkRequest.util';
+import { LOGOUT_QL, REFRESH_TOKEN_QL } from './user.qgl-queries';
 
 const endpoint = ConfigUtil.get('authBeEndpoint') || 'http://localhost:3001/api/graphql';
-
 @Injectable()
 export class UserRepository {
+  constructor(
+    @InjectModel(ConfigUtil.get('dynamodb.schema.authUsers'))
+    private userModel: Model<User, SimplePrimaryKey>,
+  ) {}
+
+  async createUser(user: User) {
+    return this.userModel.create(user);
+  }
+
+  async saveUser(key: SimplePrimaryKey, user: Partial<User>) {
+    return this.userModel.update(key, user);
+  }
+
+  async getUserByKey(key: SimplePrimaryKey) {
+    return this.userModel.get(key);
+  }
+
+  async getUserByEmail(email: string) {
+    const result = await this.userModel.query({ email }).using(GSI.GSIEmailIndex).exec();
+    return result[0];
+  }
+
   async refreshToken(res: any, refreshToken: string) {
     const payload: IGraphqlPayload = {
       query: REFRESH_TOKEN_QL,

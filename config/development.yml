@@ -1,4 +1,4 @@
-authBeEndpoint: 'http://localhost:3001/auth-api/graphql'
+authBeEndpoint: 'http://localhost:3001/api/graphql'
 
 jwt:
   secret: 'topSecret51'

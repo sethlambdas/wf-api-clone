@@ -9,7 +9,13 @@
     "target": "es6",
     "sourceMap": true,
     "outDir": "./dist",
-    "baseUrl": "./"
+    "baseUrl": "./src",
+    "paths": {
+      "@graphql:common/*": ["graphql/common/*"],
+      "@graphql:dynamodb/*": ["graphql/dynamodb/*"],
+      "@src:config/*": ["config/*"]
+    }
   },
+  "include": ["src/**/*.ts", "test/**/*.ts"],
   "exclude": ["node_modules", "dist"]
 }

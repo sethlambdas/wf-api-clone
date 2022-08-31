@@ -1,5 +1,8 @@
 import { Inject, Injectable } from '@nestjs/common';
-import { SimplePrimaryKey } from '../common/interfaces/workflow-key.interface';
+
+import { SimplePrimaryKey } from '@graphql:common/interfaces/dynamodb-keys.interface';
+import { CreateOrganizationInput } from './inputs/create-organization.input';
+import { SaveOrganizationInput } from './inputs/save-organization.input';
 import { Organization } from './organization.entity';
 import { OrganizationRepository } from './organization.repository';
 
@@ -10,12 +13,24 @@ export class OrganizationService {
     private organizationRepository: OrganizationRepository,
   ) {}
 
-  async saveOrganization(saveOrganizationInput: Partial<Organization>) {
+  async createOrganization(createOrganizationInput: CreateOrganizationInput) {
+    return this.organizationRepository.createOrganization(createOrganizationInput);
+  }
+
+  async saveOrganization(saveOrganizationInput: SaveOrganizationInput) {
+    const { PK } = saveOrganizationInput;
+
+    const simplePrimaryKey = {
+      PK,
+    };
+
+    delete saveOrganizationInput?.PK;
+
     const updatedAttribute = {
       ...saveOrganizationInput,
     } as Organization;
 
-    return this.organizationRepository.saveOrganization(updatedAttribute);
+    return this.organizationRepository.saveOrganization(simplePrimaryKey, updatedAttribute);
   }
 
   async getOrganization(simplePrimaryKey: SimplePrimaryKey) {
