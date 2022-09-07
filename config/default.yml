@@ -19,7 +19,7 @@ aws:
   region: 'ap-southeast-2'
   local: 'http://localhost:4566'
   kms:
-    keyId: '3e7eb731-1eb2-4205-a089-9ba408ee2210'
+    keyId: 'dde8d1c3-04b7-4558-97b8-5f7b11a04962'
     alias: 'alias/Workflow'
 
 s3:

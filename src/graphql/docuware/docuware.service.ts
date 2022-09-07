@@ -1,8 +1,5 @@
 import { Injectable } from '@nestjs/common';
 import got from 'got';
-
-import { AuthType } from '@graphql:common/enums/authentication.enum';
-import { CreateClientInput } from 'graphql/client/inputs/create-client.input';
 import { ClientService } from '../client/client.service';
 import { IntegrationAppService } from '../integration-app/integration-app.service';
 import { DocuwareClient } from './docuware.entity';

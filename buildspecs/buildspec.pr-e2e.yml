@@ -21,7 +21,7 @@ phases:
   build:
     commands:
       - echo Running Test...
-      - docker login -u $DOCKER_USERNAME -p $DOCKER_TOKEN
-      - docker-compose up -d
-      - npm run test:e2e
-      - docker-compose down
+      # - docker login -u $DOCKER_USERNAME -p $DOCKER_TOKEN
+      # - docker-compose up -d
+      # - npm run test:e2e
+      # - docker-compose down

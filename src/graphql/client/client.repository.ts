@@ -4,9 +4,12 @@ import { InjectModel, Model } from 'nestjs-dynamoose';
 import { CompositePrimaryKey } from '@graphql:common/interfaces/dynamodb-keys.interface';
 
 // import { CompositePrimaryKey } from '@graphql:common/interfaces/dynamodb-keys.interface';
-import { Client } from './client.entity';
+import { Client, IListClients } from './client.entity';
 import { FindClientByNameInput, ListClientsInput } from './inputs/find-client.input';
+import { HttpMethod, IGraphqlPayload, networkClient } from 'utils/helpers/networkRequest.util';
+import { LIST_CLIENTS } from './client.gql-queries';
 
+const endpoint = ConfigUtil.get('authBeEndpoint') || 'http://localhost:3001/api/graphql';
 @Injectable()
 export class ClientRepository {
   constructor(
@@ -59,5 +62,22 @@ export class ClientRepository {
 
   async deleteClientRecords(primaryKey: CompositePrimaryKey) {
     await this.clientModel.delete(primaryKey);
+  }
+
+  async listClients(listClientsInput: ListClientsInput): Promise<Client[]> {
+    const payload: IGraphqlPayload = {
+      query: LIST_CLIENTS,
+      variables: { inputs: { ...listClientsInput } },
+    };
+
+    const response = (await networkClient({
+      method: HttpMethod.POST,
+      url: endpoint,
+      headers: {},
+      queryParams: {},
+      bodyParams: payload,
+    })) as IListClients;
+
+    return response.data.ListClients;
   }
 }

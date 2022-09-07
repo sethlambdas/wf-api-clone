@@ -20,12 +20,12 @@ phases:
       - npm install
   build:
     commands:
-      - echo Setting up Mysql and Running Test...
-      - docker login -u $DOCKER_USERNAME -p $DOCKER_TOKEN
-      - docker-compose up -d
-      - npm run test:e2e
-      - docker-compose down
-      - buildExitCode=$?
+      # - echo Setting up Mysql and Running Test...
+      # - docker login -u $DOCKER_USERNAME -p $DOCKER_TOKEN
+      # - docker-compose up -d
+      # - npm run test:e2e
+      # - docker-compose down
+      # - buildExitCode=$?
     finally:
       - |
         if [ "$buildExitCode" -ne 0 ]; then

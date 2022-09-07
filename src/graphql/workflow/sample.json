@@ -1,0 +1,48 @@
+{
+  "ACT": {
+    "DESIGN": [
+      {
+        "data": {
+          "variables": {
+            "Status": 200,
+            "OrgId": "ORG#7fe322dd-bfe0-43bd-92e4-09f522364a85",
+            "AID": "9e8e2958-117d-4ded-a099-aa1a365897f3",
+            "Endpoint": "http://localhost:4566/restapis/v1plry3sp2/local/_user_request_/trigger/9e8e2958-117d-4ded-a099-aa1a365897f3",
+            "Body": "{\n  \"result\": \"success\"\n}",
+            "Name": "trig4"
+          },
+          "state": "HTTP",
+          "nodeType": "HTTP",
+          "labelIconName": "LanguageIcon"
+        },
+        "id": "node_2",
+        "position": { "x": 385, "y": 202.5 }
+      },
+      { "id": "edge_1", "source": "node_2", "type": "default", "target": "node_3" },
+      {
+        "data": { "nodeType": "Start", "labelIconName": "PlayArrowIcon", "state": "Start" },
+        "id": "node_0",
+        "position": { "x": 480, "y": 100 }
+      },
+      { "id": "edge_0", "source": "node_0", "type": "default", "target": "node_2" }
+    ],
+    "T": "HTTP",
+    "NM": "node_2",
+    "MD": {
+      "Status": 200,
+      "OrgId": "ORG#7fe322dd-bfe0-43bd-92e4-09f522364a85",
+      "Endpoint": "http://localhost:4566/restapis/v1plry3sp2/local/_user_request_/trigger/9e8e2958-117d-4ded-a099-aa1a365897f3",
+      "IsTrigger": true,
+      "AID": "9e8e2958-117d-4ded-a099-aa1a365897f3",
+      "Body": "{\n  \"result\": \"success\"\n}",
+      "Name": "trig4"
+    }
+  },
+  "updated_at": "2022-09-02T02:48:08.845Z",
+  "DATA": "AID#9e8e2958-117d-4ded-a099-aa1a365897f3",
+  "SK": "WS#0b775a93-17f1-4dd9-9cfc-177a4654399e",
+  "created_at": "2022-09-02T02:48:08.547Z",
+  "NAID": ["AID#493a8a85-a999-4eec-a5ae-0086d5be03d6"],
+  "PK": "WV#beb2bde7-2b44-4829-aa5d-fb604eedd0da",
+  "AID": "AID#9e8e2958-117d-4ded-a099-aa1a365897f3"
+}

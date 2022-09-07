@@ -57,3 +57,9 @@ export class IntegrationApp implements CompositePrimaryKey {
   @Field((type) => FileUploadType, { nullable: true })
   fileUploadType?: FileUploadType;
 }
+
+export interface IListIntegrationApps {
+  data: {
+    ListIntegrationApps: IntegrationApp[];
+  };
+}

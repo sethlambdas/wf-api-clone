@@ -272,7 +272,7 @@ describe('WorkflowStepExecutionHistoryResolver (e2e)', () => {
   });
 
   describe('ListAllManualApprovalBasedOnStatus', () => {
-    const OrgId = 'ORG#2a61005c-9269-432e-9c78-980f0ce6415f';
+    const OrgId = 'ORG#1234';
     let workflow: any;
 
     const wsxh1 = { ...createWorkflowStepExecutionHistoryInput, T: 'Manual Approval' };

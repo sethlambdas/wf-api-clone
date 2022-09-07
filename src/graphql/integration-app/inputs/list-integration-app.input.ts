@@ -12,3 +12,7 @@ export class ListIntegrationAppRecordsInput {
 export interface ListIntegrationAppRecordsRepoInput extends ListIntegrationAppRecordsInput {
   totalIntApp: number;
 }
+
+export class ListIntegrationAppsInput {
+  page: number;
+}

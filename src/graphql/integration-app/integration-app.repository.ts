@@ -3,9 +3,12 @@ import { Injectable } from '@nestjs/common';
 import { InjectModel, Model } from 'nestjs-dynamoose';
 
 import { CompositePrimaryKey } from '@graphql:common/interfaces/dynamodb-keys.interface';
-import { ListIntegrationAppRecordsRepoInput } from './inputs/list-integration-app.input';
-import { IntegrationApp } from './integration-app.entity';
+import { ListIntegrationAppRecordsRepoInput, ListIntegrationAppsInput } from './inputs/list-integration-app.input';
+import { IListIntegrationApps, IntegrationApp } from './integration-app.entity';
+import { HttpMethod, IGraphqlPayload, networkClient } from 'utils/helpers/networkRequest.util';
+import { LIST_INTEGRATION_APPS } from './integration-app.gql-queries';
 
+const endpoint = ConfigUtil.get('authBeEndpoint') || 'http://localhost:3001/api/graphql';
 @Injectable()
 export class IntegrationAppRepository {
   constructor(
@@ -82,5 +85,22 @@ export class IntegrationAppRepository {
 
   async deleteIntegrationAppRecords(primaryKey: CompositePrimaryKey) {
     await this.integrationAppModel.delete(primaryKey);
+  }
+
+  async listIntegrationApps(listIntegrationAppsInput: ListIntegrationAppsInput): Promise<IntegrationApp[]> {
+    const payload: IGraphqlPayload = {
+      query: LIST_INTEGRATION_APPS,
+      variables: { inputs: { ...listIntegrationAppsInput } },
+    };
+
+    const response = (await networkClient({
+      method: HttpMethod.POST,
+      url: endpoint,
+      headers: {},
+      queryParams: {},
+      bodyParams: payload,
+    })) as IListIntegrationApps;
+
+    return response.data.ListIntegrationApps;
   }
 }

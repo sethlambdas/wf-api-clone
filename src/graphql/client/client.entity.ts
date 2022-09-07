@@ -72,3 +72,8 @@ export class Client implements CompositePrimaryKey {
   @Field((type) => [Header], { nullable: true })
   headers?: Header[];
 }
+export interface IListClients {
+  data: {
+    ListClients: Client[];
+  };
+}
