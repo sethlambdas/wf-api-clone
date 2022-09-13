@@ -33,6 +33,8 @@ export interface IDetail {
 
   payload?: any;
 
+  loopConfig?: ILoopConfig;
+
   parentWSXH?: {
     keys: CompositePrimaryKey;
     nextParentWSXHParams: EventParams;
@@ -70,4 +72,10 @@ export interface WorkflowStepResults {
 export interface IManualApproval {
   // Workflow Step Approval
   IsApprove: boolean;
+}
+
+export interface ILoopConfig {
+  maxLoop: number;
+  currentLoop: number;
+  firstLoopActivity: CompositePrimaryKey;
 }

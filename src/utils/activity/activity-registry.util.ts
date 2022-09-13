@@ -31,6 +31,8 @@ export enum ActivityTypes {
   SubWorkflow = 'SubWorkflow',
   ParallelStart = 'Parallel Start',
   ParallelEnd = 'Parallel End',
+  StartLoop = 'Start Loop',
+  EndLoop = 'End Loop',
   End = 'End',
 }
 

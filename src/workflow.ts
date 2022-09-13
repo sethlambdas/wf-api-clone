@@ -12,7 +12,7 @@ import { ErrorAction } from './graphql/common/enums/web-service.enum';
 import activityRegistry, { ActivityTypes, TriggerTypes } from './utils/activity/activity-registry.util';
 import { ManualApprovalEmailParams } from './utils/activity/manual-approval.util';
 import { ExternalActivityTypes, runExternalService } from './utils/external-activity/external-activities.util';
-import { EventParams, ExternalServiceDetails } from './utils/workflow-types/details.types';
+import { EventParams, ExternalServiceDetails, ILoopConfig } from './utils/workflow-types/details.types';
 import { IDetail } from './utils/workflow-types/details.types';
 
 import { CAT, WorkflowExecution } from './graphql/workflow-executions/workflow-execution.entity';
@@ -98,6 +98,7 @@ export default class Workflow {
         payload,
         externalServiceDetails,
         parentWSXH,
+        loopConfig,
       }: IDetail = detail;
 
       let wfExecKeys = WorkflowExecKeys;
@@ -121,6 +122,37 @@ export default class Workflow {
         }
         
         this.logger.log('Workflow has finished executing!');
+        return;
+      }
+
+      if (act.T === ActivityTypes.EndLoop && loopConfig && loopConfig.currentLoop < loopConfig.maxLoop) {
+        const nextLoop = loopConfig.currentLoop + 1;
+        
+        this.logger.log(`RERUNNING ACTIVITIES FOR LOOP ${nextLoop}`);
+
+        const workflowStep = await this.workflowStepService.getWorkflowStepByKey(loopConfig.firstLoopActivity);
+
+        const details: IDetail = {
+          ...detail,
+          currentWorkflowStep: workflowStep,
+          loopConfig: {
+            ...loopConfig,
+            currentLoop: nextLoop,
+          },
+        };
+
+        const params = {
+          Entries: [],
+        };
+
+        params.Entries.push({
+          Detail: JSON.stringify(details),
+          DetailType: Workflow.getDetailType(),
+          Source: Workflow.getSource(),
+        });
+
+        await putEventsEB(params);
+
         return;
       }
 
@@ -176,6 +208,7 @@ export default class Workflow {
           WorkflowVersionKeys,
           WorkflowStepExecutionHistorySK,
           WLFN,
+          loopConfig && act.T !== ActivityTypes.EndLoop ? loopConfig : undefined,
         );
         wfExec = result.wfExec;
         wfStepExecHistory = result.wfStepExecHistory;
@@ -204,7 +237,8 @@ export default class Workflow {
           this.logger.log('================Activity Type===============');
           this.logger.log(act?.T);
           this.logger.log('================Activity Type===============');
-          if (activityRegistry[act?.T] || (externalService && externalService.isDone) || act?.T === ActivityTypes.SubWorkflow) {
+
+          if (activityRegistry[act?.T] || (externalService && externalService.isDone) || Object.keys(ActivityTypes).some((key) => ActivityTypes[key] === act.T)) {
             const nextActIds = currentWorkflowStep.NAID;
             const parallelStatus = await this.updateParallelStatus(
               wfExec,
@@ -278,9 +312,17 @@ export default class Workflow {
                 WLFN,
                 OrgId,
                 previousStepResults: currentWlfStepResults,
+                loopConfig,
               };
 
               if (parentWSXH) details.parentWSXH = parentWSXH;
+              if (act.T === ActivityTypes.StartLoop) {
+                details.loopConfig = {
+                  maxLoop: act.MD.NLoop,
+                  currentLoop: 1,
+                  firstLoopActivity: { PK: getWorkflowStep.PK, SK: getWorkflowStep.SK },
+                }
+              }
 
               params.Entries.push({
                 Detail: JSON.stringify(details),
@@ -479,12 +521,13 @@ export default class Workflow {
     WorkflowVersionKeys: { PK: string; SK: string },
     WorkflowStepExecutionHistorySK: string,
     WorkflowName: string,
+    loopConfig?: ILoopConfig,
   ) {
     let wfExec: WorkflowExecution;
     let wfStepExecHistory: WorkflowStepExecutionHistory;
 
     const ActivityType = act.T.replace(' ', '');
-    const WSXH_SK = `WSXH|${OrgId}|${ActivityType}|${v4()}`;
+    const WSXH_SK = loopConfig ? `WSXH|LOOP-${loopConfig.currentLoop}|${OrgId}|${ActivityType}|${v4()}` : `WSXH|${OrgId}|${ActivityType}|${v4()}`;
 
     if (wfExecKeys) {
       wfExec = await this.workflowExecutionService.getWorkflowExecutionByKey(wfExecKeys);

@@ -215,6 +215,10 @@ export class MD {
   // SubWorkflow
   @Field((type) => CompositeKeys, { nullable: true })
   WorkflowKeys?: CompositeKeys;
+
+  // StartLoop
+  @Field({ nullable: true })
+  NLoop?: number;
 }
 
 @ObjectType()

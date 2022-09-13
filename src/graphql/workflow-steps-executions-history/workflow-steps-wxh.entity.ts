@@ -28,6 +28,15 @@ export class WebService {
 }
 
 @ObjectType()
+class CompositePK implements CompositePrimaryKey {
+  @Field()
+  PK: string;
+
+  @Field()
+  SK: string;
+}
+
+@ObjectType()
 export class WorkflowStepExecutionHistory
   extends OmitType(ACT, ['DESIGN', 'END'] as const)
   implements CompositePrimaryKey
@@ -55,15 +64,6 @@ export class WorkflowStepExecutionHistory
 
   @Field((type) => WebService, { nullable: true })
   WEB_SERVICE?: WebService;
-}
-
-@ObjectType()
-class CompositePK implements CompositePrimaryKey {
-  @Field()
-  PK: string;
-
-  @Field()
-  SK: string;
 }
 
 @ObjectType()

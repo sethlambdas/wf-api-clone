@@ -207,6 +207,10 @@ export const MDSchema = new Schema({
   WorkflowKeys: {
     type: Object,
     schema: CompositeKeys
+  },
+  // Loop
+  NLoop: {
+    type: Number,
   }
 });
 
