@@ -19,7 +19,7 @@ aws:
   region: 'ap-southeast-2'
   local: 'http://localhost:4566'
   kms:
-    keyId: '8d0c7f10-23df-471e-84be-9081bd805a6f'
+    keyId: '07806e2c-06c9-4dd0-88ed-53ab129c06cc'
     alias: 'alias/Workflow'
 
 s3:
@@ -93,11 +93,11 @@ lambda:
 
 mailgun:
   test: false
-  apiKey: 'ba8388311d8f3e35419b2f73b2933f08-d2cc48bc-e9e59ed8'
-  domain: 'sandbox9f94ce022345440d9288de6b451d87a8.mailgun.org'
+  apiKey: '839b890b5e34d37dfc5c4564170a40e5-2bf328a5-8ef298c2'
+  domain: 'sandboxfce6122a4b56445895c58d09b9b5496b.mailgun.org'
   fromEmail: 'CoWo Team <support@cowo.io>'
-  toEmail: 'printerEmail@gmail.com'
-  ccEmail: 'ccEmail@gmail.com'
+  toEmail: 'seth@lambdas.io'
+  ccEmail: 'notifications@lambdas.io'
 
 oauth:
   redirectUriPath: 'http://localhost:3001'

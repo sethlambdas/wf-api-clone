@@ -32,10 +32,12 @@ export default async function manualApproval(payload: any, state?: any) {
     }
     const origin = ConfigUtil.get('workflow.domain');
     const executeManualApprovalEB = async (manualApprovalEmailParams: ManualApprovalEmailParams) => {
+      
       const ActivityType = encodeURIComponent(ActivityTypes.ManualApproval);
       const mapManualApprovalEmailParams = mapValues(manualApprovalEmailParams, (value) => {
         return encodeURIComponent(value);
       });
+      
       const searchParams = {
         ...mapManualApprovalEmailParams,
         ActivityType,
@@ -51,6 +53,7 @@ export default async function manualApproval(payload: any, state?: any) {
         Subject,
         Body,
       };
+     
       await mailgunSendEmail(manualApprovalPayload);
       logger.log(`Email for approval sent to ${Email}`);
     };

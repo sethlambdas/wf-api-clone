@@ -128,8 +128,6 @@ export class WorkflowService {
     };
 
     const workflowVersion = await this.workflowVersionService.createWorkflowVersion(createWorkflowVersionInput);
-    this.logger.log(workflowVersion);
-
     for (const state of States) {
       const AID = state?.Variables?.AID || v4();
 

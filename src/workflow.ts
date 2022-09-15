@@ -419,13 +419,14 @@ export default class Workflow {
                 return;
               } else if (act.T === ActivityTypes.ManualApproval && !ManualApproval) {
                 if (typeof actResult === 'function') {
+                  
                   const workflow = await this.workflowService.getWorkflowByName({
                     WorkflowName: WLFN,
                     OrgId,
                   });
                   const workflowVersionSK = wfExec.PK.split('|')[0];
                   const workflowVersion = await this.workflowVersionService.getWorkflowVersionByKey({
-                    PK: workflow.PK,
+                    PK: workflow.PK+"||"+workflow.SK,
                     SK: workflowVersionSK,
                   });
                   const executeManualApprovalEB = actResult as (
