@@ -6,7 +6,7 @@ import { ConfigUtil } from '@lambdascrew/utility';
 import { GSI } from '../common/enums/gsi-names.enum';
 import { SimplePrimaryKey } from '@graphql:common/interfaces/dynamodb-keys.interface';
 import { IRefreshToken, ISignOut, RefreshToken, User } from './user.entity';
-import { HttpMethod, IGraphqlPayload, networkClient } from 'utils/helpers/networkRequest.util';
+import { HttpMethod, IGraphqlPayload, networkClient } from '../../utils/helpers/networkRequest.util';
 import { LOGOUT_QL, REFRESH_TOKEN_QL } from './user.qgl-queries';
 
 const endpoint = ConfigUtil.get('authBeEndpoint') || 'http://localhost:3001/api/graphql';

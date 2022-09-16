@@ -6,7 +6,7 @@ import { CompositePrimaryKey } from '@graphql:common/interfaces/dynamodb-keys.in
 // import { CompositePrimaryKey } from '@graphql:common/interfaces/dynamodb-keys.interface';
 import { Client, IListClients } from './client.entity';
 import { FindClientByNameInput, ListClientsInput } from './inputs/find-client.input';
-import { HttpMethod, IGraphqlPayload, networkClient } from 'utils/helpers/networkRequest.util';
+import { HttpMethod, IGraphqlPayload, networkClient } from '../../utils/helpers/networkRequest.util';
 import { LIST_CLIENTS } from './client.gql-queries';
 
 const endpoint = ConfigUtil.get('authBeEndpoint') || 'http://localhost:3001/api/graphql';

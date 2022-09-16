@@ -5,7 +5,7 @@ import { InjectModel, Model } from 'nestjs-dynamoose';
 import { CompositePrimaryKey } from '@graphql:common/interfaces/dynamodb-keys.interface';
 import { ListIntegrationAppRecordsRepoInput, ListIntegrationAppsInput } from './inputs/list-integration-app.input';
 import { IListIntegrationApps, IntegrationApp } from './integration-app.entity';
-import { HttpMethod, IGraphqlPayload, networkClient } from 'utils/helpers/networkRequest.util';
+import { HttpMethod, IGraphqlPayload, networkClient } from '../../utils/helpers/networkRequest.util';
 import { LIST_INTEGRATION_APPS } from './integration-app.gql-queries';
 
 const endpoint = ConfigUtil.get('authBeEndpoint') || 'http://localhost:3001/api/graphql';
