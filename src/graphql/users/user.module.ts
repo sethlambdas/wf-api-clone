@@ -1,4 +1,4 @@
-import { DynamoDBModule } from '@graphql:dynamodb/dynamodb.module';
+import { DynamoDBModule } from '../dynamodb/dynamodb.module';
 import { Module } from '@nestjs/common';
 import { JwtModule } from '@nestjs/jwt';
 import { PassportModule } from '@nestjs/passport';

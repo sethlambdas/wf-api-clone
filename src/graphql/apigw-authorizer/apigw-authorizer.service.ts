@@ -2,7 +2,7 @@ import { Inject, Injectable } from '@nestjs/common';
 import { v4 } from 'uuid';
 import * as SafeBuffer from 'safe-buffer';
 
-import { SimplePrimaryKey } from '@graphql:common/interfaces/dynamodb-keys.interface';
+import { SimplePrimaryKey } from '../common/interfaces/dynamodb-keys.interface';
 import { cipherCMS, KMSType } from '../../utils/kms.util';
 
 import { ApigwAuthorizerRepository } from './apigw-authorizer.repository';

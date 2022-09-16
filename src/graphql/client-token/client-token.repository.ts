@@ -3,7 +3,7 @@ import { InjectModel, Model } from 'nestjs-dynamoose';
 
 import { ConfigUtil } from '@lambdascrew/utility';
 
-import { SimplePrimaryKey } from '@graphql:common/interfaces/dynamodb-keys.interface';
+import { SimplePrimaryKey } from '../common/interfaces/dynamodb-keys.interface';
 import { ClientToken } from './client-token.entity';
 
 @Injectable()

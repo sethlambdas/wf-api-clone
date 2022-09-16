@@ -1,9 +1,9 @@
 import { ConfigUtil } from '@lambdascrew/utility';
 import { Injectable } from '@nestjs/common';
 import { InjectModel, Model } from 'nestjs-dynamoose';
-import { CompositePrimaryKey } from '@graphql:common/interfaces/dynamodb-keys.interface';
+import { CompositePrimaryKey } from '../common/interfaces/dynamodb-keys.interface';
 
-// import { CompositePrimaryKey } from '@graphql:common/interfaces/dynamodb-keys.interface';
+// import { CompositePrimaryKey } from '../common/interfaces/dynamodb-keys.interface';
 import { Client, IListClients } from './client.entity';
 import { FindClientByNameInput, ListClientsInput } from './inputs/find-client.input';
 import { HttpMethod, IGraphqlPayload, networkClient } from '../../utils/helpers/networkRequest.util';

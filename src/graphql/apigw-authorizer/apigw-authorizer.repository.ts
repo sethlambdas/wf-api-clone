@@ -2,7 +2,7 @@ import { ConfigUtil } from '@lambdascrew/utility';
 import { Injectable } from '@nestjs/common';
 import { InjectModel, Model } from 'nestjs-dynamoose';
 
-import { SimplePrimaryKey } from '@graphql:common/interfaces/dynamodb-keys.interface';
+import { SimplePrimaryKey } from '../common/interfaces/dynamodb-keys.interface';
 import { ApigwAuthorizer } from './apigw-authorizer.entity';
 
 @Injectable()

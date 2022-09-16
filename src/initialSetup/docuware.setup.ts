@@ -1,4 +1,4 @@
-import { AuthType, ClientStatus } from '@graphql:common/enums/authentication.enum';
+import { AuthType, ClientStatus } from '../graphql/common/enums/authentication.enum';
 import { INestApplication, Logger } from '@nestjs/common';
 
 import { ClientService } from '../graphql/client/client.service';

@@ -1,6 +1,6 @@
 import { Inject, Injectable } from '@nestjs/common';
 
-import { CompositePrimaryKey } from '@graphql:common/interfaces/dynamodb-keys.interface';
+import { CompositePrimaryKey } from '../common/interfaces/dynamodb-keys.interface';
 import { EntityCountService } from '../entity-count/entitiy-count.service';
 
 import { CreateIntegrationAppInput } from './inputs/create-integration-app.inputs';

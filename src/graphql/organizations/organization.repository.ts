@@ -4,7 +4,7 @@ import { v4 } from 'uuid';
 
 import { ConfigUtil } from '@lambdascrew/utility';
 
-import { SimplePrimaryKey } from '@graphql:common/interfaces/dynamodb-keys.interface';
+import { SimplePrimaryKey } from '../common/interfaces/dynamodb-keys.interface';
 import { CreateOrganizationInput } from './inputs/create-organization.input';
 import { Organization } from './organization.entity';
 

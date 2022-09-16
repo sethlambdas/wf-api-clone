@@ -1,6 +1,6 @@
 import { Field, InputType, PartialType } from '@nestjs/graphql';
 
-import { AuthType, ClientStatus } from '@graphql:common/enums/authentication.enum';
+import { AuthType, ClientStatus } from '../../common/enums/authentication.enum';
 import { MetadataSchema, SecretsSchema } from '../client.entity';
 import { HeaderInput } from '../../integration-app/inputs/create-integration-app.inputs';
 

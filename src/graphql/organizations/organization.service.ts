@@ -1,6 +1,6 @@
 import { Inject, Injectable } from '@nestjs/common';
 
-import { SimplePrimaryKey } from '@graphql:common/interfaces/dynamodb-keys.interface';
+import { SimplePrimaryKey } from '../common/interfaces/dynamodb-keys.interface';
 import { CreateOrganizationInput } from './inputs/create-organization.input';
 import { SaveOrganizationInput } from './inputs/save-organization.input';
 import { Organization } from './organization.entity';

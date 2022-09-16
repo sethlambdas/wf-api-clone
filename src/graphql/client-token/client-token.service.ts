@@ -1,6 +1,6 @@
 import { Inject, Injectable } from '@nestjs/common';
 
-import { SimplePrimaryKey } from '@graphql:common/interfaces/dynamodb-keys.interface';
+import { SimplePrimaryKey } from '../common/interfaces/dynamodb-keys.interface';
 import { cipherCMS, KMSType } from '../../utils/kms.util';
 import { ClientToken } from './client-token.entity';
 import { ClientTokenRepository } from './client-token.repository';

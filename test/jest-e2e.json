@@ -10,7 +10,7 @@
   "coverageDirectory": "../coverage",
   "testEnvironment": "node",
   "moduleNameMapper": {
-    "@graphql:common/(.*)": ["<rootDir>/../src/graphql/common/$1"],
+    "../common/(.*)": ["<rootDir>/../src/graphql/common/$1"],
     "@graphql:dynamodb/(.*)": ["<rootDir>/../src/graphql/dynamodb/$1"],
     "@src:config/(.*)": ["<rootDir>/../src/config/$1"]
   }

@@ -1,7 +1,7 @@
 import { Field, InputType, Int, PartialType } from '@nestjs/graphql';
 
 import { Header, Urls } from '../integration-app.entity';
-import { AuthType } from '@graphql:common/enums/authentication.enum';
+import { AuthType } from '../../common/enums/authentication.enum';
 import { FileUploadType } from '../integration-app.enum';
 
 @InputType()

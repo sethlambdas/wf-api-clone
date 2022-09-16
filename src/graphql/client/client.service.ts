@@ -1,9 +1,9 @@
 import { Inject, Injectable } from '@nestjs/common';
 import { v4 } from 'uuid';
 
-// import { CompositePrimaryKey } from '@graphql:common/interfaces/dynamodb-keys.interface';
+// import { CompositePrimaryKey } from '../common/interfaces/dynamodb-keys.interface';
 import { cipherCMS, KMSType } from '../../utils/kms.util';
-import { CompositePrimaryKey } from '@graphql:common/interfaces/dynamodb-keys.interface';
+import { CompositePrimaryKey } from '../common/interfaces/dynamodb-keys.interface';
 import { IntegrationAppService } from '../integration-app/integration-app.service';
 // import { IntegrationAppService } from '../integration-app/integration-app.service';
 import { Client } from './client.entity';

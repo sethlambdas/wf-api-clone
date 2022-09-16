@@ -1,6 +1,6 @@
 import { Field, InputType, PartialType } from '@nestjs/graphql';
 
-import { SimplePrimaryKey } from '@graphql:common/interfaces/dynamodb-keys.interface';
+import { SimplePrimaryKey } from '../../common/interfaces/dynamodb-keys.interface';
 
 @InputType()
 export class CreateClientTokenInput implements SimplePrimaryKey {

@@ -4,7 +4,7 @@ import { InjectModel, Model } from 'nestjs-dynamoose';
 import { ConfigUtil } from '@lambdascrew/utility';
 
 import { GSI } from '../common/enums/gsi-names.enum';
-import { SimplePrimaryKey } from '@graphql:common/interfaces/dynamodb-keys.interface';
+import { SimplePrimaryKey } from '../common/interfaces/dynamodb-keys.interface';
 import { IRefreshToken, ISignOut, RefreshToken, User } from './user.entity';
 import { HttpMethod, IGraphqlPayload, networkClient } from '../../utils/helpers/networkRequest.util';
 import { LOGOUT_QL, REFRESH_TOKEN_QL } from './user.qgl-queries';

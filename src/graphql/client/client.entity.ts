@@ -1,7 +1,7 @@
 import { Field, ObjectType } from '@nestjs/graphql';
 
-import { AuthType, ClientStatus } from '@graphql:common/enums/authentication.enum';
-import { CompositePrimaryKey } from '@graphql:common/interfaces/dynamodb-keys.interface';
+import { AuthType, ClientStatus } from '../common/enums/authentication.enum';
+import { CompositePrimaryKey } from '../common/interfaces/dynamodb-keys.interface';
 import { Header } from '../integration-app/integration-app.entity';
 
 @ObjectType()

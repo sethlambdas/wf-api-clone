@@ -1,6 +1,6 @@
 import { Field, InputType } from '@nestjs/graphql';
 
-import { CompositePrimaryKey } from '@graphql:common/interfaces/dynamodb-keys.interface';
+import { CompositePrimaryKey } from '../../common/interfaces/dynamodb-keys.interface';
 
 @InputType()
 export class FindIntegrationAppByNameInput {

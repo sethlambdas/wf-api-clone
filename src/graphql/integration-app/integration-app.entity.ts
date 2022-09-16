@@ -1,7 +1,7 @@
 import { Field, Int, ObjectType } from '@nestjs/graphql';
 
-import { CompositePrimaryKey } from '@graphql:common/interfaces/dynamodb-keys.interface';
-import { AuthType } from '@graphql:common/enums/authentication.enum';
+import { CompositePrimaryKey } from '../common/interfaces/dynamodb-keys.interface';
+import { AuthType } from '../common/enums/authentication.enum';
 import { FileUploadType } from './integration-app.enum';
 
 @ObjectType()

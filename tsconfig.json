@@ -11,7 +11,7 @@
     "outDir": "./dist",
     "baseUrl": "./src",
     "paths": {
-      "@graphql:common/*": ["graphql/common/*"],
+      "../common/*": ["graphql/common/*"],
       "@graphql:dynamodb/*": ["graphql/dynamodb/*"],
       "@src:config/*": ["config/*"]
     }

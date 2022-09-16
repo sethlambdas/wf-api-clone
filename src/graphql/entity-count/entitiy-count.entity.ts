@@ -1,6 +1,6 @@
 import { Field, Int, ObjectType } from '@nestjs/graphql';
 
-import { CompositePrimaryKey } from '@graphql:common/interfaces/dynamodb-keys.interface';
+import { CompositePrimaryKey } from '../common/interfaces/dynamodb-keys.interface';
 
 @ObjectType()
 export class EntityCount implements CompositePrimaryKey {
