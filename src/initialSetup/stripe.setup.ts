@@ -1,7 +1,8 @@
 import { INestApplication, Logger } from '@nestjs/common';
 
 import { AuthType, ClientStatus } from '../graphql/common/enums/authentication.enum';
-import { CreateClientInput } from 'graphql/client/inputs/create-client.input';
+
+import { CreateClientInput } from '../graphql/client/inputs/create-client.input';
 import { CreateIntegrationAppInput } from '../graphql/integration-app/inputs/create-integration-app.inputs';
 
 import { ClientService } from '../graphql/client/client.service';
