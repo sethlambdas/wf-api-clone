@@ -187,7 +187,9 @@ export class UserService {
 
   async validateUserPassword(signInCredentialsInput: SignInCredentialsInput): Promise<User> {
     const { email, password } = signInCredentialsInput;
+    this.logger.log('validateUserPassword - getUserByEmail')
     const user = await this.userRepository.getUserByEmail(email);
+    this.logger.log('validateUserPassword - validatePassword')
     if (user && (await this.validatePassword(password, user))) {
       return user;
     }
