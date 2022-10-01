@@ -66,11 +66,13 @@ export class UserService {
   }
 
   async signIn(signInCredentialsInput: SignInCredentialsInput): Promise<AuthCredentials> {
+    this.logger.log('signIn - validateUserPassword');
     const user = await this.validateUserPassword(signInCredentialsInput);
     if (!user) {
       throw new UnauthorizedException('Invalid credentials');
     }
     const payload: User = user;
+    this.logger.log('signIn - generateToken');
     const { accessToken, refreshTokenGenerate } = await this.generateToken(payload);
     this.logger.debug(`Generated JWT Token with payload ${JSON.stringify(payload)}`);
     return { accessToken, refreshTokenGenerate };
