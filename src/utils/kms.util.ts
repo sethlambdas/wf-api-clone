@@ -78,7 +78,7 @@ export async function decryptKMS(base64EncryptedString: string) {
       KeyId: ConfigUtil.get('aws.kms.keyId'),
       CiphertextBlob: Buffer.from(base64EncryptedString, 'base64'),
     };
-    logger.log(`decryptKMS - about to decrypt`);
+    logger.log(`decryptKMS - about to decrypt with KeyId: ${decryptParams.KeyId}`);
     const decryptData = await kms.decrypt(decryptParams).promise();
     logger.log(`decryptKMS - decrypted`);
     const text = decryptData?.Plaintext?.toString('ascii');
