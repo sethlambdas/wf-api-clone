@@ -61,7 +61,9 @@ export async function encryptKMS(data: any) {
       KeyId: ConfigUtil.get('aws.kms.keyId'),
       Plaintext: JSON.stringify(data),
     };
+    logger.log(`encryptKMS KeyId: ${encryptParams.KeyId}`);
     const encryptData = await kms.encrypt(encryptParams).promise();
+    logger.log(`encryptKMS encryptData: ${encryptData}`);
     const base64EncryptedString = encryptData?.CiphertextBlob?.toString('base64');
     return base64EncryptedString;
   } catch (err) {
@@ -73,9 +75,12 @@ export async function encryptKMS(data: any) {
 export async function decryptKMS(base64EncryptedString: string) {
   try {
     const decryptParams: KMS.Types.DecryptRequest = {
+      KeyId: ConfigUtil.get('aws.kms.keyId'),
       CiphertextBlob: Buffer.from(base64EncryptedString, 'base64'),
     };
+    logger.log(`decryptKMS - about to decrypt`);
     const decryptData = await kms.decrypt(decryptParams).promise();
+    logger.log(`decryptKMS - decrypted`);
     const text = decryptData?.Plaintext?.toString('ascii');
     return text && JSON.parse(text);
   } catch (err) {
@@ -90,6 +95,7 @@ export enum KMSType {
 }
 
 export async function cipherCMS(type: KMSType, data: any) {
+  logger.log(`cipherCMS - start`);
   const updatedData = data;
   for (const key in updatedData) {
     if (updatedData.hasOwnProperty(key) && kmsKeys.indexOf(key) > -1 && updatedData[key]) {
@@ -101,5 +107,6 @@ export async function cipherCMS(type: KMSType, data: any) {
       }
     }
   }
+  logger.log(`cipherCMS - done`);
   return updatedData;
 }
