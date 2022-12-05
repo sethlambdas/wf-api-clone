@@ -60,7 +60,7 @@ import { DocuwareModule } from './docuware/docuware.module';
         region: ConfigUtil.get('aws.region'),
       },
       model: {
-        create: ConfigUtil.get('dynamodb.local') ? true : false,
+        create: true,
       },
     }),
     TerminusModule,

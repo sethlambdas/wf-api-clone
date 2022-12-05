@@ -63,41 +63,44 @@ async function bootstrap() {
   app.use(cookieParser());
 
   const origin = ConfigUtil.get('server.origin');
-  app.enableCors({ credentials: true, origin });
+  app.enableCors({
+    credentials: true,
+    origin,
+  });
   logger.log(`Accepting requests from origin "${origin}"`);
 
   const port = ConfigUtil.get('server.port');
   await app.listen(port);
   logger.log(`Application listening on port ${port}`);
 
-    // Create Organization for Testing
-    const organization = await organizationService.getOrganization({ PK: 'ORG#1234' });
-    if (!organization) {
-      await organizationService.createOrganization({ ORGNAME: 'TestOrgName', ORGID: '1234' });
-    }
-  
-    logger.log(`Running Initial Setup`);
-  
-    if (process.env.NODE_ENV === 'development') {
-      await setupKMS(app);
-    }
-  
-    await setupEntityCount(app);
-    await setupZoho(app);
-    await setupDocuware(app);
-    await setupCin7(app);
-    await setupXero(app);
-    await setupMYOB(app);
-    await setupSlack(app);
-    await setupShopify(app);
-    await setupStripe(app);
-    await setupGithub(app);
-    await setupDropbox(app);
-    await setupGoogleDrive(app);
-    await setupAdobesign(app);
-    await setupDocusign(app);
-    await setupImgur(app);
-    await setupOnedrive(app);
+  // Create Organization for Testing
+  const organization = await organizationService.getOrganization({ PK: 'ORG#1234' });
+  if (!organization) {
+    await organizationService.createOrganization({ ORGNAME: 'TestOrgName', ORGID: '1234' });
+  }
+
+  logger.log(`Running Initial Setup`);
+
+  if (process.env.NODE_ENV === 'development') {
+    await setupKMS(app);
+  }
+
+  await setupEntityCount(app);
+  await setupZoho(app);
+  await setupDocuware(app);
+  await setupCin7(app);
+  await setupXero(app);
+  await setupMYOB(app);
+  await setupSlack(app);
+  await setupShopify(app);
+  await setupStripe(app);
+  await setupGithub(app);
+  await setupDropbox(app);
+  await setupGoogleDrive(app);
+  await setupAdobesign(app);
+  await setupDocusign(app);
+  await setupImgur(app);
+  await setupOnedrive(app);
 
   const workflow = new Workflow(
     logger,

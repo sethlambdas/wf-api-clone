@@ -1,5 +1,5 @@
 server:
-  origin: 'http://localhost:3001'
+  origin: 'http://localhost:8081'
   port: 3001
   prefix: 'api'
   payload:
@@ -14,12 +14,13 @@ externalServices:
   ocrEndpoint: http://localhost:3002
 
 aws:
-  accessKeyId: 'sampleAccessKeyId'
-  secretAccessKey: 'sampleSecretAccessKey'
+  accessKeyId: 'mock'
+  secretAccessKey: 'mock'
   region: 'ap-southeast-2'
-  local: 'http://localhost:4566'
+# use host.docker.internal if we run the workflow-api image container, hence use localhost if run directly
+  local: 'http://host.docker.internal:4566'
   kms:
-    keyId: 'cf4c8c4e-d07b-43a2-9ce3-d12c11bf42cf'
+    keyId: '605d7185-79e0-4364-b704-70a366d7d23a'
     alias: 'alias/Workflow'
 
 s3:
@@ -27,7 +28,7 @@ s3:
   expiresIn: 86400
 
 dynamodb:
-  local: 'http://localhost:4566'
+  local: 'http://host.docker.internal:4566'
   schema:
     workflow: 'workflow'
     workflowVersions: 'workflow-versions'
@@ -45,6 +46,7 @@ jwt:
   refreshToken:
     expiresIn: '12h'
     maxAge: 43200000
+    sameSite: 'None'
   emailToken:
     expiresIn: '1h'
 
@@ -54,7 +56,7 @@ email:
     password: 'somePassword'
 
 apiGateway:
-  endpoint: 'http://localhost:4566'
+  endpoint: 'http://host.docker.internal:4566'
   usagePlanName: 'Workflow Usage Plan'
   restApiName: 'Workflow API'
   restApiResource: 'trigger'
@@ -74,11 +76,11 @@ files:
   dir: './uploads/'
 
 sqs:
-  endpoint: 'http://localhost:4566'
+  endpoint: 'http://host.docker.internal:4566'
   queueName: 'WORKFLOW_QUEUE'
-  queueUrl: 'http://localhost:4566/000000000000/WORKFLOW_QUEUE'
+  queueUrl: 'http://host.docker.internal:4566/000000000000/WORKFLOW_QUEUE'
   queueError: 'WORKFLOW_QUEUE_ERROR'
-  queueErrorUrl: 'http://localhost:4566/000000000000/WORKFLOW_QUEUE_ERROR'
+  queueErrorUrl: 'http://host.docker.internal:4566/000000000000/WORKFLOW_QUEUE_ERROR'
   maxRetriesLimit: 3
   maxRetriesIntervalSeconds:
     - 5
@@ -86,7 +88,7 @@ sqs:
     - 30
 
 eventBridge:
-  endpoint: 'http://localhost:4566'
+  endpoint: 'http://host.docker.internal:4566'
 
 lambda:
   webServiceFunctionName: 'srvls-generic-svc-local-genericFunction'
@@ -100,4 +102,5 @@ mailgun:
   ccEmail: 'notifications@lambdas.io'
 
 oauth:
-  redirectUriPath: 'http://localhost:3001'
+  redirectUriPath: 'http://workflow-api.lambdas.io'
+authBeEndpoint: 'https://workflow-api.lambdas.io/api/graphql'

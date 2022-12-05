@@ -1,5 +1,19 @@
 server:
-  origin: http://nestjs-task-management-frontend.s3-website-eu-west-1.amazonaws.com
+  origin: https://workflow.lambdas.io
 
 workflow:
-  domain: https://workflow-dev.coredocs.cloud
+  domain: https//workflow.lambdas.io
+
+aws:
+  local: #empty to overide default.yml local endpoint
+
+dynamodb:
+   local: #empty to overide default.yml local endpoint
+
+
+sqs:
+  queueUrl: 'https://sqs.ap-southeast-2.amazonaws.com/917209780752/WORKFLOW_QUEUE'
+  queueErrorUrl: '  https://sqs.ap-southeast-2.amazonaws.com/917209780752/WORKFLOW_QUEUE_ERROR'
+
+lambda:
+  webServiceFunctionName: 'srvls-generic-svc-production-genericFunction'

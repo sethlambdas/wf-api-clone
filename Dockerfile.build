@@ -30,7 +30,7 @@ RUN apk add curl
 RUN addgroup appgroup \
     && adduser -G appgroup -D appuser
 
-ENTRYPOINT ["tini", "--", "./entrypoint.sh"]
+ENTRYPOINT ["tini", "--", "sh","./entrypoint.sh"]
 
 # CMD ["node", "main.js"]
 

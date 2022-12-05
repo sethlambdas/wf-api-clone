@@ -2,8 +2,14 @@ import * as AWS from 'aws-sdk';
 
 import { ConfigUtil } from '@lambdascrew/utility';
 
+const region = ConfigUtil.get('aws.region');
+const accessKeyId = ConfigUtil.get('aws.accessKeyId');
+const secretAccessKey = ConfigUtil.get('aws.secretAccessKey');
+
 const config: { [key: string]: any } = {
-  region: ConfigUtil.get('aws.region'),
+  region,
+  accessKeyId,
+  secretAccessKey,
 };
 
 if (process.env.NODE_ENV === 'development') {

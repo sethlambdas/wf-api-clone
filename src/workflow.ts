@@ -181,7 +181,7 @@ export default class Workflow {
         await this.UpdateTimedTriggerStepStatus(OrgId, timedTrigger.ACT, timedTrigger.SK, wfExecKeys, WSXH_SK, WLFN);
       }
 
-      if (httpTrigger && httpTrigger.IsHttpTriggered && !externalService)
+      if (httpTrigger && httpTrigger.IsHttpTriggered && !externalService){
         await this.UpdateHttpStepStatus(
           OrgId,
           httpTrigger.httpACT,
@@ -190,7 +190,7 @@ export default class Workflow {
           httpTrigger.HTTP_WSXH_SK,
           WLFN,
         );
-
+      }
       if (isRerun) {
         this.logger.log(
           `Rerunning: ${act.T} of workflow step "${currentWorkflowStep.SK}" of execution history "${WorkflowStepExecutionHistorySK}"`,

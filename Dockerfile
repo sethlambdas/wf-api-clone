@@ -9,9 +9,9 @@ LABEL io.lambdas.nodeversion=$NODE_VERSION
 
 ENV NODE_ENV=production
 
-EXPOSE 3000
+EXPOSE 3001
 
-ENV PORT 3000
+ENV PORT 3001
 
 WORKDIR /app
 
@@ -30,7 +30,7 @@ RUN apk add curl
 RUN addgroup appgroup \
     && adduser -G appgroup -D appuser
 
-ENTRYPOINT ["tini", "--", "./entrypoint.sh"]
+ENTRYPOINT ["tini", "--", "sh","./entrypoint.sh"]
 
 # CMD ["node", "main.js"]
 
@@ -39,7 +39,12 @@ ENTRYPOINT ["tini", "--", "./entrypoint.sh"]
 ####################################
 FROM base as dev
 
-ENV NODE_ENV=development
+ENV NODE_ENV=production
+# ENV AWS_SECRET_ACCESS_KEY sampleSecretAccessKey
+# ENV AWS_ACCESS_KEY_ID sampleAccessKeyId
+# ENV AWS_REGION ap-southeast-2
+# ENV WORKFLOW_QUEUE WORKFLOW_QUEUE
+# ENV WORKFLOW_QUEUE_ERROR WORKFLOW_QUEUE_ERROR
 
 #RUN apt-get update -qq && apt-get install -qy \
 RUN apk add --no-cache \
@@ -98,7 +103,6 @@ RUN apk add --no-cache python3 py-pip jq \
 
 COPY --from=pre-prod /app/config/default.yml /app/config/
 COPY --from=pre-prod /app/config/production.yml /app/config/
-COPY --from=pre-prod /app/config/development.yml /app/config/
 COPY --from=pre-prod /app/dist /app
 COPY --from=pre-prod /app/entrypoint.sh /app
 
@@ -106,4 +110,4 @@ RUN chown -R appuser:appgroup /app
 
 RUN chmod +x /app/entrypoint.sh
 
-USER appuser
+USER appuser:appgroup

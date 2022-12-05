@@ -124,6 +124,8 @@ export class UserService {
     const cookieOptions = {
       httpOnly: true,
       maxAge: ConfigUtil.get('jwt.refreshToken.maxAge'),
+      sameSite: ConfigUtil.get('jwt.refreshToken.sameSite'),
+      secure: true
     };
     context.res.cookie('refreshToken', refreshTokenGenerate, cookieOptions);
     return cookieOptions;

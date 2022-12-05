@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import { InjectModel, Model } from 'nestjs-dynamoose';
 
 import { ConfigUtil } from '@lambdascrew/utility';
@@ -39,7 +39,6 @@ export class UserRepository {
       query: REFRESH_TOKEN_QL,
       variables: { refreshToken },
     };
-
     const response = (await networkClient({
       method: HttpMethod.POST,
       url: endpoint,

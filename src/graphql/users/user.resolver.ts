@@ -1,3 +1,4 @@
+import { Logger } from '@nestjs/common';
 import { Args, Context, Mutation, Query, Resolver } from '@nestjs/graphql';
 import { AuthCredentials, RefreshTokenResult } from './auth/auth-credentials.type';
 import { ForgotPasswordInput } from './inputs/forgot-password.input';

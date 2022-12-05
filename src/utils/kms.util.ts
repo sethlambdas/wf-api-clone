@@ -17,7 +17,7 @@ const kmsKeys = [...clientKMSKeys, ...clientTokenKMSKeys, ...apigwAuthorizerKMSK
 
 const getKMS = () => {
   return process.env.NODE_ENV === 'production'
-    ? new KMS({ region })
+    ? new KMS({ region, accessKeyId, secretAccessKey })
     : new KMS({
         accessKeyId,
         secretAccessKey,
@@ -32,7 +32,7 @@ export async function createKeyKMS(params: KMS.Types.CreateKeyRequest) {
   try {
     return kms.createKey(params).promise();
   } catch (err) {
-    logger.error('ERROR:', err);
+    logger.error('ERROR:1', err);
     throw err;
   }
 }
@@ -41,7 +41,7 @@ export async function createAliasKMS(params: KMS.Types.CreateAliasRequest) {
   try {
     return kms.createAlias(params).promise();
   } catch (err) {
-    logger.error('ERROR:', err);
+    logger.error('ERROR:2', err);
     throw err;
   }
 }
@@ -50,7 +50,7 @@ export async function listAliasesKMS(params?: KMS.Types.ListAliasesRequest) {
   try {
     return kms.listAliases(params).promise();
   } catch (err) {
-    logger.error('ERROR:', err);
+    logger.error('ERROR:3', err);
     throw err;
   }
 }
@@ -67,7 +67,7 @@ export async function encryptKMS(data: any) {
     const base64EncryptedString = encryptData?.CiphertextBlob?.toString('base64');
     return base64EncryptedString;
   } catch (err) {
-    logger.error('ERROR:', err);
+    logger.error('ERROR:4', err);
     throw err;
   }
 }
@@ -84,7 +84,7 @@ export async function decryptKMS(base64EncryptedString: string) {
     const text = decryptData?.Plaintext?.toString('ascii');
     return text && JSON.parse(text);
   } catch (err) {
-    logger.error('ERROR:', err);
+    logger.error('ERROR:5', err);
     throw err;
   }
 }

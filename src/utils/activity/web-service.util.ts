@@ -150,7 +150,6 @@ export function resolveMentionedVariables(unresolvedString: string, state?: any)
   if (!unresolvedString) {
     return '';
   }
-
   return getMentionedData(unresolvedString, state);
 }
 
