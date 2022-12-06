@@ -18,7 +18,7 @@ import { IDetail } from './utils/workflow-types/details.types';
 import { CAT, WorkflowExecution } from './graphql/workflow-executions/workflow-execution.entity';
 import { WorkflowExecStatus } from './graphql/workflow-executions/workflow-execution.enum';
 import { WorkflowExecutionService } from './graphql/workflow-executions/workflow-execution.service';
-import { CreateWorkflowStepExecutionHistoryInput } from './graphql/workflow-steps-executions-history/inputs/post.inputs';
+import { CreateWorkflowStepExecutionHistoryInput, WebServiceInput } from './graphql/workflow-steps-executions-history/inputs/post.inputs';
 import { SaveWorkflowStepExecutionHistoryInput } from './graphql/workflow-steps-executions-history/inputs/put.inputs';
 import { WorkflowStepExecutionHistory } from './graphql/workflow-steps-executions-history/workflow-steps-wxh.entity';
 import { WorkflowStepExecutionHistoryService } from './graphql/workflow-steps-executions-history/workflow-steps-wxh.service';
@@ -182,6 +182,11 @@ export default class Workflow {
       }
 
       if (httpTrigger && httpTrigger.IsHttpTriggered && !externalService){
+        const webServiceHttpTriggerRes = {
+          Request: JSON.stringify(httpTrigger.NetworkRequest),
+          Result: httpTrigger.httpACT.MD.Body,
+          Error: 'None',
+        };
         await this.UpdateHttpStepStatus(
           OrgId,
           httpTrigger.httpACT,
@@ -189,6 +194,7 @@ export default class Workflow {
           wfExecKeys,
           httpTrigger.HTTP_WSXH_SK,
           WLFN,
+          webServiceHttpTriggerRes
         );
       }
       if (isRerun) {
@@ -474,7 +480,10 @@ export default class Workflow {
                   UQ_OVL: WorkflowStepStatus.Finished,
                   WEB_SERVICE: webServiceRes,
                 });
-              } else await this.updateCATStatus(wfStepExecHistory, WorkflowStepStatus.Finished);
+              } 
+              else{
+                await this.updateCATStatus(wfStepExecHistory, WorkflowStepStatus.Finished);
+              } 
             }
           }
         }
@@ -497,6 +506,7 @@ export default class Workflow {
     act: CAT,
     CurrentWorkflowStepSK: string,
     WorkflowName: string,
+    webServiceTriggerResult?: WebServiceInput
   ) {
     const inputs: CreateWorkflowStepExecutionHistoryInput = {
       OrgId,
@@ -511,6 +521,7 @@ export default class Workflow {
     };
     if (act.MD) inputs.MD = act.MD;
     if (act.END) inputs.END = act.END;
+    if(webServiceTriggerResult) inputs.WEB_SERVICE = webServiceTriggerResult
     return await this.workflowStepExecutionHistoryService.createWorkflowStepExecutionHistory(inputs);
   }
 
@@ -605,9 +616,10 @@ export default class Workflow {
     wfExecKeys: any,
     WSXH_SK: string,
     WorkflowName: string,
+    webServiceTriggerResult?: WebServiceInput
   ) {
     act.Status = WorkflowStepStatus.Finished;
-    await this.createStepExecHistory(OrgId, wfExecKeys.PK, WSXH_SK, act, CurrentWorkflowStepSK, WorkflowName);
+    await this.createStepExecHistory(OrgId, wfExecKeys.PK, WSXH_SK, act, CurrentWorkflowStepSK, WorkflowName, webServiceTriggerResult);
   }
 
   private async UpdateTimedTriggerStepStatus(
@@ -709,9 +721,10 @@ export default class Workflow {
   }
 
   private async updateCATStatus(wfStepExecHistory: WorkflowStepExecutionHistory, status: WorkflowStepStatus) {
+    const saveWorkflowStepExecutionHistoryInput:SaveWorkflowStepExecutionHistoryInput = { Status: status, UQ_OVL: status };
     await this.workflowStepExecutionHistoryService.saveWorkflowStepExecutionHistory(
       { PK: wfStepExecHistory.PK, SK: wfStepExecHistory.SK },
-      { Status: status, UQ_OVL: status },
+      saveWorkflowStepExecutionHistoryInput,
     );
   }
 

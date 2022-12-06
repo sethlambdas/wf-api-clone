@@ -1,6 +1,8 @@
+import { WorkflowStepStatus } from 'graphql/workflow-steps/enums/workflow-step-status.enum';
 import { CompositePrimaryKey } from '../../graphql/common/interfaces/workflow-key.interface';
 import { CAT } from '../../graphql/workflow-executions/workflow-execution.entity';
 import { WorkflowStep } from '../../graphql/workflow-steps/workflow-step.entity';
+import { EventRequestParams } from './lambda.types';
 
 export interface IDetail {
   isRerun?: boolean;
@@ -38,7 +40,7 @@ export interface IDetail {
   parentWSXH?: {
     keys: CompositePrimaryKey;
     nextParentWSXHParams: EventParams;
-  }
+  };
 }
 
 export interface EventParams {
@@ -46,7 +48,7 @@ export interface EventParams {
     Detail: string;
     DetailType: string;
     Source: string;
-  }[]
+  }[];
 }
 
 export interface HttpTrigger {
@@ -54,6 +56,21 @@ export interface HttpTrigger {
   httpACT: CAT;
   HTTP_WSXH_SK: string;
   HTTP_workflowStepSK: string;
+  Status?: WorkflowStepStatus;
+  Body?: string;
+  NetworkRequest?: NetworkRequest;
+}
+
+export interface NetworkRequest {
+  endpoint: HttpTriggerEndpoint;
+  headers: any;
+  queryString: any;
+  body: any;
+}
+
+export interface HttpTriggerEndpoint {
+  url: string;
+  method: string;
 }
 
 export interface ExternalServiceDetails {

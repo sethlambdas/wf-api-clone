@@ -1,8 +1,8 @@
+import { ConfigUtil } from '@lambdascrew/utility';
 import { Inject, Injectable, Logger } from '@nestjs/common';
 import { Response as Res } from 'express';
 import * as moment from 'moment';
 import { v4 } from 'uuid';
-import { ConfigUtil } from '@lambdascrew/utility';
 
 import {
   disableRule,
@@ -10,14 +10,14 @@ import {
   formCreateEventParams,
   putEventsEB,
   putRuleEB,
-  putTargetsEB,
+  putTargetsEB
 } from '../../aws-services/event-bridge/event-bridge.util';
 import { WORKFLOW_QUEUE_URL } from '../../aws-services/sqs/sqs-config.util';
 import { getSQSQueueAttributes } from '../../aws-services/sqs/sqs.util';
 import { ActivityTypes, TriggerTypes } from '../../utils/activity/activity-registry.util';
 import { resolveMentionedVariables } from '../../utils/activity/web-service.util';
 import { ExternalActivityTypes } from '../../utils/external-activity/external-activities.util';
-import { IDetail } from '../../utils/workflow-types/details.types';
+import { HttpTrigger, HttpTriggerEndpoint, IDetail, NetworkRequest } from '../../utils/workflow-types/details.types';
 import Workflow from '../../workflow';
 
 import { ACT as TypeACT, DesignWorkflowInput } from '../common/entities/workflow-step.entity';
@@ -26,24 +26,24 @@ import { CompositePrimaryKeyInput } from '../common/inputs/workflow-key.input';
 import { CAT } from '../workflow-executions/workflow-execution.entity';
 import { WorkflowExecStatus } from '../workflow-executions/workflow-execution.enum';
 
-import { WorkflowStep } from '../workflow-steps/workflow-step.entity';
-import { CreateWorkflowStepInput } from '../workflow-steps/inputs/post.inputs';
 import { GetWorkflowStepByAidInput } from '../workflow-steps/inputs/get.inputs';
+import { CreateWorkflowStepInput } from '../workflow-steps/inputs/post.inputs';
 import { SaveWorkflowStepInput } from '../workflow-steps/inputs/put.inputs';
+import { WorkflowStep } from '../workflow-steps/workflow-step.entity';
 
 import { CreateWorkflowVersionInput } from '../workflow-versions/inputs/post.inputs';
 import { SaveWorkflowVersionInput } from '../workflow-versions/inputs/put.inputs';
 
-import { CreateWorkflowResponse, GetWorkflowsOfAnOrg, Status, WorkflowModelRepository } from './workflow.entity';
-import { CreateWorkflowInput, InitiateAWorkflowStepInput } from './inputs/post.inputs';
 import { GetWorkflowByNameInput, GetWorkflowsOfAnOrgInput } from './inputs/get.inputs';
-import { StateWorkflowInput, SaveWorkflowInput } from './inputs/put.inputs';
+import { CreateWorkflowInput, InitiateAWorkflowStepInput } from './inputs/post.inputs';
+import { SaveWorkflowInput, StateWorkflowInput } from './inputs/put.inputs';
+import { CreateWorkflowResponse, GetWorkflowsOfAnOrg, Status, WorkflowModelRepository } from './workflow.entity';
 
-import { WorkflowRepository } from './workflow.repository';
 import { OrganizationService } from '../organizations/organization.service';
-import { WorkflowVersionService } from '../workflow-versions/workflow-version.service';
-import { WorkflowStepService } from '../workflow-steps/workflow-step.service';
 import { WorkflowExecutionService } from '../workflow-executions/workflow-execution.service';
+import { WorkflowStepService } from '../workflow-steps/workflow-step.service';
+import { WorkflowVersionService } from '../workflow-versions/workflow-version.service';
+import { WorkflowRepository } from './workflow.repository';
 
 @Injectable()
 export class WorkflowService {
@@ -514,8 +514,24 @@ export class WorkflowService {
     return { Workflows: result, TotalPages: getWorkflowsOfAnOrg.search ? 0 : organization.TotalWLFBatches };
   }
 
-  async trigger(res: Res, params: string[], payload: any): Promise<any> {
+  async trigger(res: Res, params: string[], payload: any, req: any): Promise<any> {
     const { workflowId }: any = params;
+    const endpoint: HttpTriggerEndpoint = {
+      url: `${req.protocol}://${req.get('Host')}${req.originalUrl}`,
+      method: req.method
+    }
+    let reqBody;
+    try {
+      reqBody = JSON.parse(req.body.body)
+    } catch (error) {
+      reqBody = req.body.body
+    }
+    const eventReqParams: NetworkRequest = {
+      endpoint,
+      headers: req.headers,
+      queryString: req.query,
+      body: reqBody,
+    };
 
     if (!workflowId) {
       const errorData = {
@@ -583,11 +599,14 @@ export class WorkflowService {
         Status: '',
       };
 
-      const httpTrigger = {
+      const httpTrigger: HttpTrigger = {
         IsHttpTriggered: true,
         httpACT,
         HTTP_WSXH_SK: WSXH_SK,
         HTTP_workflowStepSK: workflowStep.SK,
+        // Endpoint: endpoint,
+        Body: payload,
+        NetworkRequest: eventReqParams
       };
 
       let i = 0;

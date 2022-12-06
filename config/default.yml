@@ -18,7 +18,7 @@ aws:
   secretAccessKey: 'mock'
   region: 'ap-southeast-2'
 # use host.docker.internal if we run the workflow-api image container, hence use localhost if run directly
-  local: 'http://host.docker.internal:4566'
+  local: 'http://localhost:4566'
   kms:
     keyId: '605d7185-79e0-4364-b704-70a366d7d23a'
     alias: 'alias/Workflow'
