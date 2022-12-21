@@ -520,7 +520,7 @@ export class WorkflowService {
       url: `${req.protocol}://${req.get('Host')}${req.originalUrl}`,
       method: req.method
     }
-    let reqBody;
+    let reqBody: any;
     try {
       reqBody = JSON.parse(req.body.body)
     } catch (error) {
@@ -528,7 +528,10 @@ export class WorkflowService {
     }
     const eventReqParams: NetworkRequest = {
       endpoint,
-      headers: req.headers,
+      headers: {
+        ...req.headers,
+        ...this.maskAuthorizationHeader(req.body.headers)
+      },
       queryString: req.query,
       body: reqBody,
     };
@@ -717,5 +720,17 @@ export class WorkflowService {
     return res.json({
       ...updatedBody,
     });
+  }
+
+  private maskAuthorizationHeader(header: any) {
+    try {
+      let maskedHeader = header;
+      if(header.Authorization){
+        maskedHeader.Authorization = "Bearer ****"
+      }
+      return maskedHeader;
+    } catch (error) {
+      return header;
+    }
   }
 }

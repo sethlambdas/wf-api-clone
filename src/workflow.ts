@@ -257,13 +257,22 @@ export default class Workflow {
             currentParallelIndexes = parallelStatus.updatedParallelIndexes;
 
             const parsedSte = JSON.parse(wfExec.STE);
+            let parsedPayload;
+            try {
+              if(payload){
+                parsedPayload = { 
+                  body: JSON.parse(JSON.parse(JSON.stringify(payload)).body)
+                }
+              }
+            } catch (error) {
+              parsedPayload = payload;
+            }
             const state = {
               ...parsedSte,
               ...(httpTrigger && httpTrigger.IsHttpTriggered
-                ? { [httpTrigger.httpACT.MD.Name]: { ...parsedSte.data, ...payload } }
+                ? { [httpTrigger.httpACT.MD.Name]: { ...parsedSte.data, ...parsedPayload, ...JSON.parse(httpTrigger.httpACT.MD.Body) } }
                 : {}),
             };
-
             this.logger.log('================WF Execution State===============');
             this.logger.log(state);
             this.logger.log('================WF Execution State===============');
