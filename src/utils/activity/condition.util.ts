@@ -28,5 +28,6 @@ export default async function condition(payload: any, state?: any) {
   } catch (err) {
     logger.log('ERROR:');
     logger.log(err);
+    return err;
   }
 }

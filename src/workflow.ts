@@ -420,6 +420,16 @@ export default class Workflow {
                   } else {
                     await putEventsEB(params);
                   }
+                } else {
+                  if (act.END) {
+                    this.logger.log('Workflow has finished executing!');
+                  } else {
+                    const filteredParams: any = {
+                      Entries: params.Entries.filter((entry:any)=>JSON.parse(entry.Detail).currentWorkflowStep.ACT.DESIGN[0].id === act.MD.DefaultNext)
+                    }
+                    await putEventsEB(filteredParams);
+                    this.logger.log('filtered params',filteredParams)
+                  }
                 }
               } else {
                 await this.updateCATStatus(wfStepExecHistory, WorkflowStepStatus.Error);
@@ -473,10 +483,16 @@ export default class Workflow {
                 }
               } else if (act.T === ActivityTypes.ParallelEnd) {
                 await this.updateParallelFinished(wfExec, currentParallelIndex, currentParallelIndexes, params);
-              }  else {
-                await putEventsEB(params);
+              } else {
+                if (act.MD.ErrorAction === ErrorAction.EXITPATH) {
+                  const filteredParams: any = {
+                    Entries: params.Entries.filter((entry:any)=>JSON.parse(entry.Detail).currentWorkflowStep.ACT.DESIGN[0].id !== act.MD.DefaultNext)
+                  }
+                  await putEventsEB(filteredParams);
+                } else {
+                  await putEventsEB(params);
+                }
               }
-
               if (act.T === ActivityTypes.WebService) {
                 const webServiceRes = {
                   Request: JSON.stringify(actResult.request),
@@ -490,7 +506,7 @@ export default class Workflow {
                   WEB_SERVICE: webServiceRes,
                 });
               } 
-              else{
+              else {
                 await this.updateCATStatus(wfStepExecHistory, WorkflowStepStatus.Finished);
               } 
             }
