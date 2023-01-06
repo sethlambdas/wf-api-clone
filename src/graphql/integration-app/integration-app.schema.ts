@@ -1,4 +1,5 @@
 import { Schema } from 'dynamoose';
+import { ClientIntegrationDetailsPlacementOption } from './integration-app.enum';
 
 export const HeaderSchema = new Schema({
   fieldName: {
@@ -42,6 +43,10 @@ export const IntegrationAppsSchema = new Schema(
     type: {
       type: String,
       enum: ['API-KEY', 'BASIC', 'OAUTH', 'COOKIE'],
+    },
+    clientDetailsPlacement: {
+      type: String,
+      enum: ['BODY', 'QUERY_PARAMS', 'HEADERS'],
     },
     version: {
       type: Number,

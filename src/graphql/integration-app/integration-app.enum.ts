@@ -6,6 +6,28 @@ export enum FileUploadType {
   'DIRECT_BODY' = 'DIRECT-BODY',
 }
 
+export enum ClientIntegrationDetailsPlacementOption {
+  'BODY' = 'BODY',
+  'QUERY_PARAMS' = 'QUERY_PARAMS',
+  'HEADERS' = 'HEADERS',
+}
+
+registerEnumType(ClientIntegrationDetailsPlacementOption, {
+  name: 'ClientIntegrationDetailsPlacementOption',
+  description: 'client id and secret placement',
+  valuesMap: {
+    BODY: {
+      description: 'equals to body',
+    },
+    QUERY_PARAMS: {
+      description: 'equals to Query params',
+    },
+    HEADERS: {
+      description: 'equals to headers',
+    }
+  },
+});
+
 registerEnumType(FileUploadType, {
   name: 'FileUploadType',
   description: 'The file upload types supported',

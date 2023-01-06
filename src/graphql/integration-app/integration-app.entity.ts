@@ -2,7 +2,7 @@ import { Field, Int, ObjectType } from '@nestjs/graphql';
 
 import { CompositePrimaryKey } from '../common/interfaces/dynamodb-keys.interface';
 import { AuthType } from '../common/enums/authentication.enum';
-import { FileUploadType } from './integration-app.enum';
+import { ClientIntegrationDetailsPlacementOption, FileUploadType } from './integration-app.enum';
 
 @ObjectType()
 export class Header {
@@ -38,6 +38,9 @@ export class IntegrationApp implements CompositePrimaryKey {
 
   @Field((type) => AuthType)
   type: AuthType;
+
+  @Field((type) => ClientIntegrationDetailsPlacementOption, { nullable: true })
+  clientDetailsPlacement?: ClientIntegrationDetailsPlacementOption;
 
   @Field((type) => Int)
   version: number;

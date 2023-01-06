@@ -14,6 +14,7 @@ import { IntegrationApp } from '../integration-app/integration-app.entity';
 import { IntegrationAppService } from '../integration-app/integration-app.service';
 import { ConnectOAuthInput } from './inputs/connect-oauth.input';
 import { GetAccessTokenCredentials, GetAccessTokenOptions } from './oauth.entity';
+import { ClientIntegrationDetailsPlacementOption } from 'graphql/integration-app/integration-app.enum';
 
 const Buffer = SafeBuffer.Buffer;
 const logger = new Logger('OAUTH SERVICE');
@@ -101,6 +102,7 @@ export class OAuthService {
     accessTokenUrl: string,
     getAccessTokenOptions: GetAccessTokenOptions,
     credentials: GetAccessTokenCredentials,
+    clientDetailsPlacement: ClientIntegrationDetailsPlacementOption,
   ) {
     const codeUrl = getAccessTokenOptions.code;
     let btoa;
@@ -122,11 +124,14 @@ export class OAuthService {
     getAccessTokenOptions.code = data.code as string;
 
     const body = QueryString.stringify({ ...getAccessTokenOptions });
-
-    const headers = {
-      Authorization: 'Basic ' + btoa(credentials.client_id + ':' + credentials.client_secret),
-      ...DEFAULT_HEADERS,
-    };
+    let headers: any = { ...DEFAULT_HEADERS };
+    if (clientDetailsPlacement === ClientIntegrationDetailsPlacementOption.HEADERS) {
+      headers = {
+        ...headers,
+        Authorization: 'Basic ' + btoa(credentials.client_id + ':' + credentials.client_secret),
+      };
+    }
+   
     const response = await got
       .post(accessTokenUrl, {
         method: 'POST',
@@ -181,6 +186,7 @@ export class OAuthService {
           code: req.url,
         },
         { client_id: client.secrets.clientId, client_secret: client.secrets.clientSecret },
+        integrationApp.clientDetailsPlacement,
       );
 
       if (result.error) throw new Error(result.error);

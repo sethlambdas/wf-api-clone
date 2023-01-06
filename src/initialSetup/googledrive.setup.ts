@@ -4,7 +4,7 @@ import { AuthType } from '../graphql/common/enums/authentication.enum';
 import { CreateIntegrationAppInput } from '../graphql/integration-app/inputs/create-integration-app.inputs';
 
 import { IntegrationAppService } from '../graphql/integration-app/integration-app.service';
-import { FileUploadType } from '../graphql/integration-app/integration-app.enum';
+import { ClientIntegrationDetailsPlacementOption, FileUploadType } from '../graphql/integration-app/integration-app.enum';
 
 const logger = new Logger('SetupGoogleDrive');
 
@@ -16,6 +16,7 @@ export async function setupGoogleDrive(app: INestApplication) {
   const createIntegrationAppInput: CreateIntegrationAppInput = {
     name: 'GoogleDrive',
     type: AuthType.OAUTH,
+    clientDetailsPlacement: ClientIntegrationDetailsPlacementOption.HEADERS,
     version: 1,
     urls: {
       authorize: 'https://accounts.google.com/o/oauth2/auth',

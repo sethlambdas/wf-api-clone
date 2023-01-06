@@ -1,4 +1,5 @@
 import { INestApplication, Logger } from '@nestjs/common';
+import { ClientIntegrationDetailsPlacementOption } from 'graphql/integration-app/integration-app.enum';
 
 import { AuthType } from '../graphql/common/enums/authentication.enum';
 import { CreateIntegrationAppInput } from '../graphql/integration-app/inputs/create-integration-app.inputs';
@@ -15,6 +16,7 @@ export async function setupGithub(app: INestApplication) {
   const createIntegrationAppInput: CreateIntegrationAppInput = {
     name: 'Github',
     type: AuthType.OAUTH,
+    clientDetailsPlacement: ClientIntegrationDetailsPlacementOption.HEADERS,
     version: 1,
     urls: {
       authorize: 'https://github.com/login/oauth/authorize',

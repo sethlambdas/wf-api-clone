@@ -2,7 +2,7 @@ import { Field, InputType, Int, PartialType } from '@nestjs/graphql';
 
 import { Header, Urls } from '../integration-app.entity';
 import { AuthType } from '../../common/enums/authentication.enum';
-import { FileUploadType } from '../integration-app.enum';
+import { ClientIntegrationDetailsPlacementOption, FileUploadType } from '../integration-app.enum';
 
 @InputType()
 export class HeaderInput extends PartialType(Header, InputType) {}
@@ -17,6 +17,9 @@ export class CreateIntegrationAppInput {
 
   @Field((type) => AuthType)
   type: AuthType;
+
+  @Field((type) => ClientIntegrationDetailsPlacementOption, { nullable: true })
+  clientDetailsPlacement?: ClientIntegrationDetailsPlacementOption;
 
   @Field((type) => Int)
   version: number;

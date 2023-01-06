@@ -9,6 +9,7 @@ import { ClientTokenService } from '../graphql/client-token/client-token.service
 import { CreateClientTokenInput } from '../graphql/client-token/inputs/create-client-token.inputs';
 import { ClientService } from '../graphql/client/client.service';
 import { IntegrationAppService } from '../graphql/integration-app/integration-app.service';
+import { ClientIntegrationDetailsPlacementOption } from 'graphql/integration-app/integration-app.enum';
 
 const logger = new Logger('SetupZoho');
 
@@ -22,6 +23,7 @@ export async function setupZoho(app: INestApplication) {
   const createIntegrationAppInput: CreateIntegrationAppInput = {
     name: 'Zoho',
     type: AuthType.OAUTH,
+    clientDetailsPlacement: ClientIntegrationDetailsPlacementOption.HEADERS,
     version: 1,
     urls: {
       authorize: 'https://accounts.zoho.com/oauth/v2/auth',

@@ -21,6 +21,27 @@ export class IntegrationAppRepository {
     return results;
   }
 
+  async updateIntegrationApp(integrationAppName: string, totalIntApp: number, createIntegrationAppInput: Partial<IntegrationApp>): Promise<IntegrationApp> {
+    let intAppNumber = 1;
+
+    while (intAppNumber <= totalIntApp) {
+      const primaryKey: CompositePrimaryKey = {
+        PK: `INT-APP||${intAppNumber}`,
+        SK: `INT-APP||${intAppNumber}||metadata`,
+      };
+
+      const result = await this.integrationAppModel.get(primaryKey);
+
+      if (result && result.name === integrationAppName.trim()) {
+        const results = await this.integrationAppModel.update(primaryKey, createIntegrationAppInput);
+        return results;
+      };
+
+      ++intAppNumber;
+    }
+    return;
+  }
+
   async findIntegrationAppByPK(primaryKey: CompositePrimaryKey): Promise<IntegrationApp | null> {
     const result = await this.integrationAppModel.get(primaryKey);
     return result;

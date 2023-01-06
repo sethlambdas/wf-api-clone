@@ -27,7 +27,18 @@ export class IntegrationAppService {
       entityCount.totalIntApp,
     );
 
-    if (isRecordExist) return isRecordExist;
+    if (isRecordExist) {
+      const integrationAppUpdate: Partial<IntegrationApp> = {
+        ...createIntegrationAppInput,
+      };
+  
+      const result = await this.integrationAppRepository.updateIntegrationApp(
+        createIntegrationAppInput.name.trim(),
+        entityCount.totalIntApp,
+        integrationAppUpdate,
+      );
+      return result;
+    }
 
     const pk = 'INT-APP' + '||' + (entityCount.totalIntApp + 1);
 

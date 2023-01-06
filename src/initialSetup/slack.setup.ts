@@ -7,6 +7,7 @@ import { CreateIntegrationAppInput } from '../graphql/integration-app/inputs/cre
 
 import { ClientService } from '../graphql/client/client.service';
 import { IntegrationAppService } from '../graphql/integration-app/integration-app.service';
+import { ClientIntegrationDetailsPlacementOption } from 'graphql/integration-app/integration-app.enum';
 
 const logger = new Logger('SetupSlack');
 
@@ -19,6 +20,7 @@ export async function setupSlack(app: INestApplication) {
   const createIntegrationAppInput: CreateIntegrationAppInput = {
     name: 'Slack',
     type: AuthType.OAUTH,
+    clientDetailsPlacement: ClientIntegrationDetailsPlacementOption.HEADERS,
     version: 1,
     urls: {
       authorize: 'https://slack.com/oauth/v2/authorize',
