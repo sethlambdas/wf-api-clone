@@ -68,6 +68,10 @@ export const ClientSchema = new Schema(
       type: String,
       enum: ['ACTIVE', 'DISABLED'],
     },
+    fileUploadType: {
+      type: String,
+      enum: ['MULTIPART/RELATED', 'MULTIPART/FORM-DATA', 'DIRECT-BODY'],
+    },
     intAppId: {
       type: String,
     },

@@ -1,4 +1,5 @@
 import { Field, ObjectType } from '@nestjs/graphql';
+import { FileUploadType } from 'graphql/integration-app/integration-app.enum';
 
 import { AuthType, ClientStatus } from '../common/enums/authentication.enum';
 import { CompositePrimaryKey } from '../common/interfaces/dynamodb-keys.interface';
@@ -53,6 +54,9 @@ export class Client implements CompositePrimaryKey {
 
   @Field((type) => AuthType)
   type: AuthType;
+
+  @Field((type) => FileUploadType, { nullable: true })
+  fileUploadType?: FileUploadType;
 
   @Field((type) => ClientStatus)
   status: ClientStatus;

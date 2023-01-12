@@ -20,7 +20,7 @@ export class ClientService {
   ) {}
 
   async createClient(createClientInput: CreateClientInput): Promise<Client | null> {
-    const { appClient, orgId, name, type, intAppId, status, headers, secrets, scopes, metadata, integrationType } =
+    const { appClient, orgId, name, type, intAppId, status, headers, secrets, scopes, metadata, integrationType, fileUploadType } =
       createClientInput;
 
     if (!orgId.includes('#')) return null;
@@ -37,6 +37,7 @@ export class ClientService {
       headers,
       intAppId,
       secrets,
+      fileUploadType
     };
 
     if (scopes) client.scopes = scopes.split(',');

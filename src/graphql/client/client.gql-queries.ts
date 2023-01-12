@@ -11,6 +11,7 @@ export const LIST_CLIENTS = `
       secrets {
         rootUrl
       }
+      fileUploadType
     }
   }
 `;
