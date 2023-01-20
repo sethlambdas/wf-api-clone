@@ -9,7 +9,7 @@ import { ClientTokenService } from '../graphql/client-token/client-token.service
 import { CreateClientTokenInput } from '../graphql/client-token/inputs/create-client-token.inputs';
 import { ClientService } from '../graphql/client/client.service';
 import { IntegrationAppService } from '../graphql/integration-app/integration-app.service';
-import { ClientIntegrationDetailsPlacementOption } from 'graphql/integration-app/integration-app.enum';
+import { ClientIntegrationDetailsPlacementOption, FileUploadType } from 'graphql/integration-app/integration-app.enum';
 
 const logger = new Logger('SetupXero');
 
@@ -26,6 +26,7 @@ export async function setupXero(app: INestApplication) {
     name: 'Xero',
     type: AuthType.OAUTH,
     clientDetailsPlacement: ClientIntegrationDetailsPlacementOption.HEADERS,
+    fileUploadType: FileUploadType.DIRECT_BODY,
     version: 1,
     urls: {
       authorize: 'https://login.xero.com/identity/connect/authorize',

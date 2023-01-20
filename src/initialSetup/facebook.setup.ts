@@ -1,30 +1,29 @@
 import { INestApplication, Logger } from '@nestjs/common';
-import { ClientIntegrationDetailsPlacementOption, FileUploadType } from 'graphql/integration-app/integration-app.enum';
 
 import { AuthType } from '../graphql/common/enums/authentication.enum';
 import { CreateIntegrationAppInput } from '../graphql/integration-app/inputs/create-integration-app.inputs';
 
 import { IntegrationAppService } from '../graphql/integration-app/integration-app.service';
+import { ClientIntegrationDetailsPlacementOption, FileUploadType } from '../graphql/integration-app/integration-app.enum';
 
-const logger = new Logger('SetupMYOB');
+const logger = new Logger('SetupFacebook');
 
-export async function setupMYOB(app: INestApplication) {
-  logger.log('running initial myob setup');
+export async function setUpFacebook(app: INestApplication) {
+  logger.log('running initial facebook setup');
 
   const integrationAppService = app.get(IntegrationAppService);
 
   const createIntegrationAppInput: CreateIntegrationAppInput = {
-    name: 'MYOB',
+    name: 'Facebook',
     type: AuthType.OAUTH,
-    clientDetailsPlacement: ClientIntegrationDetailsPlacementOption.HEADERS,
+    clientDetailsPlacement: ClientIntegrationDetailsPlacementOption.QUERY_PARAMS,
     fileUploadType: FileUploadType.DIRECT_BODY,
     version: 1,
     urls: {
-      authorize: 'https://secure.myob.com/oauth2/account/authorize',
-      token: 'https://secure.myob.com/oauth2/v1/authorize',
-      refreshToken: 'https://secure.myob.com/oauth2/v1/authorize',
+      authorize: 'https://www.facebook.com/v15.0/dialog/oauth',
+      token: 'https://graph.facebook.com/v15.0/oauth/access_token',
     },
-    scopes: ['CompanyFile'],
+    scopes: ['public_profile'],
     headers: [
       {
         fieldName: 'Content-Type',
@@ -34,16 +33,12 @@ export async function setupMYOB(app: INestApplication) {
         fieldName: 'Authorization',
         fieldValue: 'Bearer {{accessToken}}',
       },
-      {
-        fieldName: 'x-myobapi-key',
-        fieldValue: '{{clientId}}',
-      },
     ],
   };
 
   await integrationAppService.createIntegrationApp(createIntegrationAppInput);
 
-  logger.log('myob setup - successful');
+  logger.log('facebook setup - successful');
 
   return { success: true };
 }

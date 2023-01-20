@@ -6,25 +6,24 @@ import { CreateIntegrationAppInput } from '../graphql/integration-app/inputs/cre
 
 import { IntegrationAppService } from '../graphql/integration-app/integration-app.service';
 
-const logger = new Logger('SetupMYOB');
+const logger = new Logger('SetupNotion');
 
-export async function setupMYOB(app: INestApplication) {
-  logger.log('running initial myob setup');
+export async function setupNotion(app: INestApplication) {
+  logger.log('running initial notion setup');
 
   const integrationAppService = app.get(IntegrationAppService);
 
   const createIntegrationAppInput: CreateIntegrationAppInput = {
-    name: 'MYOB',
+    name: 'Notion',
     type: AuthType.OAUTH,
     clientDetailsPlacement: ClientIntegrationDetailsPlacementOption.HEADERS,
     fileUploadType: FileUploadType.DIRECT_BODY,
     version: 1,
     urls: {
-      authorize: 'https://secure.myob.com/oauth2/account/authorize',
-      token: 'https://secure.myob.com/oauth2/v1/authorize',
-      refreshToken: 'https://secure.myob.com/oauth2/v1/authorize',
+      authorize: 'https://api.notion.com/v1/oauth/authorize',
+      token: 'https://api.notion.com/v1/oauth/token',
     },
-    scopes: ['CompanyFile'],
+    scopes: [],
     headers: [
       {
         fieldName: 'Content-Type',
@@ -34,16 +33,12 @@ export async function setupMYOB(app: INestApplication) {
         fieldName: 'Authorization',
         fieldValue: 'Bearer {{accessToken}}',
       },
-      {
-        fieldName: 'x-myobapi-key',
-        fieldValue: '{{clientId}}',
-      },
     ],
   };
 
   await integrationAppService.createIntegrationApp(createIntegrationAppInput);
 
-  logger.log('myob setup - successful');
+  logger.log('notion setup - successful');
 
   return { success: true };
 }

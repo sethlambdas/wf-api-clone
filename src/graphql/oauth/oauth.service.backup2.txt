@@ -57,14 +57,11 @@ export class OAuthService {
       }
     }
 
-    // issue on redirect Oauth 1.0
     if (integrationAppName === 'Trello') {
       additionalConfig = {
-        expiration:'1day',
-        name:'workflow-test',
-        response_type: 'fragment',
-        key: configOAuth.clientId,
-        callback_method: 'fragment',
+        audience: 'api.atlassian.com',
+        response_type: 'code',
+        prompt: 'consent'
       }
     }
 
@@ -126,7 +123,7 @@ export class OAuthService {
       SK: `${client.intAppId}||metadata`,
     });
 
-    if(integrationApp.name === 'Amadeus') {
+    if(integrationApp.clientDetailsPlacement === ClientIntegrationDetailsPlacementOption.BODY) {
       const result: any = await this.getAccessToken(
         integrationApp.urls.authorize,
         {
@@ -151,9 +148,7 @@ export class OAuthService {
       await this.clientTokenService.createClientToken(createClientTokenInput);
 
       return 'success';
-    } 
-    
-    if (integrationApp.clientDetailsPlacement === ClientIntegrationDetailsPlacementOption.QUERY_PARAMS) {
+    } else if(integrationApp.clientDetailsPlacement === ClientIntegrationDetailsPlacementOption.QUERY_PARAMS) {
       return 'success';
     } else {
       const configOAuth = this.getConfigOAuth(
@@ -193,130 +188,110 @@ export class OAuthService {
     };
     let body;
     let headers: any = { ...DEFAULT_HEADERS };
-    if (integrationAppName !== 'Amadeus') {
+    if (integrationAppName && integrationAppName !== 'Amadeus') {
       const url = typeof codeUrl === 'object' ? codeUrl : new URL(codeUrl, 'https://extractcode.com/');
 
       if (!url.search || !url.search.substr(1)) return Promise.reject(new TypeError('Unable to process uri: ' + codeUrl));
 
       const data = typeof url.search === 'string' ? QueryString.parse(url.search.substr(1)) : url.search || {};
-    
+      Logger.log('wag kanang maweala',data)
+      Logger.log('wag kx2',getAccessTokenOptions)
       getAccessTokenOptions.code = data.code as string;
       // airtable config
-      if (integrationAppName === 'Airtable') {
+      if (integrationAppName && integrationAppName !== 'Airtable') {
         getAccessTokenOptions.code_challenge = data.code_challenge as string;
         getAccessTokenOptions.code_verifier = this.codeVerifier as string;
       }
       // bigcommerce config
-      if (integrationAppName === 'BigCommerce') {
+      if (integrationAppName && integrationAppName !== 'BigCommerce') {
         getAccessTokenOptions.context = data.context as string;
       }
-      // bigcommerce & bitly config
-      if ( integrationAppName === 'BigCommerce' || integrationAppName === 'Bitly') {
-        body = QueryString.stringify({ ...getAccessTokenOptions, ...credentials});
-      } else {
-        body = QueryString.stringify({ ...getAccessTokenOptions });
-      }
-      // bitly config
-      if ( integrationAppName === 'Bitly' ) {
-        headers = {
-          ...headers,
-          Accept: 'application/json',
-        };
-      } else {
-        headers = {
-          ...headers,
-          Authorization: 'Basic ' + btoa(credentials.client_id + ':' + credentials.client_secret),
-        };
-      }
-     
+      headers = {
+        ...headers,
+        Authorization: 'Basic ' + btoa(credentials.client_id + ':' + credentials.client_secret),
+      };
+      body = QueryString.stringify({ ...getAccessTokenOptions});
     } else {
-      // amadeus config
       body = QueryString.stringify({ ...credentials, grant_type: 'client_credentials' });
     }
-    Logger.log('Testing body:',body)
-    
     const response = await got
       .post(accessTokenUrl, {
         headers,
         body,
       })
       .json();
-      Logger.log('wag kxzx',headers)
+
     return response;
   }
 
   async callbackOAuth(req, res) {
     let data = req.query.state;
+    let buff = new Buffer(data, 'base64');
+    let text = buff.toString('ascii');
+    const state = JSON.parse(decodeURIComponent(text || '{}'));
+    const getFromUrl = (intAppPK: string, clientPK: string, clientSK: string, status: string) => {
+      const url = new URL(state.fromUrl);
+      const searchParams = new URLSearchParams(url.search);
+      searchParams.set('intAppPK', intAppPK);
+      searchParams.set('clientPK', clientPK);
+      searchParams.set('clientSK', clientSK);
+      searchParams.set('status', status);
+      url.search = searchParams.toString();
+      return url.toString();
+    };
+
     try {
-      let buff = new Buffer(data, 'base64');
-      let text = buff.toString('ascii');
-      const state = JSON.parse(decodeURIComponent(text || '{}'));
-      const getFromUrl = (intAppPK: string, clientPK: string, clientSK: string, status: string) => {
-        const url = new URL(state.fromUrl);
-        const searchParams = new URLSearchParams(url.search);
-        searchParams.set('intAppPK', intAppPK);
-        searchParams.set('clientPK', clientPK);
-        searchParams.set('clientSK', clientSK);
-        searchParams.set('status', status);
-        url.search = searchParams.toString();
-        return url.toString();
+      const client = await this.clientService.findClientByPK({
+        PK: state.clientPK,
+        SK: state.clientSK,
+      });
+
+      if (process.env.NODE_ENV === 'test') {
+        res.json(true);
+        return;
+      }
+
+      const integrationApp = await this.integrationAppService.findIntegrationAppByPK({
+        PK: client.intAppId,
+        SK: `${client.intAppId}||metadata`,
+      });
+
+      const accessTokenUri = client.metadata
+        ? integrationApp.urls.token.replace('{{store}}', client.metadata.shopifyStore)
+        : integrationApp.urls.token;
+      const result: any = await this.getAccessToken(
+        accessTokenUri,
+        {
+          grant_type: 'authorization_code',
+          redirect_uri: `${ConfigUtil.get('oauth.redirectUriPath')}/${ConfigUtil.get('server.prefix')}/oauth/callback`,
+          code: req.url,
+        },
+        { client_id: client.secrets.clientId, client_secret: client.secrets.clientSecret },
+        integrationApp.clientDetailsPlacement,
+        integrationApp.name,
+      );
+
+      if (result.error) throw new Error(result.error);
+
+      const createClientTokenInput: CreateClientTokenInput = {
+        PK: state.clientSK,
+        accessToken: result.access_token,
+        refreshToken: result.refresh_token,
+        expTime: typeof result.expires_in === 'string' ? parseInt(result.expires_in, 10) : result.expires_in,
+        clientPK: state.clientPK,
       };
 
-      try {
-        const client = await this.clientService.findClientByPK({
-          PK: state.clientPK,
-          SK: state.clientSK,
-        });
+      await this.clientTokenService.createClientToken(createClientTokenInput);
 
-        if (process.env.NODE_ENV === 'test') {
-          res.json(true);
-          return;
-        }
-
-        const integrationApp = await this.integrationAppService.findIntegrationAppByPK({
-          PK: client.intAppId,
-          SK: `${client.intAppId}||metadata`,
-        });
-
-        const accessTokenUri = client.metadata
-          ? integrationApp.urls.token.replace('{{store}}', client.metadata.shopifyStore)
-          : integrationApp.urls.token;
-        const result: any = await this.getAccessToken(
-          accessTokenUri,
-          {
-            grant_type: 'authorization_code',
-            redirect_uri: `${ConfigUtil.get('oauth.redirectUriPath')}/${ConfigUtil.get('server.prefix')}/oauth/callback`,
-            code: req.url,
-          },
-          { client_id: client.secrets.clientId, client_secret: client.secrets.clientSecret },
-          integrationApp.clientDetailsPlacement,
-          integrationApp.name,
-        );
-
-        if (result.error) throw new Error(result.error);
-
-        const createClientTokenInput: CreateClientTokenInput = {
-          PK: state.clientSK,
-          accessToken: result.access_token,
-          refreshToken: result.refresh_token,
-          expTime: typeof result.expires_in === 'string' ? parseInt(result.expires_in, 10) : result.expires_in,
-          clientPK: state.clientPK,
-        };
-
-        await this.clientTokenService.createClientToken(createClientTokenInput);
-
-        res.redirect(getFromUrl(integrationApp.PK, client.PK, client.SK, 'success'));
-      } catch (err) {
-        logger.log('ERROR HERE:');
-        logger.log(err);
-        const client = await this.clientService.findClientByPK({
-          PK: state.clientPK,
-          SK: state.clientSK,
-        });
-        res.redirect(getFromUrl(client.intAppId, client.PK, client.SK, 'error'));
-      }
-    } catch (error) {
-      res.redirect(`${ConfigUtil.get('server.origin')}/integrations`)
+      res.redirect(getFromUrl(integrationApp.PK, client.PK, client.SK, 'success'));
+    } catch (err) {
+      logger.log('ERROR HERE:');
+      logger.log(err);
+      const client = await this.clientService.findClientByPK({
+        PK: state.clientPK,
+        SK: state.clientSK,
+      });
+      res.redirect(getFromUrl(client.intAppId, client.PK, client.SK, 'error'));
     }
   }
 }

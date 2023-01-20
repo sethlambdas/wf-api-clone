@@ -1,5 +1,5 @@
 import { ConfigUtil } from '@lambdascrew/utility';
-import { Injectable } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import { InjectModel, Model } from 'nestjs-dynamoose';
 import { CompositePrimaryKey } from '../common/interfaces/dynamodb-keys.interface';
 
@@ -19,7 +19,7 @@ export class ClientRepository {
 
   async createClient(client: Client): Promise<Client> {
     const results = await this.clientModel.create(client);
-
+    Logger.log(client)
     return results;
   }
 

@@ -3,7 +3,7 @@ oauth:
   redirectUriPath: 'http://localhost:3001'
 aws:
   kms:
-    keyId: '27de59d2-8e83-402a-adf4-64e001bfd362'
+    keyId: '91b24df5-0c40-4b9a-89ba-b1cec582ba25'
     alias: 'alias/Workflow'
 
 jwt:
@@ -15,3 +15,10 @@ logLevel:
   - 'warn'
   - 'info'
   - 'debug'
+
+integrations:
+  twilio:
+    sid: 'ACac1efc8f48058add76f327cd30c0f328'
+  sendle:
+    api: 'sandbox_tVXmzStvRsn38xHfZ8mTnzDr'
+    url: 'sandbox'

@@ -1,4 +1,4 @@
-import { Inject, Injectable } from '@nestjs/common';
+import { Inject, Injectable, Logger } from '@nestjs/common';
 import { v4 } from 'uuid';
 
 // import { CompositePrimaryKey } from '../common/interfaces/dynamodb-keys.interface';

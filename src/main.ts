@@ -32,6 +32,27 @@ import { setupAdobesign } from './initialSetup/adobesign.setup';
 import { setupDocusign } from './initialSetup/docusign.setup';
 import { setupImgur } from './initialSetup/imgur.setup';
 import { setupOnedrive } from './initialSetup/onedrive.setup';
+import { setUpSalesForce } from './initialSetup/salesforce.setup';
+import { setUpAmadeus } from './initialSetup/amadeus.setup';
+import { setupAdyen } from './initialSetup/adyen.setup';
+import { setUpAerisWeather } from './initialSetup/aerisweather.setup';
+import { setUpAirtable } from './initialSetup/airtable.setup';
+import { setupBigCommerce } from './initialSetup/bigcommerce.setup';
+import { setupBitly } from './initialSetup/bitly.setup';
+import { setUpFacebook } from './initialSetup/facebook.setup';
+import { setUpFirebase } from './initialSetup/firebase.setup';
+import { setUpMailChimp } from './initialSetup/mailchimp.setup';
+import { setupMailgun } from './initialSetup/mailgun.setup';
+import { setupMicrosoftDynamics } from './initialSetup/microsoftdynamics.setup';
+import { setupNotion } from './initialSetup/notion.setup';
+import { setupPdf } from './initialSetup/pdf.setup';
+import { setupSendgrid } from './initialSetup/sendgrid.setup';
+import { setupSendle } from './initialSetup/sendle.setup';
+import { setupShort } from './initialSetup/short.setup';
+import { setupTrello } from './initialSetup/trello.setup';
+import { setupTwilio } from './initialSetup/twilio.setup';
+import { setupTypeForm } from './initialSetup/typeform.setup';
+import { setUpYHFinance } from './initialSetup/yhfinance.setup';
 
 AWS.config.update({ region: ConfigUtil.get('aws.region') });
 
@@ -101,6 +122,27 @@ async function bootstrap() {
   await setupDocusign(app);
   await setupImgur(app);
   await setupOnedrive(app);
+  await setUpSalesForce(app);
+  await setUpAmadeus(app);
+  await setupAdyen(app);
+  await setUpAerisWeather(app);
+  await setUpAirtable(app);
+  await setupBigCommerce(app);
+  await setupBitly(app);
+  await setUpFacebook(app);
+  await setUpFirebase(app);
+  await setUpMailChimp(app);
+  await setupMailgun(app);
+  await setupMicrosoftDynamics(app);
+  await setupNotion(app);
+  await setupPdf(app);
+  await setupSendgrid(app);
+  await setupSendle(app);
+  await setupShort(app);
+  await setupTrello(app);
+  await setupTwilio(app);
+  await setupTypeForm(app);
+  await setUpYHFinance(app);
 
   const workflow = new Workflow(
     logger,

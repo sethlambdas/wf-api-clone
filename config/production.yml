@@ -17,3 +17,10 @@ sqs:
 
 lambda:
   webServiceFunctionName: 'srvls-generic-svc-production-genericFunction'
+
+integrations:
+  twilio:
+    sid: 'ACac1efc8f48058add76f327cd30c0f328'
+  sendle:
+    api: 'sandbox_tVXmzStvRsn38xHfZ8mTnzDr'
+    url: 'api'
