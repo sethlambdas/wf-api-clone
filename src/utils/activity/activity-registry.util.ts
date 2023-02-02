@@ -5,7 +5,7 @@ import email from './email.util';
 import manualApproval from './manual-approval.util';
 import mergeData from './merge-data.util';
 import webService from './web-service.util';
-
+import matchingData from './matching-data.util';
 interface ActivityRegistryItem {
   label: string;
   processActivity: (payload?: any, state?: any) => Promise<unknown>;
@@ -22,6 +22,7 @@ export enum TriggerTypes {
 
 export enum ActivityTypes {
   WebService = 'Web Service',
+  MatchingData = 'Matching Data',
   Delay = 'Delay',
   Email = 'Email',
   Condition = 'Condition',
@@ -37,6 +38,10 @@ export enum ActivityTypes {
 }
 
 const activityRegistry: ActivityRegistry = {
+  [ActivityTypes.MatchingData]: {
+    label: ActivityTypes.MatchingData,
+    processActivity: (payload?: any, state?: any) => matchingData(payload, state),
+  },
   [ActivityTypes.ParallelStart]: {
     label: ActivityTypes.ParallelStart,
     processActivity: () => null,

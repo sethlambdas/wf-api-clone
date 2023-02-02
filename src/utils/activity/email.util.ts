@@ -1,6 +1,6 @@
 import { Logger } from '@nestjs/common';
 import { mailgunSendEmail } from '../helpers/mailgun-helpers.util';
-import { replaceAt } from '../helpers/string-helpers.util';
+import { getMentionedData, replaceAt } from '../helpers/string-helpers.util';
 
 const logger = new Logger('email');
 
@@ -24,18 +24,7 @@ export function emailMarkupBody(Body: string, state?: any) {
   if (!Body) {
     return '';
   }
-  const regexBrackets = /{{(.*?)}}/gm;
-  let updatedBody = Body;
-  while (true) {
-    const match = regexBrackets.exec(updatedBody);
-    if (!match) {
-      break;
-    }
-    const { 0: origWord, 1: word, index } = match;
-    const lastIndex = index + origWord.length;
-    const trimWord = word.trim();
-    const replacement = (state && state[trimWord] && JSON.stringify(state[trimWord])) || '';
-    updatedBody = replaceAt(updatedBody, index, lastIndex, replacement);
-  }
+  let updatedBody = getMentionedData(Body,state);
+  logger.log('updated body',updatedBody)
   return updatedBody;
 }

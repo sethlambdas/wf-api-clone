@@ -52,6 +52,9 @@ export const WorkflowStepExecutionHistorySchema = new Schema(
       type: Object,
       schema: WebServiceSchema,
     },
+    MATCH_RESULT: {
+      type: String,
+    },
   },
   {
     timestamps: {

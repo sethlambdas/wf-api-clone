@@ -64,6 +64,9 @@ export class WorkflowStepExecutionHistory
 
   @Field((type) => WebService, { nullable: true })
   WEB_SERVICE?: WebService;
+
+  @Field((type) => String, { nullable: true })
+  MATCH_RESULT?: string;
 }
 
 @ObjectType()

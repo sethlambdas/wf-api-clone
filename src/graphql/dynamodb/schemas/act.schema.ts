@@ -206,12 +206,24 @@ export const MDSchema = new Schema({
   // SubWorkflow
   WorkflowKeys: {
     type: Object,
-    schema: CompositeKeys
+    schema: CompositeKeys,
   },
   // Loop
   NLoop: {
     type: Number,
-  }
+  },
+  // Matching Data
+  ArrayInput: {
+    type: String,
+  },
+  // Matching Data
+  MatchingFields: {
+    type: String,
+  },
+  // Matching Data
+  PrimaryKeyField: {
+    type: String,
+  },
 });
 
 export const LabelSchema = new Schema({

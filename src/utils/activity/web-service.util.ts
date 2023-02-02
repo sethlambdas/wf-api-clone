@@ -112,7 +112,7 @@ export default async function webService(payload: any, state?: any) {
     if ([HttpMethod.POST, HttpMethod.PUT, HttpMethod.PATCH].includes(Method))
       eventReqPramas.body = (resolvedBody && JSON.parse(resolvedBody)) || {};
 
-    logger.error('resolvedBody???',resolvedBody);
+    logger.error('resolvedBody',resolvedBody);
     const data = await InvokeLambda(ConfigUtil.get('lambda.webServiceFunctionName'), eventReqPramas, webServiceDownloadFile || false, targetFileName);
 
     const requestParams: any = { ...eventReqPramas };

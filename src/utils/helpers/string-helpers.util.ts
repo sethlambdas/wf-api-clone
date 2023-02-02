@@ -40,6 +40,37 @@ export function getMentionedData(unresolvedString: string, state?: any) {
   return resolvedString;
 }
 
+export function resolveMentionDataFromMatchingData(unresolvedString: string, state?: any) {
+  const regexBrackets = /{{(.*?)}}/gm;
+  let resolvedString = unresolvedString;
+  while (true) {
+    const match = regexBrackets.exec(resolvedString);
+    if (!match) break;
+    
+    const { 0: origWord, 1: word, index } = match;
+    const lastIndex = index + origWord.length;
+    const trimWord = word.trim();
+
+    let replacement: any;
+
+    if (credentials.includes(trimWord)) replacement = `{{${word}}}`;
+    else replacement = get(state, trimWord);
+
+    resolvedString = replaceAt(
+      resolvedString,
+      index,
+      lastIndex,
+      typeof replacement === 'object' ? JSON.stringify(replacement) : replacement,
+    );
+  }
+  resolvedString = `[${resolvedString}]`;
+
+  logger.log('RESOLVED STRING - MATCH DATA');
+  logger.log(resolvedString);
+
+  return resolvedString;
+}
+
 export function resolveValueOfVariableFromState(variable: string, state? :any) {
   const regexBrackets = /{{(.*?)}}/gm;
   let resolveVariable = variable;

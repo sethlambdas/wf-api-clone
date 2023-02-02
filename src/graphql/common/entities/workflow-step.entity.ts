@@ -11,7 +11,6 @@ export class CompositeKeys {
   SK?: string;
 }
 
-
 @ObjectType()
 export class ChoiceWorkflow {
   @Field({ nullable: true })
@@ -93,7 +92,7 @@ export class MD {
   @Field({ nullable: true })
   Endpoint?: string;
 
-  // WebService & Start
+  // WebService & Start & Matching Data
   @Field({ nullable: true })
   Name?: string;
 
@@ -219,6 +218,16 @@ export class MD {
   // StartLoop
   @Field({ nullable: true })
   NLoop?: number;
+
+  // Matching Data 
+  @Field({ nullable: true })
+  ArrayInput?: string;
+
+  @Field({ nullable: true })
+  MatchingFields?: string;
+
+  @Field({ nullable: true })
+  PrimaryKeyField?: string;
 }
 
 @ObjectType()

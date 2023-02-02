@@ -10,7 +10,7 @@ import {
   formCreateEventParams,
   putEventsEB,
   putRuleEB,
-  putTargetsEB
+  putTargetsEB,
 } from '../../aws-services/event-bridge/event-bridge.util';
 import { WORKFLOW_QUEUE_URL } from '../../aws-services/sqs/sqs-config.util';
 import { getSQSQueueAttributes } from '../../aws-services/sqs/sqs.util';
@@ -68,7 +68,10 @@ export class WorkflowService {
     const workflowNameAsSK = `WLF#${WorkflowName}`;
 
     if (WorkflowPK && WorkflowName) {
-      const { TotalRecords } = await this.workflowVersionService.listAllWorkflowVersionsOfWorkflow({ WorkflowPK, WorkflowName });
+      const { TotalRecords } = await this.workflowVersionService.listAllWorkflowVersionsOfWorkflow({
+        WorkflowPK,
+        WorkflowName,
+      });
       wlfPK = WorkflowPK;
       WV = TotalRecords + 1;
     } else {
@@ -76,11 +79,18 @@ export class WorkflowService {
       const organization = await this.organizationService.getOrganization({ PK: OrgId });
       if (!organization) return { Error: 'Organization not existing' };
 
-      const getWorkflowName = await this.workflowRepository.getWorkflowByName(OrgId, WorkflowName, organization.TotalWLFBatches);
+      const getWorkflowName = await this.workflowRepository.getWorkflowByName(
+        OrgId,
+        WorkflowName,
+        organization.TotalWLFBatches,
+      );
       if (getWorkflowName) return { IsWorkflowNameExist: true };
 
       this.logger.log(organization);
-      const currentBatchWLFCount = await this.workflowRepository.getCurrentWorkflowsOfBatch(OrgId, organization.TotalWLFBatches);
+      const currentBatchWLFCount = await this.workflowRepository.getCurrentWorkflowsOfBatch(
+        OrgId,
+        organization.TotalWLFBatches,
+      );
       let TotalWLFBatches = organization.TotalWLFBatches;
 
       if (currentBatchWLFCount.count >= ConfigUtil.get('workflow.batchLimit')) {
@@ -105,7 +115,7 @@ export class WorkflowService {
         UQ_OVL: workflowTriggerId,
         TriggerStatus: 'enabled',
       });
-      
+
       this.logger.log('Workflow created');
       wlfPK = workflow.PK;
     }
@@ -118,7 +128,7 @@ export class WorkflowService {
 
     if (!activityTypesExists) throw new Error('Not every activity type exists.');
 
-    this.logger.log('CREATING WORKFLOW VERSION')
+    this.logger.log('CREATING WORKFLOW VERSION');
     const createWorkflowVersionInput: CreateWorkflowVersionInput = {
       WorkflowPK: wlfPK,
       WorkflowName,
@@ -138,7 +148,7 @@ export class WorkflowService {
         NM: state.ActivityId,
         DESIGN: await this.getDesign(Design, state),
       };
-
+      
       if (state.Variables) ACT.MD = state.Variables;
       if (state.End) ACT.END = state.End;
 
@@ -488,20 +498,21 @@ export class WorkflowService {
     const { OrgId, WorkflowName } = getWorkflowByNameInput;
 
     const organization = await this.organizationService.getOrganization({ PK: OrgId });
-    if (!organization) return { 
-      PK: '',
-      SK: '',
-      WLFN: '',
-      DATA: '',
-      FAID: '',
-      STATUS: Status.INACTIVE,
-      UQ_OVL: '',
-      TriggerStatus: '',
-      Error: 'Organization not existing'
-     };
+    if (!organization)
+      return {
+        PK: '',
+        SK: '',
+        WLFN: '',
+        DATA: '',
+        FAID: '',
+        STATUS: Status.INACTIVE,
+        UQ_OVL: '',
+        TriggerStatus: '',
+        Error: 'Organization not existing',
+      };
 
     const result = await this.workflowRepository.getWorkflowByName(OrgId, WorkflowName, organization.TotalWLFBatches);
-    
+
     return result;
   }
 
@@ -509,8 +520,11 @@ export class WorkflowService {
     const organization = await this.organizationService.getOrganization({ PK: getWorkflowsOfAnOrg.orgId });
     if (!organization) return { Error: 'Organization not existing' };
 
-    const result = await this.workflowRepository.getWorkflowsOfAnOrg({ ...getWorkflowsOfAnOrg, TotalWLFBatches: organization.TotalWLFBatches });
-    
+    const result = await this.workflowRepository.getWorkflowsOfAnOrg({
+      ...getWorkflowsOfAnOrg,
+      TotalWLFBatches: organization.TotalWLFBatches,
+    });
+
     return { Workflows: result, TotalPages: getWorkflowsOfAnOrg.search ? 0 : organization.TotalWLFBatches };
   }
 
@@ -518,19 +532,19 @@ export class WorkflowService {
     const { workflowId }: any = params;
     const endpoint: HttpTriggerEndpoint = {
       url: `${req.protocol}://${req.get('Host')}${req.originalUrl}`,
-      method: req.method
-    }
+      method: req.method,
+    };
     let reqBody: any;
     try {
-      reqBody = JSON.parse(req.body.body)
+      reqBody = JSON.parse(req.body.body);
     } catch (error) {
-      reqBody = req.body.body
+      reqBody = req.body.body;
     }
     const eventReqParams: NetworkRequest = {
       endpoint,
       headers: {
         ...req.headers,
-        ...this.maskAuthorizationHeader(req.body.headers)
+        ...this.maskAuthorizationHeader(req.body.headers),
       },
       queryString: req.query,
       body: reqBody,
@@ -607,9 +621,8 @@ export class WorkflowService {
         httpACT,
         HTTP_WSXH_SK: WSXH_SK,
         HTTP_workflowStepSK: workflowStep.SK,
-        // Endpoint: endpoint,
         Body: payload,
-        NetworkRequest: eventReqParams
+        NetworkRequest: eventReqParams,
       };
 
       let i = 0;
@@ -725,8 +738,8 @@ export class WorkflowService {
   private maskAuthorizationHeader(header: any) {
     try {
       let maskedHeader = header;
-      if(header.Authorization){
-        maskedHeader.Authorization = "Bearer ****"
+      if (header.Authorization) {
+        maskedHeader.Authorization = 'Bearer ****';
       }
       return maskedHeader;
     } catch (error) {

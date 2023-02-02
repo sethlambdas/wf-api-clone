@@ -299,6 +299,10 @@ export default class Workflow {
               const actResultResponse = actResult?.response;
               const result = typeof actResultResponse === 'object' ? actResultResponse : JSON.parse(actResultResponse);
               STE = { ...state, [`${act?.MD.Name}`]: result.body };
+            } else if (act.T === ActivityTypes.MatchingData) {
+              const actResultResponse = actResult?.result;
+              const result = typeof actResultResponse === 'object' ? actResultResponse : JSON.parse(actResultResponse);
+              STE = { ...state, [`${act?.MD.Name}`]: result };
             } else if (
               actResult &&
               typeof actResult === 'object' &&
@@ -505,8 +509,14 @@ export default class Workflow {
                   UQ_OVL: WorkflowStepStatus.Finished,
                   WEB_SERVICE: webServiceRes,
                 });
-              } 
-              else {
+              } else if (act.T === ActivityTypes.MatchingData) {
+                this.logger.log('okay kayow',actResult.result)
+                await this.updateWSXH(wfStepExecHistory, {
+                  Status: WorkflowStepStatus.Finished,
+                  UQ_OVL: WorkflowStepStatus.Finished,
+                  MATCH_RESULT: JSON.stringify(actResult.result),
+                });
+              } else {
                 await this.updateCATStatus(wfStepExecHistory, WorkflowStepStatus.Finished);
               } 
             }
@@ -546,7 +556,7 @@ export default class Workflow {
     };
     if (act.MD) inputs.MD = act.MD;
     if (act.END) inputs.END = act.END;
-    if(webServiceTriggerResult) inputs.WEB_SERVICE = webServiceTriggerResult
+    if (webServiceTriggerResult) inputs.WEB_SERVICE = webServiceTriggerResult
     return await this.workflowStepExecutionHistoryService.createWorkflowStepExecutionHistory(inputs);
   }
 
