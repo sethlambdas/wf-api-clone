@@ -5,8 +5,8 @@ import { ACT as TypeACT, DesignWorkflow } from '../common/entities/workflow-step
 import { CompositePrimaryKey } from '../common/interfaces/workflow-key.interface';
 import { WorkflowStepService } from '../workflow-steps/workflow-step.service';
 
-import { CreateWorkflowVersionInput } from './inputs/post.inputs';
 import { GetWorkflowVersionDetailsInput, ListAllWorkflowVersionsOfWorkflowInput } from './inputs/get.inputs';
+import { CreateWorkflowVersionInput } from './inputs/post.inputs';
 import { SaveWorkflowVersionInput } from './inputs/put.inputs';
 import { ListWorkflowVersions, WorkflowVersion, WorkflowVersionDetails } from './workflow-version.entity';
 import { WorkflowVersionRepository } from './workflow-version.repository';

@@ -219,7 +219,7 @@ export class MD {
   @Field({ nullable: true })
   NLoop?: number;
 
-  // Matching Data 
+  // Matching Data
   @Field({ nullable: true })
   ArrayInput?: string;
 
@@ -228,6 +228,22 @@ export class MD {
 
   @Field({ nullable: true })
   PrimaryKeyField?: string;
+
+  // Query Builder
+  @Field({ nullable: true })
+  DBConfigs?: string;
+
+  // Query Builder
+  @Field({ nullable: true })
+  DBQuery?: string;
+
+  // Query Builder
+  @Field({ nullable: true })
+  DB?: string;
+
+  // Query Builder
+  @Field({ nullable: true })
+  TableName?: string;
 }
 
 @ObjectType()

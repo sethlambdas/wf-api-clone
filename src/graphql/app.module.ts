@@ -6,10 +6,18 @@ import { DynamooseModule } from 'nestjs-dynamoose';
 
 import { ConfigUtil } from '@lambdascrew/utility';
 
+import { ApigwAuthorizerModule as ApigwAuthorizerAuthBEModule } from './apigw-authorizer/apigw-authorizer.module';
+import { ApigwAuthorizerModule } from './apigwAuthorizer/apigw-authorizer.module';
+import { ClientTokenModule } from './client-token/client-token.module';
 import { ClientModule } from './client/client.module';
+import { DBEngineModule } from './db-engine/db-engine.module';
+import { DocuwareModule } from './docuware/docuware.module';
+import { EntityCountModule } from './entity-count/entitiy-count.module';
+import { HealthResolver } from './health copy/health.resolver';
 import { AppHealthIndicator } from './health/app.health';
 import { HealthController } from './health/health.controller';
 import { IntegrationAppModule } from './integration-app/integration-app.module';
+import { OAuthModule } from './oauth/oauth.module';
 import { OrganizationModule } from './organizations/organization.module';
 import { UserModule } from './users/user.module';
 import { WorkflowExecutionModule } from './workflow-executions/workflow-execution.module';
@@ -17,13 +25,6 @@ import { WorkflowStepExecutionHistoryModule } from './workflow-steps-executions-
 import { WorkflowStepModule } from './workflow-steps/workflow-step.module';
 import { WorkflowVersionModule } from './workflow-versions/workflow-version.module';
 import { WorkflowModule } from './workflow/workflow.module';
-import { ApigwAuthorizerModule } from './apigwAuthorizer/apigw-authorizer.module';
-import { ApigwAuthorizerModule as ApigwAuthorizerAuthBEModule } from './apigw-authorizer/apigw-authorizer.module';
-import { HealthResolver } from './health copy/health.resolver';
-import { ClientTokenModule } from './client-token/client-token.module';
-import { OAuthModule } from './oauth/oauth.module';
-import { EntityCountModule } from './entity-count/entitiy-count.module';
-import { DocuwareModule } from './docuware/docuware.module';
 
 @Module({
   controllers: [HealthController],
@@ -73,13 +74,14 @@ import { DocuwareModule } from './docuware/docuware.module';
     ClientModule,
     IntegrationAppModule,
     UserModule,
-    ApigwAuthorizerModule, 
-    ApigwAuthorizerAuthBEModule,   
-    HealthResolver,        
+    ApigwAuthorizerModule,
+    ApigwAuthorizerAuthBEModule,
+    HealthResolver,
     ClientTokenModule,
     OAuthModule,
     EntityCountModule,
-    DocuwareModule,            
+    DocuwareModule,
+    DBEngineModule,
   ],
 })
 export class AppModule {}

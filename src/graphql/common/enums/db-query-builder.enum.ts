@@ -1,0 +1,7 @@
+export enum QueryBuilderEnum {
+  MYSQL = 'MYSQL',
+  MONGODB = 'MONGODB',
+  DYNAMODB = 'DYNAMODB',
+  POSTGRESQL = 'POSTGRESQL',
+  MICROSOFTSQL = 'MICROSOFTSQL',
+}

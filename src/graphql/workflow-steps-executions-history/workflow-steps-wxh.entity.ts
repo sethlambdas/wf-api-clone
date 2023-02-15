@@ -67,6 +67,9 @@ export class WorkflowStepExecutionHistory
 
   @Field((type) => String, { nullable: true })
   MATCH_RESULT?: string;
+
+  @Field((type) => String, { nullable: true })
+  DB_QUERY_RESULT?: string;
 }
 
 @ObjectType()

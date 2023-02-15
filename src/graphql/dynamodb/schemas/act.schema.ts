@@ -224,6 +224,22 @@ export const MDSchema = new Schema({
   PrimaryKeyField: {
     type: String,
   },
+  // Query Builder
+  DBConfigs: {
+    type: String,
+  },
+  // Query Builder
+  DBQuery: {
+    type: String,
+  },
+  // Query Builder
+  DB: {
+    type: String,
+  },
+  // Query Builder
+  TableName: {
+    type: String,
+  },
 });
 
 export const LabelSchema = new Schema({
