@@ -9,31 +9,31 @@ export class DBEngineController {
 
   @Post('/describe/mysql-table-columns/:tableName')
   async describeMySQLTableColumns(@Param() param: any, @Body() payload: any) {
-    const result = await this.dbEngineService.mysqlGetTableColumns({ params: param, payload });
-    return { result: result };
+    const { result, error } = await this.dbEngineService.mysqlGetTableColumns({ params: param, payload });
+    return { result, error };
   }
 
   @Post('/describe/mongo-table-columns/:tableName')
   async describeMongoTableColumns(@Param() param: any, @Body() payload: any) {
-    const result = await this.dbEngineService.mongoGetTableColumns({ params: param, payload });
-    return { result: result };
+    const { result, error } = await this.dbEngineService.mongoGetTableColumns({ params: param, payload });
+    return { result, error };
   }
 
   @Post('/describe/dynamo-table-columns/:tableName')
   async describeDynamoTableColumns(@Param() param: any, @Body() payload: any) {
-    const result = await this.dbEngineService.dynamoGetTableColumns({ params: param, payload });
-    return { result: result };
+    const { result, error } = await this.dbEngineService.dynamoGetTableColumns({ params: param, payload });
+    return { result, error };
   }
 
   @Post('/describe/postgres-table-columns/:tableName')
   async describePostgresTableColumns(@Param() param: any, @Body() payload: any) {
-    const result = await this.dbEngineService.postgresGetTableColumns({ params: param, payload });
-    return { result: result };
+    const { result, error } = await this.dbEngineService.postgresGetTableColumns({ params: param, payload });
+    return { result, error };
   }
 
   @Post('/describe/microsoftsql-table-columns/:tableName')
   async describeMicrosoftSqlTableColumns(@Param() param: any, @Body() payload: any) {
-    const result = await this.dbEngineService.microsoftSqlGetTableColumns({ params: param, payload });
-    return { result: result };
+    const { result, error } = await this.dbEngineService.microsoftSqlGetTableColumns({ params: param, payload });
+    return { result, error };
   }
 }

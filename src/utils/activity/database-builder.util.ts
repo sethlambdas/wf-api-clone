@@ -32,6 +32,12 @@ interface MongoConfigParams {
   password?: string;
 }
 
+interface ResultOutputModifier {
+  query: string;
+  result: any;
+  database_type: string;
+}
+
 interface DynamoConfigParams {
   region: string;
   accessKeyId: string;
@@ -116,8 +122,8 @@ const mysqlQuery = async ({ configs }: DBConfigsProps): Promise<any> => {
       });
     });
     connection.end();
-
-    return res;
+    const result = resultOutputModifier({ database_type: configs.DB, query: query, result: res });
+    return result;
   } catch (error) {
     return { error: error };
   }
@@ -155,7 +161,12 @@ const mongoQuery = async ({ configs }: DBConfigsProps): Promise<any> => {
       query = configs.dbQuery;
       result = await db.command(query).finally(() => client.close());
     }
-    return result;
+    const finalResult = resultOutputModifier({
+      database_type: configs.DB,
+      query: JSON.stringify(query),
+      result: result,
+    });
+    return finalResult;
   } catch (err) {
     logger.log('Mongo Error', err.message);
     return { error: err.message };
@@ -187,7 +198,9 @@ const dynamoQuery = async ({ configs }: DBConfigsProps): Promise<any> => {
       };
     }
     const data = await docClient.send(new ExecuteStatementCommand(params));
-    return data.Items;
+
+    const result = resultOutputModifier({ database_type: configs.DB, query: JSON.stringify(params), result: data });
+    return result;
   } catch (err) {
     return { error: err };
   }
@@ -215,7 +228,12 @@ const postgresQuery = async ({ configs }: DBConfigsProps): Promise<any> => {
       query = { text: `SELECT * FROM ${configs.TableName} WHERE ${configs.dbQuery.queryResult.replace(/\"/g, '')}` };
     }
 
-    const result = await pool.query(query);
+    const queryResult = await pool.query(query);
+    const result = resultOutputModifier({
+      database_type: configs.DB,
+      query: JSON.stringify(query),
+      result: queryResult,
+    });
     pool.end();
     return result;
   } catch (error) {
@@ -242,8 +260,8 @@ const mssqlQuery = async ({ configs }: DBConfigsProps): Promise<any> => {
     };
   });
 
-  const pool = new mssql.ConnectionPool(msSql);
-  await pool.connect();
+  const mspool = new mssql.ConnectionPool(msSql);
+  await mspool.connect();
 
   let query = '';
 
@@ -253,7 +271,8 @@ const mssqlQuery = async ({ configs }: DBConfigsProps): Promise<any> => {
     } else {
       query = `SELECT * FROM ${configs.TableName} WHERE ${configs.dbQuery.queryResult.replace(/\"/g, '')}`;
     }
-    const result = await pool.query(query).finally(() => pool.close());
+    const queryResult = await mspool.query(query).finally(() => mspool.close());
+    const result = resultOutputModifier({ database_type: configs.DB, query: query, result: queryResult });
     return result;
   } catch (error) {
     return { error: error };
@@ -268,4 +287,46 @@ const parseQuery = (dbQuery: any, state: any): string | DBQueryObject => {
     parsedQuery = getMentionedData(dbQuery, state);
   }
   return parsedQuery;
+};
+
+const resultOutputModifier = ({ query, result, database_type }: ResultOutputModifier) => {
+  let output = {
+    affected_rows: 0,
+  };
+  if (query.toLowerCase().includes('update') || query.toLowerCase().includes('delete')) {
+    switch (database_type) {
+      case QueryBuilderEnum.MYSQL:
+        output = {
+          affected_rows: result.affectedRows,
+        };
+        break;
+      case QueryBuilderEnum.MONGODB:
+        output = {
+          affected_rows: result.n,
+        };
+        break;
+      case QueryBuilderEnum.POSTGRESQL:
+        output = {
+          affected_rows: result.rowCount,
+        };
+        break;
+      case QueryBuilderEnum.MICROSOFTSQL:
+        output = {
+          affected_rows: result.rowsAffected[0],
+        };
+        break;
+      case QueryBuilderEnum.DYNAMODB:
+        output = {
+          affected_rows: result.Items.length,
+        };
+        break;
+
+      default:
+        output = result;
+        break;
+    }
+  } else {
+    output = result;
+  }
+  return output;
 };

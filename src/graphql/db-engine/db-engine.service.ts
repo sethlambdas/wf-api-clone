@@ -5,11 +5,16 @@ const mssql = require('mssql');
 const mysql = require('mysql2');
 const postgres = require('postgres');
 
+interface ColumnOuputInterface {
+  result: any[];
+  error?: string;
+}
+
 @Injectable()
 export class DBEngineService {
   constructor() {}
   logger = new Logger('DB Engine Service');
-  async mysqlGetTableColumns({ params, payload }) {
+  mysqlGetTableColumns = async ({ params, payload }): Promise<ColumnOuputInterface> => {
     const { tableName } = params;
     try {
       this.logger.log('MYSQL Connection');
@@ -29,14 +34,14 @@ export class DBEngineService {
       });
       this.logger.log('result', res);
       connection.end();
-      return res;
+      return { result: res };
     } catch (error) {
       this.logger.log('error', error);
-      return error;
+      return { error: error.message, result: [] };
     }
-  }
+  };
 
-  async mongoGetTableColumns({ params, payload }) {
+  mongoGetTableColumns = async ({ params, payload }): Promise<ColumnOuputInterface> => {
     const { tableName } = params;
     try {
       this.logger.log('Mongo Connection');
@@ -53,14 +58,14 @@ export class DBEngineService {
       this.logger.log(Object.keys(collection));
       const result = Object.keys(collection);
 
-      return result;
+      return { result };
     } catch (error) {
       this.logger.log('error', error);
-      return error;
+      return { error: error.message, result: [] };
     }
-  }
+  };
 
-  async dynamoGetTableColumns({ params, payload }) {
+  dynamoGetTableColumns = async ({ params, payload }): Promise<ColumnOuputInterface> => {
     const { tableName } = params;
     try {
       this.logger.log('Dynamo Connection');
@@ -80,15 +85,16 @@ export class DBEngineService {
         });
       });
 
-      return result;
+      return { result };
     } catch (error) {
       this.logger.log('error', error);
-      return error;
+      return { error: error.message, result: [] };
     }
-  }
+  };
 
-  async postgresGetTableColumns({ params, payload }) {
+  postgresGetTableColumns = async ({ params, payload }): Promise<ColumnOuputInterface> => {
     const { tableName } = params;
+    let errs = 'something';
     try {
       this.logger.log('Postgres Connection');
       const sql = postgres(payload);
@@ -101,14 +107,14 @@ export class DBEngineService {
       tableFields.map(({ column_name }) => {
         result.push(column_name);
       });
-      return result;
+      return { result };
     } catch (error) {
       this.logger.log('error', error);
-      return error;
+      return { error: error.message, result: [] };
     }
-  }
+  };
 
-  async microsoftSqlGetTableColumns({ params, payload }) {
+  microsoftSqlGetTableColumns = async ({ params, payload }): Promise<ColumnOuputInterface> => {
     const { tableName } = params;
     try {
       this.logger.log('MSSQL Connection');
@@ -127,10 +133,10 @@ export class DBEngineService {
       result.recordset.map(({ COLUMN_NAME }) => {
         tableFields.push(COLUMN_NAME);
       });
-      return tableFields;
+      return { result: tableFields };
     } catch (error) {
       this.logger.log('error', error);
-      return error
+      return { error: error.message, result: [] };
     }
-  }
+  };
 }
