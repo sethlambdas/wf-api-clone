@@ -6,6 +6,7 @@ import { QueryBuilderEnum } from '../../graphql/common/enums/db-query-builder.en
 const mssql = require('mssql');
 const pg = require('pg');
 const mysql = require('mysql2');
+const oracle = require('oracledb');
 const { MongoClient } = require('mongodb');
 
 const logger = new Logger('dbQueryBuilder');
@@ -71,6 +72,9 @@ export default async function dbQueryBuilder(payload: any, state?: any) {
         break;
       case QueryBuilderEnum.MICROSOFTSQL:
         result = await mssqlQuery({ configs: parsedPayload });
+        break;
+      case QueryBuilderEnum.ORACLEDB:
+        result = await oracleQuery({ configs: parsedPayload });
         break;
       default:
         result = await mysqlQuery({ configs: parsedPayload });
@@ -279,6 +283,46 @@ const mssqlQuery = async ({ configs }: DBConfigsProps): Promise<any> => {
   }
 };
 
+const oracleQuery = async ({ configs }: DBConfigsProps): Promise<any> => {
+  logger.log('Oracle Query . . .');
+  logger.log('dbConfigs: ', configs);
+  let oracleSQL = { libDir: null };
+  configs.dbConfigs.forEach((el) => {
+    const { fieldName, fieldValue } = el;
+    let value;
+    try {
+      value = JSON.parse(fieldValue);
+    } catch (err) {
+      value = !isNaN(parseInt(fieldValue)) ? parseInt(fieldValue) : fieldValue;
+    }
+    oracleSQL = {
+      ...oracleSQL,
+      [fieldName]: value,
+    };
+  });
+  // works for windows / mac os
+  if (oracleSQL.libDir) {
+    oracle.initOracleClient({ libDir: oracleSQL.libDir });
+  }
+  const connection = await oracle.getConnection(oracleSQL);
+  let query = '';
+
+  try {
+    if (typeof configs.dbQuery === 'string') {
+      query = configs.dbQuery;
+    } else {
+      query = `SELECT * FROM ${configs.TableName} WHERE ${configs.dbQuery.queryResult.replace(/\"/g, '')}`;
+    }
+    const queryResult = await connection.execute(query);
+    connection.commit();
+    connection.close();
+    const result = resultOutputModifier({ database_type: configs.DB, query: query, result: queryResult });
+    return result;
+  } catch (error) {
+    return { error: error };
+  }
+};
+
 const parseQuery = (dbQuery: any, state: any): string | DBQueryObject => {
   let parsedQuery;
   try {
@@ -318,6 +362,11 @@ const resultOutputModifier = ({ query, result, database_type }: ResultOutputModi
       case QueryBuilderEnum.DYNAMODB:
         output = {
           affected_rows: result.Items.length,
+        };
+        break;
+      case QueryBuilderEnum.ORACLEDB:
+        output = {
+          affected_rows: result.rowsAffected,
         };
         break;
 

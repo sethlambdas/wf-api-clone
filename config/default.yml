@@ -38,6 +38,7 @@ dynamodb:
     authOrganizations: 'auth-organizations'
     authUsers: 'auth-users'
     apigwAuthorizer: 'apigw-authorizer'
+    resources: 'resources'
 
 jwt:
   secret: 'TokenSecret'

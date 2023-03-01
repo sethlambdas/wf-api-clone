@@ -8,7 +8,11 @@ import { WorkflowStepExecutionHistorySchema } from '../workflow-steps-executions
 import { WorkflowStepSchema } from '../workflow-steps/workflow-step.schema';
 import { WorkflowVersionSchema } from '../workflow-versions/workflow-version.schema';
 import { WorkflowSchema } from '../workflow/workflow.schema';
-import { workflowSecondaryIndexes, workflowVersionsSecondaryIndexes, workflowExecutionsSecondaryIndexes } from './schemas/secondary-index.schema';
+import {
+  workflowSecondaryIndexes,
+  workflowVersionsSecondaryIndexes,
+  workflowExecutionsSecondaryIndexes,
+} from './schemas/secondary-index.schema';
 import { IntegrationAppsSchema } from '../integration-app/integration-app.schema';
 import { ApigwAuthorizerSchema } from '../apigw-authorizer/apigw-authorizer.schema';
 import { ClientTokenSchema } from '../client-token/client-token.schema';
@@ -16,30 +20,20 @@ import { ClientSchema } from '../client/client.schema';
 import { EntityCountSchema } from '../entity-count/entitiy-count.schema';
 import { UserSchema } from '../users/user.schema';
 import { OrganizationSchema } from '../organizations/organization.schema';
+import { ResourcesSchema } from '../resources/resources.schema';
 
 const workflowModel = DynamooseModule.forFeature([
   {
     name: ConfigUtil.get('dynamodb.schema.workflow'),
-    schema: [
-      workflowSecondaryIndexes,
-      WorkflowSchema,
-    ],
+    schema: [workflowSecondaryIndexes, WorkflowSchema],
   },
   {
     name: ConfigUtil.get('dynamodb.schema.workflowVersions'),
-    schema: [
-      workflowVersionsSecondaryIndexes,
-      WorkflowVersionSchema,
-      WorkflowStepSchema,
-    ],
+    schema: [workflowVersionsSecondaryIndexes, WorkflowVersionSchema, WorkflowStepSchema],
   },
   {
     name: ConfigUtil.get('dynamodb.schema.workflowExecutions'),
-    schema: [
-      workflowExecutionsSecondaryIndexes,
-      WorkflowExecutionSchema,
-      WorkflowStepExecutionHistorySchema,
-    ],
+    schema: [workflowExecutionsSecondaryIndexes, WorkflowExecutionSchema, WorkflowStepExecutionHistorySchema],
   },
   {
     name: ConfigUtil.get('dynamodb.schema.integrations'),
@@ -60,6 +54,10 @@ const workflowModel = DynamooseModule.forFeature([
   {
     name: ConfigUtil.get('dynamodb.schema.apigwAuthorizer'),
     schema: [ApigwAuthorizerSchema],
+  },
+  {
+    name: ConfigUtil.get('dynamodb.schema.resources'),
+    schema: [ResourcesSchema],
   },
 ]);
 
