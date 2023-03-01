@@ -1,4 +1,5 @@
 import { Field, Int, ObjectType, OmitType } from '@nestjs/graphql';
+import { WebService } from 'graphql/workflow-steps-executions-history/workflow-steps-wxh.entity';
 import { ACT } from '../common/entities/workflow-step.entity';
 import { CompositePrimaryKey } from '../common/interfaces/workflow-key.interface';
 
@@ -33,6 +34,9 @@ export class WorkflowExecution implements CompositePrimaryKey {
 
   @Field()
   SK: string;
+
+  @Field((type) => WebService, { nullable: true })
+  WEB_SERVICE?: WebService;
 
   @Field((type) => [String])
   WSXH_IDS: string[];

@@ -1,4 +1,4 @@
-import { Inject, Injectable } from '@nestjs/common';
+import { Inject, Injectable, Logger } from '@nestjs/common';
 
 import { CompositePrimaryKeyInput } from '../common/inputs/workflow-key.input';
 import { WorkflowVersionService } from '../workflow-versions/workflow-version.service';
@@ -74,9 +74,16 @@ export class WorkflowExecutionService {
 
     listWorkflowExecutionsOfAVersionInput.TotalEXC = workflowVersion.TotalEXC;
 
-    const result: any = await this.workflowExecutionRepository.listWorkflowExecutionsOfAVersion(
+    let result: any = await this.workflowExecutionRepository.listWorkflowExecutionsOfAVersion(
       listWorkflowExecutionsOfAVersionInput,
     );
+
+    result = result.map(async (res) => {
+      const SK = res.WSXH_IDS.filter((wshx) => wshx.includes('HTTP'))[0];
+      const WEB_SERVICE = (await this.workflowExecutionRepository.getWorkflowExecutionByKey({ PK: res.PK, SK: SK }))
+        .WEB_SERVICE;
+      return { ...res, WEB_SERVICE: WEB_SERVICE };
+    });
 
     return {
       WorkflowExecution: result,

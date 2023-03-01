@@ -148,7 +148,7 @@ export class WorkflowService {
         NM: state.ActivityId,
         DESIGN: await this.getDesign(Design, state),
       };
-      
+
       if (state.Variables) ACT.MD = state.Variables;
       if (state.End) ACT.END = state.End;
 
