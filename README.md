@@ -184,3 +184,9 @@ Nest is an MIT-licensed open source project. It can grow thanks to the sponsors 
 ## DOCKER AWS Auth
 
 sudo docker login -u AWS -p $(aws ecr get-login-password --region ap-southeast-2) 610780540569.dkr.ecr.ap-southeast-2.amazonaws.com
+
+## PUSH DOCKER IMAGE TO AWS ECR
+aws ecr get-login-password --region ap-southeast-2 | docker login --username AWS --password-stdin 917209780752.dkr.ecr.ap-southeast-2.amazonaws.com
+
+## GENERATE DOCKER IMAGE
+docker build --rm -t wf-api:latest .

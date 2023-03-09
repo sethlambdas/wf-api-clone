@@ -9,7 +9,7 @@ import { ClientTokenService } from '../graphql/client-token/client-token.service
 import { CreateClientTokenInput } from '../graphql/client-token/inputs/create-client-token.inputs';
 import { ClientService } from '../graphql/client/client.service';
 import { IntegrationAppService } from '../graphql/integration-app/integration-app.service';
-import { ClientIntegrationDetailsPlacementOption, FileUploadType } from 'graphql/integration-app/integration-app.enum';
+import { ClientIntegrationDetailsPlacementOption, FileUploadType } from '../graphql/integration-app/integration-app.enum';
 
 const logger = new Logger('SetupZoho');
 

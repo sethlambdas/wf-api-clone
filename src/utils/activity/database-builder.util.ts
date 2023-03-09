@@ -1,7 +1,7 @@
 import { DynamoDBClient, ExecuteStatementCommand, ExecuteStatementCommandInput } from '@aws-sdk/client-dynamodb';
 import { Logger } from '@nestjs/common';
-import { getMentionedData } from 'utils/helpers/string-helpers.util';
-import { IFieldValue } from 'utils/workflow-types/lambda.types';
+import { getMentionedData } from '../helpers/string-helpers.util';
+import { IFieldValue } from '../../utils/workflow-types/lambda.types';
 import { QueryBuilderEnum } from '../../graphql/common/enums/db-query-builder.enum';
 const mssql = require('mssql');
 const pg = require('pg');

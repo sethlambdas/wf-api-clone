@@ -9,8 +9,5 @@ export const dynamooseOptions = (): DynamooseModuleOptions => {
     aws: {
       region: ConfigUtil.get('aws.region'),
     },
-    model: {
-      create: ConfigUtil.get('aws.local') ? true : false,
-    },
   };
 };

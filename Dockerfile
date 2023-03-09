@@ -1,7 +1,7 @@
 ####################################
 ### BASE
 ####################################
-FROM node:14.15.1-alpine3.12 as base
+FROM node:18-alpine as base
 
 LABEL org.opencontainers.image.authors=devs@lambdas.io
 LABEL org.opencontainers.image.title="Node.js images"
@@ -19,7 +19,7 @@ COPY package*.json ./
 
 RUN npm config list
 
-RUN npm ci \
+RUN npm ci --silent --legacy-peer-deps \
     && npm cache clean --force
 
 ENV PATH /app/node_modules/.bin:$PATH
@@ -54,7 +54,7 @@ RUN apk add --no-cache \
 
 RUN npm config list
 
-RUN npm install --only=development \
+RUN npm install --only=development --legacy-peer-deps \
     && npm cache clean --force
 
 RUN chown -R appuser:appgroup /app
@@ -98,6 +98,8 @@ RUN rm -rf ./test* \
 ####################################
 FROM base as prod
 
+ENV AWS_SECRET_ACCESS_KEY=YOURSECRETACCESSKEY
+ENV AWS_ACCESS_KEY_ID=YOURACCESSKEYID
 RUN apk add --no-cache python3 py-pip jq \
     && pip install awscli
 

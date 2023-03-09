@@ -1,7 +1,7 @@
 import { Module } from '@nestjs/common';
 import { ResourcesService } from './resources.service';
 import { ResourcesResolver } from './resources.resolver';
-import { DynamoDBModule } from '@graphql:dynamodb/dynamodb.module';
+import { DynamoDBModule } from '../dynamodb/dynamodb.module';
 import { ResourcesRepository } from './resources.repository';
 
 @Module({

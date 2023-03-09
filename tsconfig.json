@@ -12,6 +12,7 @@
     "baseUrl": "./src",
     "paths": {
       "../common/*": ["graphql/common/*"],
+      "@src:graphql/*": ["graphql/*"],
       "@graphql:dynamodb/*": ["graphql/dynamodb/*"],
       "@src:config/*": ["config/*"]
     }

@@ -1,5 +1,5 @@
 import { Field, Int, ObjectType, OmitType } from '@nestjs/graphql';
-import { WebService } from 'graphql/workflow-steps-executions-history/workflow-steps-wxh.entity';
+import { WebService } from '../workflow-steps-executions-history/workflow-steps-wxh.entity';
 import { ACT } from '../common/entities/workflow-step.entity';
 import { CompositePrimaryKey } from '../common/interfaces/workflow-key.interface';
 

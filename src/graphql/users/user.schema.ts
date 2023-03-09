@@ -16,7 +16,7 @@ export const UserSchema = new Schema(
     email: {
       type: String,
       index: {
-        global: true,
+        type: 'global',
         name: `${GSI.GSIEmailIndex}`,
       },
     },

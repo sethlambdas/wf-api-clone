@@ -15,7 +15,7 @@ import { IntegrationApp } from '../integration-app/integration-app.entity';
 import { IntegrationAppService } from '../integration-app/integration-app.service';
 import { ConnectOAuthInput } from './inputs/connect-oauth.input';
 import { GetAccessTokenCredentials, GetAccessTokenOptions } from './oauth.entity';
-import { ClientIntegrationDetailsPlacementOption } from 'graphql/integration-app/integration-app.enum';
+import { ClientIntegrationDetailsPlacementOption } from '../integration-app/integration-app.enum';
 
 const Buffer = SafeBuffer.Buffer;
 const logger = new Logger('OAUTH SERVICE');
@@ -30,7 +30,7 @@ export class OAuthService {
   ) {
   }
   // prevents others from impersonating you
-  codeVerifier = crypto.randomBytes(96).toString('base64url'); // 128 characters
+  codeVerifier = crypto.randomBytes(96).toString('base64'); // 128 characters
 
   getClient(configOAuth: ClientOAuth2.Options, integrationAppName: string) {
     let data = configOAuth.state;

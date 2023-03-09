@@ -4,7 +4,6 @@ import * as bcrypt from 'bcryptjs';
 import { ConfigUtil } from '@lambdascrew/utility';
 
 import { JwtService } from '@nestjs/jwt';
-import { AuthenticationError } from 'apollo-server-express';
 import { EmailUtil } from '../../utils/email.util';
 import { OrganizationService } from '../organizations/organization.service';
 import { AuthCredentials, RefreshTokenResult } from './auth/auth-credentials.type';
@@ -14,6 +13,7 @@ import { SignInCredentialsInput } from './inputs/sign-in-credentials.input';
 import { SignUpCredentialsInput } from './inputs/sign-up-credentials.input';
 import { User } from './user.entity';
 import { UserRepository } from './user.repository';
+import { GraphQLError } from 'graphql';
 
 @Injectable()
 export class UserService {
@@ -103,7 +103,7 @@ export class UserService {
       const cookieOptions = await this.setCookie(context, { refreshTokenGenerate });
       return { accessToken, refreshTokenGenerate, cookieOptions, orgId: user.PK.split('|')[0] };
     } catch {
-      throw new AuthenticationError('Unauthorized Access');
+      throw new GraphQLError('Unauthorized Access');
     }
   }
 
@@ -125,7 +125,7 @@ export class UserService {
       httpOnly: true,
       maxAge: ConfigUtil.get('jwt.refreshToken.maxAge'),
       sameSite: ConfigUtil.get('jwt.refreshToken.sameSite'),
-      secure: true
+      secure: true,
     };
     context.res.cookie('refreshToken', refreshTokenGenerate, cookieOptions);
     return cookieOptions;

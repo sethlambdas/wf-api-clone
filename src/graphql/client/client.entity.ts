@@ -1,5 +1,5 @@
 import { Field, ObjectType } from '@nestjs/graphql';
-import { FileUploadType } from 'graphql/integration-app/integration-app.enum';
+import { FileUploadType } from '../integration-app/integration-app.enum';
 
 import { AuthType, ClientStatus } from '../common/enums/authentication.enum';
 import { CompositePrimaryKey } from '../common/interfaces/dynamodb-keys.interface';

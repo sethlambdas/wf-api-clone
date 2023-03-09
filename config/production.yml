@@ -2,10 +2,12 @@ server:
   origin: https://workflow.lambdas.io
 
 workflow:
-  domain: https//workflow.lambdas.io
+  domain: https://workflow.lambdas.io
 
 aws:
   local: #empty to overide default.yml local endpoint
+  accessKeyId: 'AKIA5LDPWSIID6U5NYVN'
+  secretAccessKey: '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'
 
 dynamodb:
    local: #empty to overide default.yml local endpoint

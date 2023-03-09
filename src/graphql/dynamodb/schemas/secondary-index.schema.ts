@@ -14,7 +14,7 @@ export const workflowSecondaryIndexes = new Schema(
     UQ_OVL: {
       type: String,
       index: {
-        global: true,
+        type: 'global',
         rangeKey: 'SK',
         name: `${GSI.UniqueKeyOverloading}`,
         project: true,
@@ -43,7 +43,7 @@ export const workflowVersionsSecondaryIndexes = new Schema(
     DATA: {
       type: String,
       index: {
-        global: true,
+        type: 'global',
         rangeKey: 'PK',
         name: `${GSI.DataOverloading}`,
         project: true,
@@ -72,7 +72,7 @@ export const workflowExecutionsSecondaryIndexes = new Schema(
     UQ_OVL: {
       type: String,
       index: {
-        global: true,
+        type: 'global',
         rangeKey: 'SK',
         name: `${GSI.UniqueKeyOverloading}`,
         project: true,

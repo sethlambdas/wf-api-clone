@@ -103,5 +103,5 @@ mailgun:
   ccEmail: 'notifications@lambdas.io'
 
 oauth:
-  redirectUriPath: 'http://workflow-api.lambdas.io'
+  redirectUriPath: 'https://workflow-api.lambdas.io'
 authBeEndpoint: 'https://workflow-api.lambdas.io/api/graphql'

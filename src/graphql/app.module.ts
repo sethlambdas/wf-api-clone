@@ -26,12 +26,17 @@ import { WorkflowStepModule } from './workflow-steps/workflow-step.module';
 import { WorkflowVersionModule } from './workflow-versions/workflow-version.module';
 import { WorkflowModule } from './workflow/workflow.module';
 import { ResourcesModule } from './resources/resources.module';
+import { ApolloDriver, ApolloDriverConfig } from '@nestjs/apollo';
 
+const region = ConfigUtil.get('aws.region');
+const accessKeyId = ConfigUtil.get('aws.accessKeyId');
+const secretAccessKey = ConfigUtil.get('aws.secretAccessKey');
 @Module({
   controllers: [HealthController],
   providers: [AppHealthIndicator],
   imports: [
-    GraphQLModule.forRoot({
+    GraphQLModule.forRoot<ApolloDriverConfig>({
+      driver: ApolloDriver,
       useGlobalPrefix: true,
       autoSchemaFile: `${__dirname}/schema.gql`,
       sortSchema: true,
@@ -59,10 +64,9 @@ import { ResourcesModule } from './resources/resources.module';
     DynamooseModule.forRoot({
       local: ConfigUtil.get('dynamodb.local') ? ConfigUtil.get('dynamodb.local') : false,
       aws: {
-        region: ConfigUtil.get('aws.region'),
-      },
-      model: {
-        create: true,
+        region,
+        accessKeyId,
+        secretAccessKey,
       },
     }),
     TerminusModule,

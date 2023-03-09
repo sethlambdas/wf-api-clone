@@ -1,5 +1,4 @@
 #!/bin/sh
-
 echo "loading . . ."
 # env file
 # echo "reading environment for ${ENV}"

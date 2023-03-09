@@ -13,9 +13,6 @@ const typeOrmConfig: TypeOrmModuleOptions = {
   entities: [`${__dirname}/../**/*.entity.{js,ts}`],
   migrations: [`${__dirname}/../migrations/**/*.{js,ts}`],
   synchronize: ConfigUtil.get('db.synchronize'),
-  cli: {
-    migrationsDir: 'src/migrations',
-  },
 };
 
 export = typeOrmConfig;

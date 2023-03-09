@@ -3,31 +3,111 @@
 ####################################
 FROM node:14.15.1-alpine3.12 as base
 
-# set working directory
+LABEL org.opencontainers.image.authors=devs@lambdas.io
+LABEL org.opencontainers.image.title="Node.js images"
+LABEL io.lambdas.nodeversion=$NODE_VERSION
+
+ENV NODE_ENV=development
+
+EXPOSE 3001
+
+ENV PORT 3001
+
 WORKDIR /app
 
-# add `/app/node_modules/.bin` to $PATH
+COPY package*.json ./
+
+RUN npm config list
+
+RUN npm ci \
+    && npm cache clean --force
+
 ENV PATH /app/node_modules/.bin:$PATH
 
-# add app dependencies
-COPY package.json ./
-COPY package-lock.json ./
+RUN apk add --no-cache tini
+RUN apk add curl
 
-# run npm install dependencies
-RUN npm install
+RUN addgroup appgroup \
+    && adduser -G appgroup -D appuser
 
-# add app
-COPY . ./
+ENTRYPOINT ["tini", "--", "sh","./entrypoint.sh"]
+
+# CMD ["node", "main.js"]
 
 ####################################
 ### DEV
 ####################################
 FROM base as dev
 
-# expose app port
-EXPOSE 3000
+ENV NODE_ENV=development
+# ENV AWS_SECRET_ACCESS_KEY sampleSecretAccessKey
+# ENV AWS_ACCESS_KEY_ID sampleAccessKeyId
+# ENV AWS_REGION ap-southeast-2
+# ENV WORKFLOW_QUEUE WORKFLOW_QUEUE
+# ENV WORKFLOW_QUEUE_ERROR WORKFLOW_QUEUE_ERROR
 
-ENV PORT 3000
+#RUN apt-get update -qq && apt-get install -qy \
+RUN apk add --no-cache \
+    ca-certificates \
+    bzip2 \
+    curl
 
-# start app
+RUN npm config list
+
+RUN npm install --only=development \
+    && npm cache clean --force
+
+RUN chown -R appuser:appgroup /app
+
+USER appuser
+
 CMD ["nodemon"]
+
+####################################
+### TEST
+####################################
+FROM dev as test
+
+COPY . .
+
+# TODO: fix later
+# RUN npm audit --audit-level=critical
+
+# ARG MICROSCANNER_TOKEN
+
+# ADD https://get.aquasec.com/microscanner /
+
+USER root
+
+# RUN chmod +x /microscanner
+
+# RUN /microscanner $MICROSCANNER_TOKEN --continue-on-failure
+
+####################################
+### PRE PRODUCTION
+####################################
+FROM test as pre-prod
+
+RUN npm run build
+
+RUN rm -rf ./test* \
+    && rm -rf ./node_modules
+
+####################################
+### PRODUCTION
+####################################
+FROM base as prod
+
+RUN apk add --no-cache python3 py-pip jq \
+    && pip install awscli
+
+COPY --from=pre-prod /app/config/default.yml /app/config/
+COPY --from=pre-prod /app/config/production.yml /app/config/
+COPY --from=pre-prod /app/dist /app
+COPY --from=pre-prod /app/entrypoint.sh /app
+
+RUN chown -R appuser:appgroup /app
+
+RUN chmod +x /app/entrypoint.sh
+
+USER appuser:appgroup

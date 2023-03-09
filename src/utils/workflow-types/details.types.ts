@@ -1,4 +1,4 @@
-import { WorkflowStepStatus } from 'graphql/workflow-steps/enums/workflow-step-status.enum';
+import { WorkflowStepStatus } from '../../graphql/workflow-steps/enums/workflow-step-status.enum';
 import { CompositePrimaryKey } from '../../graphql/common/interfaces/workflow-key.interface';
 import { CAT } from '../../graphql/workflow-executions/workflow-execution.entity';
 import { WorkflowStep } from '../../graphql/workflow-steps/workflow-step.entity';

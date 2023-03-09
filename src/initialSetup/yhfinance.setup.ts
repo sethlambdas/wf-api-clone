@@ -5,8 +5,8 @@ import { CreateIntegrationAppInput } from '../graphql/integration-app/inputs/cre
 
 import { IntegrationAppService } from '../graphql/integration-app/integration-app.service';
 import { ClientIntegrationDetailsPlacementOption, FileUploadType } from '../graphql/integration-app/integration-app.enum';
-import { CreateClientInput } from 'graphql/client/inputs/create-client.input';
-import { ClientService } from 'graphql/client/client.service';
+import { CreateClientInput } from '../graphql/client/inputs/create-client.input';
+import { ClientService } from '../graphql/client/client.service';
 
 const logger = new Logger('SetupYHFinance');
 

@@ -1,6 +1,6 @@
 import { Logger } from '@nestjs/common';
 import * as _ from 'lodash';
-import { getMentionedData, resolveMentionDataFromMatchingData } from 'utils/helpers/string-helpers.util';
+import { getMentionedData, resolveMentionDataFromMatchingData } from '../helpers/string-helpers.util';
 
 interface TwoThreeWayMatchingFunctionProps {
   arrayInput: string;
