@@ -98,8 +98,12 @@ RUN rm -rf ./test* \
 ####################################
 FROM base as prod
 
-ENV AWS_SECRET_ACCESS_KEY=YOURSECRETACCESSKEY
-ENV AWS_ACCESS_KEY_ID=YOURACCESSKEYID
+ARG AWS_SECRET_ACCESS_KEY
+ARG AWS_ACCESS_KEY_ID
+
+ENV AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY}
+ENV AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID}
+
 RUN apk add --no-cache python3 py-pip jq \
     && pip install awscli
 

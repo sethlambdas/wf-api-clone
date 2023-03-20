@@ -23,3 +23,10 @@ cli
 docker-test.env
 
 .env
+# Local .terraform directories
+**/.terraform/*
+# .tfstate files
+*.tfstate
+*.tfstate.*
+/lambda
+**/.terraform.*
