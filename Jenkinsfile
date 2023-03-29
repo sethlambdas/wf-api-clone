@@ -32,6 +32,15 @@ pipeline {
                 }
             }
         }
+        stage('Modify Yaml files') {
+            steps {
+                withCredentials([[$class: 'AmazonWebServicesCredentialsBinding', credentialsId: 'aws-credentials']]) {
+                    script {
+                        sh 'cat config/*.yml | envsubst > config/*.yml'
+                    }
+                }
+            }
+        }
         stage('Build Docker Image') {
             steps {
                 withCredentials([[$class: 'AmazonWebServicesCredentialsBinding', credentialsId: 'aws-credentials']]) {

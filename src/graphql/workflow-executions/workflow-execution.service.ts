@@ -80,8 +80,9 @@ export class WorkflowExecutionService {
 
     result = result.map(async (res) => {
       const SK = res.WSXH_IDS.filter((wshx) => wshx.includes('HTTP'))[0];
-      const WEB_SERVICE = (await this.workflowExecutionRepository.getWorkflowExecutionByKey({ PK: res.PK, SK: SK }))
-        .WEB_SERVICE;
+      const WEB_SERVICE = SK
+        ? (await this.workflowExecutionRepository.getWorkflowExecutionByKey({ PK: res.PK, SK: SK })).WEB_SERVICE
+        : null;
       return { ...res, WEB_SERVICE: WEB_SERVICE };
     });
 

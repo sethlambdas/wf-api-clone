@@ -1,9 +1,9 @@
+import { ConfigUtil } from '@lambdascrew/utility';
 import { Logger } from '@nestjs/common';
 import { SQS } from 'aws-sdk';
 import { find } from 'lodash';
 import { Consumer } from 'sqs-consumer';
 import { v4 } from 'uuid';
-import { ConfigUtil } from '@lambdascrew/utility';
 
 import { putEventsEB } from './aws-services/event-bridge/event-bridge.util';
 import { WORKFLOW_QUEUE_URL } from './aws-services/sqs/sqs-config.util';
@@ -12,9 +12,9 @@ import { ErrorAction } from './graphql/common/enums/web-service.enum';
 import activityRegistry, { ActivityTypes, TriggerTypes } from './utils/activity/activity-registry.util';
 import { ManualApprovalEmailParams } from './utils/activity/manual-approval.util';
 import { ExternalActivityTypes, runExternalService } from './utils/external-activity/external-activities.util';
-import { EventParams, ExternalServiceDetails, ILoopConfig } from './utils/workflow-types/details.types';
-import { IDetail } from './utils/workflow-types/details.types';
+import { EventParams, ExternalServiceDetails, IDetail, ILoopConfig } from './utils/workflow-types/details.types';
 
+import { CompositePrimaryKey } from './graphql/common/interfaces/workflow-key.interface';
 import { CAT, WorkflowExecution } from './graphql/workflow-executions/workflow-execution.entity';
 import { WorkflowExecStatus } from './graphql/workflow-executions/workflow-execution.enum';
 import { WorkflowExecutionService } from './graphql/workflow-executions/workflow-execution.service';
@@ -30,7 +30,6 @@ import { WorkflowStep } from './graphql/workflow-steps/workflow-step.entity';
 import { WorkflowStepService } from './graphql/workflow-steps/workflow-step.service';
 import { WorkflowVersionService } from './graphql/workflow-versions/workflow-version.service';
 import { WorkflowService } from './graphql/workflow/workflow.service';
-import { CompositePrimaryKey } from './graphql/common/interfaces/workflow-key.interface';
 
 export default class Workflow {
   private logger: Logger;
@@ -506,7 +505,7 @@ export default class Workflow {
                 }
               } else if (act.T === ActivityTypes.ParallelEnd) {
                 await this.updateParallelFinished(wfExec, currentParallelIndex, currentParallelIndexes, params);
-              } else {
+              } else if (act.T === ActivityTypes.WebService) {
                 if (act.MD.ErrorAction === ErrorAction.EXITPATH) {
                   const filteredParams: any = {
                     Entries: params.Entries.filter(
@@ -518,6 +517,8 @@ export default class Workflow {
                 } else {
                   await putEventsEB(params);
                 }
+              } else {
+                await putEventsEB(params);
               }
               if (act.T === ActivityTypes.WebService) {
                 const webServiceRes = {
