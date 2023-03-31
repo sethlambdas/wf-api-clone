@@ -14,21 +14,27 @@ pipeline {
         stage('Terraform Init') {
             steps {
                 dir('terraform') {
-                    sh 'terraform init'
+                    withCredentials([[$class: 'AmazonWebServicesCredentialsBinding', credentialsId: 'aws-credentials']]) {
+                        sh 'terraform init'
+                    }
                 }
             }
         }
         stage('Terraform Plan') {
             steps {
                 dir('terraform') {
-                    sh 'terraform plan'
+                    withCredentials([[$class: 'AmazonWebServicesCredentialsBinding', credentialsId: 'aws-credentials']]) {
+                        sh 'terraform plan'
+                    }
                 }
             }
         }
         stage('Terraform Approve') {
             steps {
                 dir('terraform') {
-                    sh 'terraform apply -auto-approve'
+                    withCredentials([[$class: 'AmazonWebServicesCredentialsBinding', credentialsId: 'aws-credentials']]) {
+                        sh 'terraform apply -auto-approve'
+                    }
                 }
             }
         }
@@ -63,7 +69,7 @@ pipeline {
             steps {
                 // Log in to ECR
                 withCredentials([[$class: 'AmazonWebServicesCredentialsBinding', credentialsId: 'aws-credentials']]) {
-                    sh "aws ecr get-login-password --region ap-southeast-2 | docker login --username AWS --password-stdin ${ECR_REGISTRY}"
+                    sh "/usr/local/aws-cli/v2/current/dist/aws ecr get-login-password --region ap-southeast-2 | docker login --username AWS --password-stdin ${ECR_REGISTRY}"
                 }
                 // Push the Docker image to ECR
                 sh "docker push ${ECR_REGISTRY}/${IMAGE_NAME}:${APP_VERSION}"
@@ -73,7 +79,9 @@ pipeline {
         stage('Terraform Reapprove') {
             steps {
                 dir('terraform') {
-                    sh "terraform apply --auto-approve -var wf_api_image_tag=${APP_VERSION}"
+                    withCredentials([[$class: 'AmazonWebServicesCredentialsBinding', credentialsId: 'aws-credentials']]) {
+                        sh "terraform apply --auto-approve -var wf_api_image_tag=${APP_VERSION}"
+                    }
                 }
             }
         }

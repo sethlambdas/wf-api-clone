@@ -13,5 +13,4 @@ terraform {
 provider "aws" {
   version = "4.34.0"
   region = var.region
-  profile = var.aws_profile
 }
