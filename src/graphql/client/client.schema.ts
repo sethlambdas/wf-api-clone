@@ -38,6 +38,14 @@ export const SecretsSchema = new Schema({
     type: String,
     required: false,
   },
+  accessKey: {
+    type: String,
+    required: false,
+  },
+  secretKey: {
+    type: String,
+    required: false,
+  },
 });
 
 export const MetadataSchema = new Schema({
@@ -62,7 +70,7 @@ export const ClientSchema = new Schema(
     },
     type: {
       type: String,
-      enum: ['API-KEY', 'BASIC', 'OAUTH', 'COOKIE'],
+      enum: ['API-KEY', 'BASIC', 'OAUTH', 'COOKIE','AWS Signature'],
     },
     status: {
       type: String,

@@ -33,6 +33,12 @@ export class SecretsSchema {
 
   @Field({ nullable: true })
   cookie?: string;
+
+  @Field({ nullable: true })
+  accessKey?: string;
+
+  @Field({ nullable: true })
+  secretKey?: string;
 }
 
 @ObjectType()

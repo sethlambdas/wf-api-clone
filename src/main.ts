@@ -53,6 +53,7 @@ import { setupTrello } from './initialSetup/trello.setup';
 import { setupTwilio } from './initialSetup/twilio.setup';
 import { setupTypeForm } from './initialSetup/typeform.setup';
 import { setUpYHFinance } from './initialSetup/yhfinance.setup';
+import { setUpAWSSignature } from 'initialSetup/aws.setup';
 
 AWS.config.update({ region: ConfigUtil.get('aws.region') });
 
@@ -108,7 +109,8 @@ async function bootstrap() {
 
   await setupEntityCount(app);
   await setupZoho(app);
-  await setupDocuware(app);
+  await setUpAWSSignature(app);
+  // await setupDocuware(app);
   await setupCin7(app);
   await setupXero(app);
   await setupMYOB(app);

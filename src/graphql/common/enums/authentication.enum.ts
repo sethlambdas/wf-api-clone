@@ -5,6 +5,7 @@ export enum AuthType {
   'BASIC' = 'BASIC',
   'OAUTH' = 'OAUTH',
   'COOKIE' = 'COOKIE',
+  'AWSSignature' = 'AWS Signature'
 }
 
 export enum ClientStatus {
@@ -27,6 +28,9 @@ registerEnumType(AuthType, {
     },
     COOKIE: {
       description: 'equals to COOKIE',
+    },
+    AWSSignature: {
+      description: 'equals to AWS Signature',
     },
   },
 });

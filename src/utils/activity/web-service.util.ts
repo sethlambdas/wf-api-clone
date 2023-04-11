@@ -3,7 +3,8 @@ import { Logger } from '@nestjs/common';
 import { get } from 'lodash';
 
 import { InvokeLambda } from '../../aws-services/aws-lambda/lambda.util';
-import { HttpMethod } from '../../graphql/common/enums/general.enum'
+import { AuthType } from '../../graphql/common/enums/authentication.enum';
+import { HttpMethod } from '../../graphql/common/enums/general.enum';
 import { getMentionedData } from '../helpers/string-helpers.util';
 import { EventRequestParams, IFieldValue } from '../workflow-types/lambda.types';
 
@@ -32,7 +33,7 @@ export default async function webService(payload: any, state?: any) {
       Retries,
       Interval,
       webServiceDownloadFile,
-      targetFileName
+      targetFileName,
     } = payload;
 
     logger.log('WEB SERVICE PAYLOAD');
@@ -112,8 +113,15 @@ export default async function webService(payload: any, state?: any) {
     if ([HttpMethod.POST, HttpMethod.PUT, HttpMethod.PATCH].includes(Method))
       eventReqPramas.body = (resolvedBody && JSON.parse(resolvedBody)) || {};
 
-    logger.error('resolvedBody',resolvedBody);
-    const data = await InvokeLambda(ConfigUtil.get('lambda.webServiceFunctionName'), eventReqPramas, webServiceDownloadFile || false, targetFileName);
+    logger.error('resolvedBody', resolvedBody);
+    const data: any = await InvokeLambda(
+      ConfigUtil.get('lambda.webServiceFunctionName'),
+      eventReqPramas,
+      webServiceDownloadFile || false,
+      targetFileName,
+    );
+
+    let parseData = data;
 
     const requestParams: any = { ...eventReqPramas };
     delete requestParams.auth;
@@ -121,8 +129,12 @@ export default async function webService(payload: any, state?: any) {
     if (requestParams.file.files === null) delete requestParams.file;
 
     checkEvaluations(Evaluations, data, requestParams);
+    if (ClientSK.includes(AuthType.AWSSignature)) {
+      requestParams.headers = { ...requestParams.headers, ...JSON.parse(data).headers };
+      parseData = removeAWSHeaders(JSON.parse(data));
+    }
 
-    return { request: requestParams, response: data };
+    return { request: requestParams, response: parseData };
   } catch (err) {
     logger.log('ERROR OCCURED:');
     logger.log(err);
@@ -171,6 +183,14 @@ const checkEvaluations = (Evaluations: string, data: any, requestParams: EventRe
   });
 
   logger.log('ALL EVALUATIONS PASSED :: REQUEST IS SUCCESSFUL');
+};
+
+const removeAWSHeaders = (obj: any) => {
+  const headers = obj.headers;
+  delete headers.Authorization;
+  delete headers['X-Amz-Content-Sha256'];
+  delete headers['X-Amz-Date'];
+  return JSON.stringify(obj);
 };
 
 const processEvaluation = (fieldName: string, fieldValue: string, result: any, data: any, requestParams: any) => {

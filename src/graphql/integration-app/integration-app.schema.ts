@@ -42,7 +42,7 @@ export const IntegrationAppsSchema = new Schema(
     },
     type: {
       type: String,
-      enum: ['API-KEY', 'BASIC', 'OAUTH', 'COOKIE'],
+      enum: ['API-KEY', 'BASIC', 'OAUTH', 'COOKIE','AWS Signature'],
     },
     clientDetailsPlacement: {
       type: String,
