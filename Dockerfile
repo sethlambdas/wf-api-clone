@@ -19,7 +19,7 @@ COPY package*.json ./
 
 RUN npm config list
 
-RUN npm ci --silent --legacy-peer-deps \
+RUN npm ci \
     && npm cache clean --force
 
 ENV PATH /app/node_modules/.bin:$PATH
