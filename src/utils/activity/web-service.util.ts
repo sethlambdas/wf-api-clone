@@ -122,7 +122,6 @@ export default async function webService(payload: any, state?: any) {
     );
 
     let parseData = data;
-
     const requestParams: any = { ...eventReqPramas };
     delete requestParams.auth;
     delete requestParams.retry;

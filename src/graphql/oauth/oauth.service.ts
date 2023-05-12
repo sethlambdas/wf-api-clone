@@ -233,7 +233,6 @@ export class OAuthService {
       // amadeus config
       body = QueryString.stringify({ ...credentials, grant_type: 'client_credentials' });
     }
-    Logger.log('Testing body:',body)
     
     const response = await got
       .post(accessTokenUrl, {
@@ -241,7 +240,6 @@ export class OAuthService {
         body,
       })
       .json();
-      Logger.log('wag kxzx',headers)
     return response;
   }
 
