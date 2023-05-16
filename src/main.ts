@@ -53,8 +53,8 @@ import { setupTrello } from './initialSetup/trello.setup';
 import { setupTwilio } from './initialSetup/twilio.setup';
 import { setupTypeForm } from './initialSetup/typeform.setup';
 import { setUpYHFinance } from './initialSetup/yhfinance.setup';
-import { setUpAWSSignature } from 'initialSetup/aws.setup';
-import { setUpMicrosoftAzure } from 'initialSetup/azure.setup';
+import { setUpAWSSignature } from './initialSetup/aws.setup';
+import { setUpMicrosoftAzure } from './initialSetup/azure.setup';
 
 AWS.config.update({ region: ConfigUtil.get('aws.region') });
 
