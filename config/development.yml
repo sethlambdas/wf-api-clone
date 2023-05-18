@@ -3,7 +3,7 @@ oauth:
   redirectUriPath: 'http://localhost:3001'
 aws:
   kms:
-    keyId: '762ffd9e-f313-4ac0-a20a-1c78fc97f9b7'
+    keyId: '9e9ebe9d-f617-4956-a376-34a6239ff245'
     alias: 'alias/Workflow'
 
 jwt:

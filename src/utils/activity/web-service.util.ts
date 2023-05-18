@@ -71,12 +71,12 @@ export default async function webService(payload: any, state?: any) {
         interval: Interval || 10,
       },
     };
-
-    if (ClientPK && ClientSK)
+    if (ClientPK && ClientSK) {
       eventReqPramas.auth = {
         client_pk: ClientPK,
         client_sk: ClientSK,
       };
+    }
 
     if (!!webServiceDownloadFile) eventReqPramas.headers = { ...eventReqPramas.headers, webServiceDownloadFile };
 
@@ -128,9 +128,11 @@ export default async function webService(payload: any, state?: any) {
     if (requestParams.file.files === null) delete requestParams.file;
 
     checkEvaluations(Evaluations, data, requestParams);
-    if (ClientSK.includes(AuthType.AWSSignature)) {
-      requestParams.headers = { ...requestParams.headers, ...JSON.parse(data).headers };
-      parseData = removeAWSHeaders(JSON.parse(data));
+    if (ClientSK) {
+      if (ClientSK.includes(AuthType.AWSSignature)) {
+        requestParams.headers = { ...requestParams.headers, ...JSON.parse(data).headers };
+        parseData = removeAWSHeaders(JSON.parse(data));
+      }
     }
 
     return { request: requestParams, response: parseData };
