@@ -20,7 +20,8 @@ export class WorkflowRepository {
   ) {}
 
   async createWorkflow(createWorkflowInputRepository: CreateWorkflowInputRepository) {
-    const { WorkflowName, OrgId, WorkflowBatchNumber, FAID, UQ_OVL, TriggerStatus, TimeTriggerRuleName } = createWorkflowInputRepository;
+    const { WorkflowName, OrgId, WorkflowBatchNumber, FAID, UQ_OVL, TriggerStatus, TimeTriggerRuleName } =
+      createWorkflowInputRepository;
 
     console.log('CREATE WORKFLOW', TriggerStatus);
 
@@ -32,7 +33,7 @@ export class WorkflowRepository {
       FAID,
       STATUS: Status.ACTIVE,
       UQ_OVL,
-      TriggerStatus, 
+      TriggerStatus,
     };
 
     if (TimeTriggerRuleName) data.TimeTriggerRuleName = TimeTriggerRuleName;
@@ -71,42 +72,47 @@ export class WorkflowRepository {
       .using(GSI.UniqueKeyOverloading)
       .exec();
 
-    return results[0]
+    return results[0];
   }
 
-  async getWorkflowByName(orgId: string, workflowName: string, TotalWLFBatches: number): Promise<WorkflowModelRepository> {
-    const result = await new Promise(async (resolve) => {
-      let searchNumber = 0; 
+  async getWorkflowByName(
+    orgId: string,
+    workflowName: string,
+    TotalWLFBatches: number,
+  ): Promise<WorkflowModelRepository> {
+    const result = (await new Promise(async (resolve) => {
+      let searchNumber = 0;
 
       const retrievedMatchedItems = async (startLoop: number, endLoop: number) => {
         for (let currentBatchNumber = startLoop; currentBatchNumber <= endLoop; currentBatchNumber++) {
           if (searchNumber === 2) return;
-          
-          const result = await this.workflowModel.get({ PK: this.formWorkflowTablePK(orgId, currentBatchNumber), SK: this.formWorkflowTableSK(workflowName) });
+
+          const result = await this.workflowModel.get({
+            PK: this.formWorkflowTablePK(orgId, currentBatchNumber),
+            SK: this.formWorkflowTableSK(workflowName),
+          });
 
           if (result) {
             searchNumber = 2;
-            return resolve(result)
-          };
+            return resolve(result);
+          }
         }
-        
+
         searchNumber += 1;
         if (searchNumber === 2 || TotalWLFBatches === 1) resolve(null);
-      }
+      };
 
       if (TotalWLFBatches > 1) {
         const half = Math.floor(TotalWLFBatches / 2);
         retrievedMatchedItems(1, half);
         retrievedMatchedItems(half + 1, TotalWLFBatches);
-      } else 
-        retrievedMatchedItems(1, 1);
-      
-    }) as WorkflowModelRepository;
+      } else retrievedMatchedItems(1, 1);
+    })) as WorkflowModelRepository;
 
     return result;
   }
 
-  async getWorkflowsOfAnOrg(getWorkflowsOfAnOrg: GetWorkflowsOfAnOrgInput & { TotalWLFBatches: number}) {
+  async getWorkflowsOfAnOrg(getWorkflowsOfAnOrg: GetWorkflowsOfAnOrgInput & { TotalWLFBatches: number }) {
     const { orgId, page, search, TotalWLFBatches } = getWorkflowsOfAnOrg;
 
     if (search) {
@@ -115,7 +121,7 @@ export class WorkflowRepository {
     }
 
     return this.workflowModel
-      .query({ PK: this.formWorkflowTablePK(orgId,page) })
+      .query({ PK: this.formWorkflowTablePK(orgId, page), STATUS: Status.ACTIVE })
       .and()
       .where('SK')
       .beginsWith('WLF#')
@@ -125,34 +131,33 @@ export class WorkflowRepository {
   private async searchWorklowsWithFilter(orgId: string, TotalWLFBatches: number, search: string) {
     let searchNumber = 0;
     let results = [];
-    
+
     const retrievedMatchedItems = async (startLoop: number, endLoop: number, resolve: (value: unknown) => void) => {
       let matchedItems = [];
 
       for (let currentBatchNumber = startLoop; currentBatchNumber <= endLoop; currentBatchNumber++) {
         const records = await this.workflowModel
-          .query({ PK: this.formWorkflowTablePK(orgId, currentBatchNumber) })
+          .query({ PK: this.formWorkflowTablePK(orgId, currentBatchNumber), STATUS: Status.ACTIVE })
           .and()
           .where('SK')
           .beginsWith(this.formWorkflowTableSK(search))
           .exec();
-        
+
         matchedItems = [...matchedItems, ...records];
       }
 
       results = [...results, ...matchedItems];
       searchNumber += 1;
       if (searchNumber === 2 || TotalWLFBatches === 1) return resolve(null);
-    }
+    };
 
     await new Promise((resolve) => {
       if (TotalWLFBatches > 1) {
         const half = Math.floor(TotalWLFBatches / 2);
         retrievedMatchedItems(1, half, resolve);
         retrievedMatchedItems(half + 1, TotalWLFBatches, resolve);
-      } else 
-        retrievedMatchedItems(1, 1, resolve);
-    })
+      } else retrievedMatchedItems(1, 1, resolve);
+    });
 
     return results;
   }

@@ -5,6 +5,7 @@ import * as moment from 'moment';
 import { v4 } from 'uuid';
 
 import {
+  deleteEventRule,
   disableRule,
   enableRule,
   formCreateEventParams,
@@ -235,6 +236,9 @@ export class WorkflowService {
     };
     delete saveWorkflowInput.PK;
     delete saveWorkflowInput.SK;
+    if (saveWorkflowInput.TimeTriggerRuleName && saveWorkflowInput.STATUS === Status.DELETED) {
+      await deleteEventRule(saveWorkflowInput.TimeTriggerRuleName);
+    }
     return this.workflowRepository.saveWorkflow(key, saveWorkflowInput);
   }
 

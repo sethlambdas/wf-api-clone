@@ -9,9 +9,16 @@ const logger = new Logger('EventBridge');
 export async function deleteEventRule(name: string) {
   try {
     logger.log('Deleting Event Rule');
-
+    const targets = await EB.listTargetsByRule({ Rule: name }).promise();
+    logger.log('Target-list:', targets);
+    const targetIds = [];
+    for (let i = 0; i < targets.Targets.length; i++) {
+      targetIds.push(targets.Targets[i].Id);
+    }
+    const removedTargets = await EB.removeTargets({ Ids: targetIds, Rule: name }).promise();
+    logger.log('Removed-targets:', removedTargets);
     const isDeleted = await EB.deleteRule({ Name: name }).promise();
-    logger.log(isDeleted);
+    logger.log('Is Removed:',isDeleted);
 
     return;
   } catch (err) {
