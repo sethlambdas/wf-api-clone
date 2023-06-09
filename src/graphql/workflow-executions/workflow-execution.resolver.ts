@@ -3,7 +3,7 @@ import { Args, Mutation, Query, Resolver } from '@nestjs/graphql';
 import { CompositePrimaryKeyInput } from '../common/inputs/workflow-key.input';
 
 import { CreateWorkflowExecutionInput } from './inputs/post.inputs';
-import { ListWorkflowExecutionsOfAVersionInput } from './inputs/get.inputs';
+import { ListWorkflowExecutionsOfAnOrganizationInput, ListWorkflowExecutionsOfAVersionInput } from './inputs/get.inputs';
 import { SaveWorkflowExecutionInput } from './inputs/put.inputs';
 import { ListWorkflowExecution, WorkflowExecution } from './workflow-execution.entity';
 import { WorkflowExecutionService } from './workflow-execution.service';
@@ -47,5 +47,13 @@ export class WorkflowExecutionResolver {
     listWorkflowExecutionsOfAVersionInput: ListWorkflowExecutionsOfAVersionInput,
   ) {
     return this.workflowExecutionService.listWorkflowExecutionsOfAVersion(listWorkflowExecutionsOfAVersionInput);
+  }
+
+  @Query((returns) => ListWorkflowExecution)
+  async ListWorkflowExecutionsOfAnOrganization(
+    @Args('listWorkflowExecutionsOfAnOrganizationInput')
+    listWorkflowExecutionsOfAnOrganizationInput: ListWorkflowExecutionsOfAnOrganizationInput,
+  ) {
+    return this.workflowExecutionService.listWorkflowExecutionsOfAnOrganization(listWorkflowExecutionsOfAnOrganizationInput);
   }
 }

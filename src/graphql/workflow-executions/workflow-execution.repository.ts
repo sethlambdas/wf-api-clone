@@ -6,7 +6,10 @@ import { ConfigUtil } from '@lambdascrew/utility';
 import { CompositePrimaryKeyInput } from '../common/inputs/workflow-key.input';
 import { CompositePrimaryKey } from '../common/interfaces/workflow-key.interface';
 
-import { ListWorkflowExecutionsOfAVersionInput } from './inputs/get.inputs';
+import {
+  ListWorkflowExecutionsOfAnOrganizationInput,
+  ListWorkflowExecutionsOfAVersionInput
+} from './inputs/get.inputs';
 import { WorkflowExecution } from './workflow-execution.entity';
 import { PrefixWorkflowExecutionKeys } from './workflow-execution.enum';
 
@@ -31,6 +34,27 @@ export class WorkflowExecutionRepository {
 
   async getWorkflowExecutionByKey(key: CompositePrimaryKeyInput) {
     return this.workflowExecutionModel.get(key);
+  }
+
+  async listWorkflowExecutionsOfAnOrganization(
+    listWorkflowExecutionsOfAnOrganizationInput: ListWorkflowExecutionsOfAnOrganizationInput,
+  ) {
+    const { OrgId } = listWorkflowExecutionsOfAnOrganizationInput;
+    const readItems = [];
+    const resultsPKSK = await this.workflowExecutionModel.scan().where('SK').beginsWith(`WSXH|${OrgId}`).exec();
+    for (let i = 0; i < resultsPKSK.length; i++) {
+      const splitString = resultsPKSK[i].PK.split('|');      
+      const resultSK = await this.workflowExecutionModel
+        .query({ PK: resultsPKSK[i].PK })
+        .and()
+        .where('SK')
+        .beginsWith(splitString[1])
+        .exec();      
+      if (resultSK[0]) {        
+        readItems.push(resultSK[0]);
+      }
+    }
+    return Array.from(new Set(readItems.map(obj => JSON.stringify(obj)))).map(str => JSON.parse(str));
   }
 
   async listWorkflowExecutionsOfAVersion(listWorkflowExecutionsOfAVersionInput: ListWorkflowExecutionsOfAVersionInput) {

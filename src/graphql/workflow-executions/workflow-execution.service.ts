@@ -5,7 +5,10 @@ import { WorkflowVersionService } from '../workflow-versions/workflow-version.se
 
 import { WorkflowExecStatus } from './workflow-execution.enum';
 import { CreateWorkflowExecutionInput } from './inputs/post.inputs';
-import { ListWorkflowExecutionsOfAVersionInput } from './inputs/get.inputs';
+import {
+  ListWorkflowExecutionsOfAnOrganizationInput,
+  ListWorkflowExecutionsOfAVersionInput,
+} from './inputs/get.inputs';
 import { SaveWorkflowExecutionInput } from './inputs/put.inputs';
 import { ListWorkflowExecution, WorkflowExecution } from './workflow-execution.entity';
 import { WorkflowExecutionRepository } from './workflow-execution.repository';
@@ -89,6 +92,20 @@ export class WorkflowExecutionService {
     return {
       WorkflowExecution: result,
       TotalRecords: workflowVersion.TotalEXC,
+    };
+  }
+
+  async listWorkflowExecutionsOfAnOrganization(
+    listWorkflowExecutionsOfAnOrganizationInput: ListWorkflowExecutionsOfAnOrganizationInput,
+  ): Promise<ListWorkflowExecution> {
+    const { OrgId } = listWorkflowExecutionsOfAnOrganizationInput;
+    let result: any = await this.workflowExecutionRepository.listWorkflowExecutionsOfAnOrganization(
+      listWorkflowExecutionsOfAnOrganizationInput,
+    );
+
+    return {
+      TotalRecords: result.length,
+      WorkflowExecution: result,
     };
   }
 }

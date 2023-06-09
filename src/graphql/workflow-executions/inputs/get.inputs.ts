@@ -15,3 +15,9 @@ export class ListWorkflowExecutionsOfAVersionInput extends PartialType(Paginatio
   @Field((type) => Int, { nullable: true })
   TotalEXC?: number;
 }
+
+@InputType()
+export class ListWorkflowExecutionsOfAnOrganizationInput extends PartialType(PaginationInput) {
+  @Field()
+  OrgId: string;
+}
