@@ -39,22 +39,34 @@ export class WorkflowExecutionRepository {
   async listWorkflowExecutionsOfAnOrganization(
     listWorkflowExecutionsOfAnOrganizationInput: ListWorkflowExecutionsOfAnOrganizationInput,
   ) {
-    const { OrgId } = listWorkflowExecutionsOfAnOrganizationInput;
-    const readItems = [];
+    const { OrgId, filter } = listWorkflowExecutionsOfAnOrganizationInput;
+    const allWorkflowExecutions = [];
     const resultsPKSK = await this.workflowExecutionModel.scan().where('SK').beginsWith(`WSXH|${OrgId}`).exec();
     for (let i = 0; i < resultsPKSK.length; i++) {
-      const splitString = resultsPKSK[i].PK.split('|');      
+      const splitString = resultsPKSK[i].PK.split('|');
       const resultSK = await this.workflowExecutionModel
         .query({ PK: resultsPKSK[i].PK })
         .and()
         .where('SK')
         .beginsWith(splitString[1])
-        .exec();      
-      if (resultSK[0]) {        
-        readItems.push(resultSK[0]);
+        .exec();
+      if (resultSK[0]) {
+        if (!filter && !filter?.startDate && !filter?.endDate) {
+          // Get all the executions
+          allWorkflowExecutions.push(resultSK[0]);
+        } else {
+          // Get the filtered month's start and end dates
+          const startOfMonth = new Date(filter.startDate);
+          const endOfMonth = new Date(filter.endDate);
+
+          const resultDate = new Date(resultSK[0].created_at);
+          if (resultDate >= startOfMonth && resultDate <= endOfMonth) {
+            allWorkflowExecutions.push(resultSK[0]);
+          }
+        }
       }
     }
-    return Array.from(new Set(readItems.map(obj => JSON.stringify(obj)))).map(str => JSON.parse(str));
+    return Array.from(new Set(allWorkflowExecutions.map((obj) => JSON.stringify(obj)))).map((str) => JSON.parse(str));
   }
 
   async listWorkflowExecutionsOfAVersion(listWorkflowExecutionsOfAVersionInput: ListWorkflowExecutionsOfAVersionInput) {

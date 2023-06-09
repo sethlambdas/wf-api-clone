@@ -49,6 +49,9 @@ export class WorkflowExecution implements CompositePrimaryKey {
 
   @Field()
   STATUS: string;
+
+  @Field()
+  created_at?: string;
 }
 
 @ObjectType()
@@ -61,4 +64,13 @@ export class ListWorkflowExecution {
 
   @Field({ nullable: true })
   Error?: string;
+}
+
+@ObjectType()
+export class ListAllWorkflowExecution {
+  @Field((type) => ListWorkflowExecution, { nullable: true })
+  TotalWorkflowExecution?: ListWorkflowExecution;
+
+  @Field((type) => ListWorkflowExecution, { nullable: true })
+  CurrentWorkflowExecution?: ListWorkflowExecution;
 }

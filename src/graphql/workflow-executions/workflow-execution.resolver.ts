@@ -5,7 +5,7 @@ import { CompositePrimaryKeyInput } from '../common/inputs/workflow-key.input';
 import { CreateWorkflowExecutionInput } from './inputs/post.inputs';
 import { ListWorkflowExecutionsOfAnOrganizationInput, ListWorkflowExecutionsOfAVersionInput } from './inputs/get.inputs';
 import { SaveWorkflowExecutionInput } from './inputs/put.inputs';
-import { ListWorkflowExecution, WorkflowExecution } from './workflow-execution.entity';
+import { ListAllWorkflowExecution, ListWorkflowExecution, WorkflowExecution } from './workflow-execution.entity';
 import { WorkflowExecutionService } from './workflow-execution.service';
 
 @Resolver((of) => WorkflowExecution)
@@ -49,7 +49,7 @@ export class WorkflowExecutionResolver {
     return this.workflowExecutionService.listWorkflowExecutionsOfAVersion(listWorkflowExecutionsOfAVersionInput);
   }
 
-  @Query((returns) => ListWorkflowExecution)
+  @Query((returns) => ListAllWorkflowExecution)
   async ListWorkflowExecutionsOfAnOrganization(
     @Args('listWorkflowExecutionsOfAnOrganizationInput')
     listWorkflowExecutionsOfAnOrganizationInput: ListWorkflowExecutionsOfAnOrganizationInput,

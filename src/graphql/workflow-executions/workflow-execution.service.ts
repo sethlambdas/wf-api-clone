@@ -10,7 +10,7 @@ import {
   ListWorkflowExecutionsOfAVersionInput,
 } from './inputs/get.inputs';
 import { SaveWorkflowExecutionInput } from './inputs/put.inputs';
-import { ListWorkflowExecution, WorkflowExecution } from './workflow-execution.entity';
+import { ListAllWorkflowExecution, ListWorkflowExecution, WorkflowExecution } from './workflow-execution.entity';
 import { WorkflowExecutionRepository } from './workflow-execution.repository';
 
 @Injectable()
@@ -97,15 +97,36 @@ export class WorkflowExecutionService {
 
   async listWorkflowExecutionsOfAnOrganization(
     listWorkflowExecutionsOfAnOrganizationInput: ListWorkflowExecutionsOfAnOrganizationInput,
-  ): Promise<ListWorkflowExecution> {
+  ): Promise<ListAllWorkflowExecution> {
     const { OrgId } = listWorkflowExecutionsOfAnOrganizationInput;
-    let result: any = await this.workflowExecutionRepository.listWorkflowExecutionsOfAnOrganization(
+
+    // total workflow executions count
+    let allWFE: any = await this.workflowExecutionRepository.listWorkflowExecutionsOfAnOrganization(
       listWorkflowExecutionsOfAnOrganizationInput,
     );
 
+    // Get the current month's start and end dates
+    const currentDate = new Date();
+    const startOfMonth = new Date(currentDate.getFullYear(), currentDate.getMonth(), 1);
+    const endOfMonth = new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 0);
+    // current month workflow executions count
+    let currentWFE: any = await this.workflowExecutionRepository.listWorkflowExecutionsOfAnOrganization({
+      ...listWorkflowExecutionsOfAnOrganizationInput,
+      filter: {
+        startDate: startOfMonth.toString(),
+        endDate: endOfMonth.toString(),
+      },
+    });
+
     return {
-      TotalRecords: result.length,
-      WorkflowExecution: result,
+      TotalWorkflowExecution: {
+        WorkflowExecution: allWFE,
+        TotalRecords: allWFE.length,
+      },
+      CurrentWorkflowExecution: {
+        WorkflowExecution: currentWFE,
+        TotalRecords: currentWFE.length,
+      },
     };
   }
 }
