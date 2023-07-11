@@ -51,6 +51,9 @@ export class WorkflowExecution implements CompositePrimaryKey {
   STATUS: string;
 
   @Field()
+  T?: string;
+
+  @Field()
   created_at?: string;
 }
 

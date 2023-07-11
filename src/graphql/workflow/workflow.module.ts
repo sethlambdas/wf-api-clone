@@ -1,4 +1,5 @@
 import { Module } from '@nestjs/common';
+import { PaymentsModule } from '@src:graphql/payments/payments.module';
 
 import { DynamoDBModule } from '../dynamodb/dynamodb.module';
 import { OrganizationModule } from '../organizations/organization.module';
@@ -12,7 +13,14 @@ import { WorkflowResolver } from './workflow.resolver';
 import { WorkflowService } from './workflow.service';
 
 @Module({
-  imports: [WorkflowStepModule, WorkflowVersionModule, WorkflowExecutionModule, OrganizationModule, DynamoDBModule],
+  imports: [
+    WorkflowStepModule,
+    WorkflowVersionModule,
+    WorkflowExecutionModule,
+    OrganizationModule,
+    DynamoDBModule,
+    PaymentsModule,
+  ],
   controllers: [WorkflowController],
   providers: [WorkflowResolver, WorkflowService, WorkflowRepository],
   exports: [WorkflowService],

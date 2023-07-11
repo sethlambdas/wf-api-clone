@@ -102,6 +102,9 @@ mailgun:
   toEmail: 'seth@lambdas.io'
   ccEmail: 'notifications@lambdas.io'
 
+stripe:
+  sk: 'sk_test_51NOXgvKnTggJv0dQKRWDBwgdGESYGaVVbgSw756Vbmh3gJlDBlGLUhKWesPEfICpBZEnULxFflSpLZrrSQI4pohG00LPbQhUTL'
+
 oauth:
   redirectUriPath: 'https://workflow-api.lambdas.io'
 authBeEndpoint: 'https://workflow-api.lambdas.io/api/graphql'

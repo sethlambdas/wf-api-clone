@@ -45,6 +45,7 @@ import { WorkflowExecutionService } from '../workflow-executions/workflow-execut
 import { WorkflowStepService } from '../workflow-steps/workflow-step.service';
 import { WorkflowVersionService } from '../workflow-versions/workflow-version.service';
 import { WorkflowRepository } from './workflow.repository';
+import { PaymentService } from '@src:graphql/payments/payments.service';
 
 @Injectable()
 export class WorkflowService {
@@ -57,6 +58,7 @@ export class WorkflowService {
     private workflowVersionService: WorkflowVersionService,
     private workflowExecutionService: WorkflowExecutionService,
     private organizationService: OrganizationService,
+    private paymentService: PaymentService,
   ) {}
 
   async createWorkflow(createWorkflowInput: CreateWorkflowInput): Promise<CreateWorkflowResponse> {
@@ -568,6 +570,12 @@ export class WorkflowService {
     }
 
     const workflow = await this.workflowRepository.getWorkflowByUniqueKey({ UniqueKey: workflowId });
+    // get workflow organization
+    const org = await this.organizationService.getOrganization({ PK: workflow.PK.split('|')[0] });
+    if (org) {
+      const usageRecord = await this.paymentService.reportUsageRecord(org.subscriptionId);
+      this.logger.log('Usage-record:', usageRecord);
+    }
 
     if (workflow.TriggerStatus === 'disabled') {
       this.logger.log('Workflow trigger is disabled');
@@ -694,7 +702,9 @@ export class WorkflowService {
       const workflow = await this.getWorkflowByKey(workflowKeysInput);
 
       await this.saveWorkflow({ ...workflowKeysInput, TriggerStatus: 'disabled' });
-      if (workflow.TimeTriggerRuleName) await disableRule({ Name: workflow.TimeTriggerRuleName });
+      if (workflow.TimeTriggerRuleName) {
+        await disableRule({ Name: workflow.TimeTriggerRuleName });
+      }
       return true;
     } catch (err) {
       return false;
@@ -706,7 +716,9 @@ export class WorkflowService {
       const workflow = await this.getWorkflowByKey(workflowKeysInput);
 
       await this.saveWorkflow({ ...workflowKeysInput, TriggerStatus: 'enabled' });
-      if (workflow.TimeTriggerRuleName) await enableRule({ Name: workflow.TimeTriggerRuleName });
+      if (workflow.TimeTriggerRuleName) {
+        await enableRule({ Name: workflow.TimeTriggerRuleName });
+      }
       return true;
     } catch (err) {
       return false;

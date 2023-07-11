@@ -20,6 +20,12 @@ export class User implements SimplePrimaryKey {
 
   @Field()
   salt: string;
+
+  @Field()
+  stripeCustomerId?: string;
+
+  @Field()
+  subscriptionId?: string;
 }
 
 export class CookieOptions {

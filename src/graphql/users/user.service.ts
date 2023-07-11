@@ -14,6 +14,7 @@ import { SignUpCredentialsInput } from './inputs/sign-up-credentials.input';
 import { User } from './user.entity';
 import { UserRepository } from './user.repository';
 import { GraphQLError } from 'graphql';
+import { SimplePrimaryKey } from '../common/interfaces/dynamodb-keys.interface';
 
 @Injectable()
 export class UserService {
@@ -76,6 +77,16 @@ export class UserService {
     const { accessToken, refreshTokenGenerate } = await this.generateToken(payload);
     this.logger.debug(`Generated JWT Token with payload ${JSON.stringify(payload)}`);
     return { accessToken, refreshTokenGenerate };
+  }
+
+  async saveUser(key: SimplePrimaryKey, user: Partial<User>): Promise<any> {
+    const updatedUser = await this.userRepository.saveUser(key, user);
+    return updatedUser;
+  }
+
+  async getUserByKey(key: SimplePrimaryKey): Promise<User> {
+    const user = await this.userRepository.getUserByKey(key);
+    return user;
   }
 
   async signOut(context: any): Promise<boolean> {
@@ -189,9 +200,9 @@ export class UserService {
 
   async validateUserPassword(signInCredentialsInput: SignInCredentialsInput): Promise<User> {
     const { email, password } = signInCredentialsInput;
-    this.logger.log('validateUserPassword - getUserByEmail')
+    this.logger.log('validateUserPassword - getUserByEmail');
     const user = await this.userRepository.getUserByEmail(email);
-    this.logger.log('validateUserPassword - validatePassword')
+    this.logger.log('validateUserPassword - validatePassword');
     if (user && (await this.validatePassword(password, user))) {
       return user;
     }

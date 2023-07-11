@@ -14,4 +14,10 @@ export class Organization implements SimplePrimaryKey {
 
   @Field((type) => Int)
   TotalUSR: number;
+  
+  @Field()
+  stripeCustomerId?: string;
+
+  @Field()
+  subscriptionId?: string;
 }

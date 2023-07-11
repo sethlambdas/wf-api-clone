@@ -30,6 +30,8 @@ import { WorkflowStep } from './graphql/workflow-steps/workflow-step.entity';
 import { WorkflowStepService } from './graphql/workflow-steps/workflow-step.service';
 import { WorkflowVersionService } from './graphql/workflow-versions/workflow-version.service';
 import { WorkflowService } from './graphql/workflow/workflow.service';
+import { PaymentService } from './graphql/payments/payments.service';
+import { OrganizationService } from './graphql/organizations/organization.service';
 
 export default class Workflow {
   private logger: Logger;
@@ -38,6 +40,8 @@ export default class Workflow {
   private workflowExecutionService: WorkflowExecutionService;
   private workflowStepExecutionHistoryService: WorkflowStepExecutionHistoryService;
   private workflowVersionService: WorkflowVersionService;
+  private paymentService: PaymentService;
+  private organizationService: OrganizationService;
 
   constructor(
     logger: Logger,
@@ -46,6 +50,8 @@ export default class Workflow {
     workflowExecutionService: WorkflowExecutionService,
     workflowStepExecutionHistoryService: WorkflowStepExecutionHistoryService,
     workflowVersionService: WorkflowVersionService,
+    paymentService: PaymentService,
+    organizationService: OrganizationService,
   ) {
     this.logger = logger;
     this.workflowService = workflowService;
@@ -53,6 +59,8 @@ export default class Workflow {
     this.workflowExecutionService = workflowExecutionService;
     this.workflowStepExecutionHistoryService = workflowStepExecutionHistoryService;
     this.workflowVersionService = workflowVersionService;
+    this.paymentService = paymentService;
+    this.organizationService = organizationService;
   }
 
   static getRule() {
@@ -170,6 +178,11 @@ export default class Workflow {
       }
 
       if (timedTrigger) {
+        const org = await this.organizationService.getOrganization({ PK: OrgId });
+        if (org) {
+          const usageRecord = await this.paymentService.reportUsageRecord(org.subscriptionId);
+          this.logger.log('Stripe usage-record:', usageRecord);
+        }        
         const WSXH_SK = `WSXH|${OrgId}|Timed|${v4()}`;
         const wfExec = await this.workflowExecutionService.createWorkflowExecution({
           WorkflowVersionKeys: { PK: WorkflowVersionKeys.PK, SK: WorkflowVersionKeys.SK },

@@ -15,6 +15,12 @@ export const OrganizationSchema = new Schema(
     TotalUSR: {
       type: Number,
     },
+    stripeCustomerId: {
+      type: String,
+    },
+    subscriptionId: {
+      type: String,
+    },
   },
   {
     timestamps: {

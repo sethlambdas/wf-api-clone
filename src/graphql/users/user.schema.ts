@@ -26,6 +26,12 @@ export const UserSchema = new Schema(
     salt: {
       type: String,
     },
+    stripeCustomerId: {
+      type: String,
+    },
+    subscriptionId: {
+      type: String,
+    },
   },
   {
     timestamps: {

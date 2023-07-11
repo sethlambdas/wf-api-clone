@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import { InjectModel, Model } from 'nestjs-dynamoose';
 
 import { ConfigUtil } from '@lambdascrew/utility';
@@ -8,7 +8,7 @@ import { CompositePrimaryKey } from '../common/interfaces/workflow-key.interface
 
 import {
   ListWorkflowExecutionsOfAnOrganizationInput,
-  ListWorkflowExecutionsOfAVersionInput
+  ListWorkflowExecutionsOfAVersionInput,
 } from './inputs/get.inputs';
 import { WorkflowExecution } from './workflow-execution.entity';
 import { PrefixWorkflowExecutionKeys } from './workflow-execution.enum';
@@ -42,10 +42,13 @@ export class WorkflowExecutionRepository {
     const { OrgId, filter } = listWorkflowExecutionsOfAnOrganizationInput;
     const allWorkflowExecutions = [];
     const resultsPKSK = await this.workflowExecutionModel.scan().where('SK').beginsWith(`WSXH|${OrgId}`).exec();
-    for (let i = 0; i < resultsPKSK.length; i++) {
-      const splitString = resultsPKSK[i].PK.split('|');
+
+    const filteredResults = resultsPKSK.filter((item) => item.T.startsWith('HTTP') || item.T.startsWith('Timed'));
+
+    for (let i = 0; i < filteredResults.length; i++) {
+      const splitString = filteredResults[i].PK.split('|');
       const resultSK = await this.workflowExecutionModel
-        .query({ PK: resultsPKSK[i].PK })
+        .query({ PK: filteredResults[i].PK })
         .and()
         .where('SK')
         .beginsWith(splitString[1])

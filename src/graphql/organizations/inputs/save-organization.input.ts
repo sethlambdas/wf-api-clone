@@ -13,4 +13,10 @@ export class SaveOrganizationInput {
 
   @Field((type) => Int, { nullable: true })
   TotalUSR?: number;
+
+  @Field({ nullable: true })
+  stripeCustomerId?: string;
+
+  @Field({ nullable: true })
+  subscriptionId?: string;
 }
