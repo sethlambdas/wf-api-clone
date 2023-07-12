@@ -103,7 +103,7 @@ mailgun:
   ccEmail: 'notifications@lambdas.io'
 
 stripe:
-  sk: 'sk_test_51NOXgvKnTggJv0dQKRWDBwgdGESYGaVVbgSw756Vbmh3gJlDBlGLUhKWesPEfICpBZEnULxFflSpLZrrSQI4pohG00LPbQhUTL'
+  sk: 'test_key'
 
 oauth:
   redirectUriPath: 'https://workflow-api.lambdas.io'

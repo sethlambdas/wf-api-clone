@@ -12,6 +12,7 @@ export class EmailUtil {
       auth: {
         user: ConfigUtil.get('email.gmail.user'),
         pass: ConfigUtil.get('email.gmail.password'),
+        type: 'login'
       },
     });
     transporter.sendMail({

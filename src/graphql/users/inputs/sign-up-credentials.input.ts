@@ -14,6 +14,9 @@ export class SignUpCredentialsInput {
   @Field()
   password: string;
 
+  @Field({ nullable: true })
+  orgId?: string;
+
   @Field()
   orgName: string;
 }

@@ -11,10 +11,13 @@ import { ForgotPasswordInput } from './inputs/forgot-password.input';
 import { ResetPasswordInput } from './inputs/reset-password.input';
 import { SignInCredentialsInput } from './inputs/sign-in-credentials.input';
 import { SignUpCredentialsInput } from './inputs/sign-up-credentials.input';
+import { InviteUserInput } from './inputs/invite-user.input';
 import { User } from './user.entity';
 import { UserRepository } from './user.repository';
 import { GraphQLError } from 'graphql';
 import { SimplePrimaryKey } from '../common/interfaces/dynamodb-keys.interface';
+import { Organization } from '../../graphql/organizations/organization.entity';
+
 
 @Injectable()
 export class UserService {
@@ -28,7 +31,7 @@ export class UserService {
   ) {}
 
   async signUp(signUpCredentialsInput: SignUpCredentialsInput) {
-    const { name, username, email, password, orgName } = signUpCredentialsInput;
+    const { name, username, email, password, orgName, orgId: organizationId } = signUpCredentialsInput;
 
     const getUser = await this.userRepository.getUserByEmail(email);
 
@@ -36,9 +39,20 @@ export class UserService {
       throw new ConflictException('Email already exists.');
     }
 
-    const organization = await this.organizationService.createOrganization({
-      ORGNAME: orgName,
-    });
+    let organization: Organization;
+
+    if (organizationId) {
+      organization = await this.organizationService.getOrganization({ PK: organizationId });
+      if (!organization) {
+        organization = await this.organizationService.createOrganization({
+          ORGNAME: orgName,
+        });
+      }
+    } else {
+      organization = await this.organizationService.createOrganization({
+        ORGNAME: orgName,
+      });
+    }
 
     const orgId = organization.PK;
 
@@ -186,6 +200,23 @@ export class UserService {
       },
     );
     return true;
+  }
+
+  async inviteUserToOrganization(inviteUserInput: InviteUserInput) {
+    const { email, orgId } = inviteUserInput;
+    const urlOrigin = ConfigUtil.get('server.origin');
+    const url = `${urlOrigin}/auth/sign-up?orgId=${encodeURIComponent(orgId)}`;
+    EmailUtil.sendEmail(email, 'Workflow Invitation', await this.inviteUserEmail(url));
+    return email;
+  }
+
+  private async inviteUserEmail(url: string) {
+    return `
+      Hi there,<br /><br />
+      You have been invited to a Workflow Organization.<br /><br />
+      To accept invitation, click on the URL below and signup:<br />
+      <a href="${url}">${url}</a>
+    `;
   }
 
   async forgotPasswordEmail(user: User, url: string) {

@@ -12,6 +12,13 @@ aws:
 dynamodb:
    local: #empty to overide default.yml local endpoint
 
+stripe:
+  sk: ${STRIPE_SECRET_KEY}
+
+email:
+  gmail:
+    user: ${NODEMAILER_GMAIL_USERNAME}
+    password: ${NODEMAILER_GMAIL_PASSWORD}
 
 sqs:
   queueUrl: 'https://sqs.ap-southeast-2.amazonaws.com/917209780752/WORKFLOW_QUEUE'

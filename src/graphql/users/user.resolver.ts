@@ -2,6 +2,7 @@ import { Logger } from '@nestjs/common';
 import { Args, Context, Mutation, Query, Resolver } from '@nestjs/graphql';
 import { AuthCredentials, RefreshTokenResult } from './auth/auth-credentials.type';
 import { ForgotPasswordInput } from './inputs/forgot-password.input';
+import { InviteUserInput } from './inputs/invite-user.input';
 import { ResetPasswordInput } from './inputs/reset-password.input';
 import { SignInCredentialsInput } from './inputs/sign-in-credentials.input';
 import { SignUpCredentialsInput } from './inputs/sign-up-credentials.input';
@@ -42,6 +43,11 @@ export class UserResolver {
   @Mutation((returns) => String)
   async ForgotPassword(@Args('forgotPasswordInput') forgotPasswordInput: ForgotPasswordInput) {
     return this.userService.forgotPassword(forgotPasswordInput);
+  }
+
+  @Mutation((returns) => String)
+  async InviteUserToOrganization(@Args('inviteUserInput') inviteUserInput: InviteUserInput) {
+    return this.userService.inviteUserToOrganization(inviteUserInput);
   }
 
   @Mutation((returns) => Boolean)
