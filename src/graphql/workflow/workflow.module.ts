@@ -1,5 +1,5 @@
 import { Module } from '@nestjs/common';
-import { PaymentsModule } from '@src:graphql/payments/payments.module';
+import { PaymentsModule } from '../../graphql/payments/payments.module';
 
 import { DynamoDBModule } from '../dynamodb/dynamodb.module';
 import { OrganizationModule } from '../organizations/organization.module';

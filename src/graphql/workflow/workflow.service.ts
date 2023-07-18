@@ -45,7 +45,7 @@ import { WorkflowExecutionService } from '../workflow-executions/workflow-execut
 import { WorkflowStepService } from '../workflow-steps/workflow-step.service';
 import { WorkflowVersionService } from '../workflow-versions/workflow-version.service';
 import { WorkflowRepository } from './workflow.repository';
-import { PaymentService } from '@src:graphql/payments/payments.service';
+import { PaymentService } from '../../graphql/payments/payments.service';
 
 @Injectable()
 export class WorkflowService {

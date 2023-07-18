@@ -1,9 +1,9 @@
 import { ConfigUtil } from '@lambdascrew/utility';
 import { Injectable, Logger } from '@nestjs/common';
-import { SaveOrganizationInput } from '@src:graphql/organizations/inputs/save-organization.input';
-import { OrganizationService } from '@src:graphql/organizations/organization.service';
-import { User } from '@src:graphql/users/user.entity';
-import { UserService } from '@src:graphql/users/user.service';
+import { SaveOrganizationInput } from '../../graphql/organizations/inputs/save-organization.input';
+import { OrganizationService } from '../../graphql/organizations/organization.service';
+import { User } from '../../graphql/users/user.entity';
+import { UserService } from '../../graphql/users/user.service';
 
 @Injectable()
 export class PaymentService {

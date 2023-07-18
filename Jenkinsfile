@@ -1,15 +1,15 @@
 pipeline {
     agent any
-    
+
     environment {
         AWS_REGION="ap-southeast-2"
         CLUSTER_NAME="wf-cluster"
         ECR_REGISTRY = "917209780752.dkr.ecr.ap-southeast-2.amazonaws.com"
         IMAGE_NAME = "wf-api"
-        BUILD_DATE = sh(returnStdout: true, script: 'date +%y.%m%d').trim()        
+        BUILD_DATE = sh(returnStdout: true, script: 'date +%y.%m%d').trim()
         APP_VERSION = "${BUILD_DATE}.${BUILD_ID}"
     }
-    
+
     stages {
         stage('Terraform Init') {
             steps {
@@ -42,7 +42,10 @@ pipeline {
             steps {
                 withCredentials([[$class: 'AmazonWebServicesCredentialsBinding', credentialsId: 'aws-credentials']]) {
                     script {
-                        sh 'cat config/*.yml | envsubst > config/*.yml'
+                        sh "/usr/local/aws-cli/v2/current/dist/aws ssm get-parameter --region ${AWS_REGION} --name \"/workflow-api/production/env\" --with-decryption | jq --raw-output .Parameter.Value > env.txt"
+                        sh "export \$(cat env.txt | sed 's/#.*//g' | xargs -0) && cat config/production.yml | envsubst > config/temp.yml"
+                        sh 'mv config/temp.yml config/production.yml'
+                        sh 'cat config/production.yml'
                     }
                 }
             }
@@ -85,6 +88,6 @@ pipeline {
                 }
             }
         }
-        
+
     }
 }

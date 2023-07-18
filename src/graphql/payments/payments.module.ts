@@ -1,6 +1,6 @@
 import { Module } from '@nestjs/common';
-import { OrganizationModule } from '@src:graphql/organizations/organization.module';
-import { UserModule } from '@src:graphql/users/user.module';
+import { OrganizationModule } from '../../graphql/organizations/organization.module';
+import { UserModule } from '../../graphql/users/user.module';
 import { PaymentsController } from './payments.controller';
 import { PaymentService } from './payments.service';
 
