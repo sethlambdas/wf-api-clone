@@ -6,7 +6,9 @@ import { InviteUserInput } from './inputs/invite-user.input';
 import { ResetPasswordInput } from './inputs/reset-password.input';
 import { SignInCredentialsInput } from './inputs/sign-in-credentials.input';
 import { SignUpCredentialsInput } from './inputs/sign-up-credentials.input';
+import { UpdateUserInput } from './inputs/update-user.input';
 import { User } from './user.entity';
+import { UserRepository } from './user.repository';
 import { UserService } from './user.service';
 
 @Resolver((of) => User)
@@ -33,6 +35,16 @@ export class UserResolver {
     const token = await this.userService.signIn(signInCredentialsInput);
     await this.userService.setCookie(context, token);
     return token;
+  }
+
+  @Mutation((returns) => User)
+  async UpdateUserRole(
+    @Args('updateUserInput')
+    updateUserInput: UpdateUserInput,
+  ) {
+    const { key, role } = updateUserInput;
+    const user = await this.userService.saveUser({ PK: key }, { role });
+    return user;
   }
 
   @Query((returns) => Boolean)
@@ -62,5 +74,10 @@ export class UserResolver {
     refreshToken: string,
   ) {
     return this.userService.refreshToken(context, refreshToken);
+  }
+
+  @Query((returns) => [User], { nullable: true })
+  async GetAllUsersOfOrganization(@Args('orgId') orgId: string): Promise<User[]> {
+    return this.userService.getAllUsersOfOrg(orgId);
   }
 }

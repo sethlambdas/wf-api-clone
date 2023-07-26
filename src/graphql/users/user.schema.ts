@@ -1,5 +1,6 @@
 import { Schema } from 'dynamoose';
 import { GSI } from '../common/enums/gsi-names.enum';
+import { UserRoleEnum } from '../common/enums/user-roles.enum';
 
 export const UserSchema = new Schema(
   {
@@ -19,6 +20,11 @@ export const UserSchema = new Schema(
         type: 'global',
         name: `${GSI.GSIEmailIndex}`,
       },
+    },
+    role: {
+      type: String,
+      enum: [UserRoleEnum.ADMINISTRATOR, UserRoleEnum.DEVELOPER, UserRoleEnum.GUEST, UserRoleEnum.MODERATOR],
+      default: UserRoleEnum.GUEST,
     },
     password: {
       type: String,

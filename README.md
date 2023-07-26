@@ -190,3 +190,11 @@ aws ecr get-login-password --region ap-southeast-2 | docker login --username AWS
 
 ## GENERATE DOCKER IMAGE
 docker build --rm -t wf-api:latest .
+
+## EXPORT ENV VARIABLES (development)
+export AWS_SECRET_ACCESS_KEY=sampleSecretAccessKey
+export AWS_ACCESS_KEY_ID=sampleAccessKeyId
+export AWS_REGION=ap-southeast-2
+export WORKFLOW_QUEUE=WORKFLOW_QUEUE
+export WORKFLOW_QUEUE_ERROR=WORKFLOW_QUEUE_ERROR
+

@@ -1,5 +1,6 @@
 import { SimplePrimaryKey } from '../common/interfaces/dynamodb-keys.interface';
 import { Field, ObjectType } from '@nestjs/graphql';
+import { UserRoleEnum } from '../common/enums/user-roles.enum';
 
 @ObjectType()
 export class User implements SimplePrimaryKey {
@@ -14,6 +15,9 @@ export class User implements SimplePrimaryKey {
 
   @Field()
   email: string;
+
+  @Field((type) => UserRoleEnum)
+  role: UserRoleEnum;
 
   @Field()
   password: string;

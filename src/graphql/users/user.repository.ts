@@ -29,6 +29,11 @@ export class UserRepository {
     return this.userModel.get(key);
   }
 
+  async getAllUsersOfOrg() {
+    const users: User[] = await this.userModel.scan().all().exec();
+    return users
+  }
+
   async getUserByEmail(email: string) {
     const result = await this.userModel.query({ email }).using(GSI.GSIEmailIndex).exec();
     return result[0];

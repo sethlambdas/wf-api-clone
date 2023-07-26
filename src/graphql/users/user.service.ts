@@ -17,7 +17,7 @@ import { UserRepository } from './user.repository';
 import { GraphQLError } from 'graphql';
 import { SimplePrimaryKey } from '../common/interfaces/dynamodb-keys.interface';
 import { Organization } from '../../graphql/organizations/organization.entity';
-
+import { UserRoleEnum } from '../common/enums/user-roles.enum';
 
 @Injectable()
 export class UserService {
@@ -34,7 +34,8 @@ export class UserService {
     const { name, username, email, password, orgName, orgId: organizationId } = signUpCredentialsInput;
 
     const getUser = await this.userRepository.getUserByEmail(email);
-
+    // by default it is admin or either guest
+    let userRole = UserRoleEnum.ADMINISTRATOR;
     if (getUser) {
       throw new ConflictException('Email already exists.');
     }
@@ -43,10 +44,12 @@ export class UserService {
 
     if (organizationId) {
       organization = await this.organizationService.getOrganization({ PK: organizationId });
+      userRole = UserRoleEnum.MODERATOR;
       if (!organization) {
         organization = await this.organizationService.createOrganization({
           ORGNAME: orgName,
         });
+        userRole = UserRoleEnum.ADMINISTRATOR;
       }
     } else {
       organization = await this.organizationService.createOrganization({
@@ -65,6 +68,7 @@ export class UserService {
       email,
       password: await this.hashPassword(password, salt),
       salt,
+      role: userRole,
     } as User;
 
     const createdUser = await this.userRepository.createUser(user);
@@ -101,6 +105,12 @@ export class UserService {
   async getUserByKey(key: SimplePrimaryKey): Promise<User> {
     const user = await this.userRepository.getUserByKey(key);
     return user;
+  }
+
+  async getAllUsersOfOrg(orgId: string): Promise<User[]> {
+    const users = await this.userRepository.getAllUsersOfOrg();
+    const filteredUsers = users.filter((user) => user.PK.includes(orgId));
+    return filteredUsers;
   }
 
   async signOut(context: any): Promise<boolean> {
