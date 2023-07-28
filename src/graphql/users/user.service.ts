@@ -34,7 +34,7 @@ export class UserService {
     const { name, username, email, password, orgName, orgId: organizationId } = signUpCredentialsInput;
 
     const getUser = await this.userRepository.getUserByEmail(email);
-    // by default it is admin or either guest
+    // by default it is admin or either TRIAL
     let userRole = UserRoleEnum.ADMINISTRATOR;
     if (getUser) {
       throw new ConflictException('Email already exists.');
@@ -44,7 +44,7 @@ export class UserService {
 
     if (organizationId) {
       organization = await this.organizationService.getOrganization({ PK: organizationId });
-      userRole = UserRoleEnum.MODERATOR;
+      userRole = UserRoleEnum.SUPPORT;
       if (!organization) {
         organization = await this.organizationService.createOrganization({
           ORGNAME: orgName,
@@ -146,6 +146,7 @@ export class UserService {
     const signedData = {
       PK: user.PK,
       email: user.email,
+      role: user.role,
     };
     const accessToken = await this.jwtService.sign(signedData);
     const refreshTokenGenerate = await this.jwtService.sign(signedData, {

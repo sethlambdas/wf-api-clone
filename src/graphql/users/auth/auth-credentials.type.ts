@@ -1,4 +1,5 @@
 import { Field, ObjectType } from '@nestjs/graphql';
+import { UserRoleEnum } from '../../common/enums/user-roles.enum';
 
 @ObjectType()
 export class CookieOptions {

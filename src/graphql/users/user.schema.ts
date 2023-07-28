@@ -23,8 +23,14 @@ export const UserSchema = new Schema(
     },
     role: {
       type: String,
-      enum: [UserRoleEnum.ADMINISTRATOR, UserRoleEnum.DEVELOPER, UserRoleEnum.GUEST, UserRoleEnum.MODERATOR],
-      default: UserRoleEnum.GUEST,
+      enum: [
+        UserRoleEnum.ADMINISTRATOR,
+        UserRoleEnum.DEVELOPER,
+        UserRoleEnum.TRIAL,
+        UserRoleEnum.MODERATOR,
+        UserRoleEnum.SUPPORT,
+      ],
+      default: UserRoleEnum.SUPPORT,
     },
     password: {
       type: String,
