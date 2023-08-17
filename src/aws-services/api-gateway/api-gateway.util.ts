@@ -22,7 +22,7 @@ export async function getRestApisAPIGateway(getRestApisParams: GetRestApisInput)
 
 interface CreateRestApiInput {
   name: string;
-  endpointConfiguration: { types: string[] };
+  endpointConfiguration?: { types: string[] };
 }
 
 export async function createRestApiAPIGateway(createRestApiParams: CreateRestApiInput) {
@@ -80,7 +80,7 @@ interface PutMethodInput {
   httpMethod: string;
   authorizationType: string;
   apiKeyRequired: boolean;
-  requestParameters: { [key: string]: any };
+  requestParameters?: { [key: string]: any };
 }
 
 export async function putMethodAPIGateway(putMethodParams: PutMethodInput) {
@@ -92,7 +92,7 @@ export async function putMethodAPIGateway(putMethodParams: PutMethodInput) {
 
     return result;
   } catch (err) {
-    logger.error(`Error, ${err}`);
+    logger.error(`Error:`, err);
   }
 }
 
@@ -103,7 +103,7 @@ interface PutIntegrationInput {
   type: string;
   integrationHttpMethod: string;
   uri: string;
-  requestParameters: any;
+  requestParameters?: any;
 }
 
 export async function putIntegrationAPIGateway(putIntegrationParams: PutIntegrationInput) {
@@ -115,7 +115,7 @@ export async function putIntegrationAPIGateway(putIntegrationParams: PutIntegrat
 
     return result;
   } catch (err) {
-    logger.error(`Error, ${err}`);
+    logger.error(`Error:`, err);
   }
 }
 
@@ -135,7 +135,7 @@ export async function putMethodResponseAPIGateway(putMethodResponseParams: PutMe
 
     return result;
   } catch (err) {
-    logger.error(`Error, ${err}`);
+    logger.error(`Error:`, err);
   }
 }
 
@@ -155,7 +155,7 @@ export async function createDeploymentAPIGateway(createDeploymentParams: CreateD
 
     return result;
   } catch (err) {
-    logger.error(`Error, ${err}`);
+    logger.error(`Error:`, err);
   }
 }
 
@@ -167,6 +167,15 @@ interface CreateUsagePlanInput {
       stage: string;
     },
   ];
+  quota?: {
+    limit?: number;
+    offset?: number;
+    period?: string;
+  };
+  throttle?: {
+    burstLimit?: number;
+    rateLimit?: number;
+  };
 }
 
 export async function createUsagePlanAPIGateway(createUsagePlanParams: CreateUsagePlanInput) {
@@ -178,7 +187,25 @@ export async function createUsagePlanAPIGateway(createUsagePlanParams: CreateUsa
 
     return result;
   } catch (err) {
-    logger.error(`Error, ${err}`);
+    logger.error(`Error:`, err);
+  }
+}
+
+interface updateUsagePlanProps {
+  usagePlanId: string;
+  patchOperations: any;
+}
+
+export async function updateUsagePlanAPIGateway(updateUsagePlansParams: updateUsagePlanProps) {
+  try {
+    logger.log('Update Usage Plan on API Gateway');
+
+    const result = await APIGateway.updateUsagePlan(updateUsagePlansParams).promise();
+    logger.log(result);
+
+    return result;
+  } catch (err) {
+    logger.error(`Error:`, err);
   }
 }
 
@@ -197,7 +224,54 @@ export async function createApiKeyAPIGateway(createApiKeyParams: CreateApiKeyInp
 
     return result;
   } catch (err) {
-    logger.error(`Error, ${err}`);
+    logger.error(`Error:`, err);
+  }
+}
+
+export async function updateApiGatewayApiKey(apiKey: string, patchOperations: any) {
+  try {
+    logger.log('Update Api Key on API Gateway');
+
+    const result = await APIGateway.updateApiKey({
+      apiKey,
+      patchOperations,
+    }).promise();
+    logger.log('update-api-key', result);
+
+    return result;
+  } catch (err) {
+    logger.error(`Error:`, err);
+  }
+}
+
+interface GetApiKeyProps {
+  apiKey: string;
+  includeValue?: boolean;
+}
+
+export async function getApiGatewayApiKey({ apiKey, includeValue = false }: GetApiKeyProps) {
+  try {
+    logger.log('get Api Key on API Gateway');
+
+    const result = await APIGateway.getApiKey({ apiKey, includeValue }).promise();
+    logger.log(result);
+
+    return result;
+  } catch (err) {
+    logger.error(`Error:`, err);
+  }
+}
+
+export async function getApiGatewayApiKeys(customerId: string) {
+  try {
+    logger.log('Get Api Keys on API Gateway');
+
+    const result = await APIGateway.getApiKeys({ customerId }).promise();
+    logger.log(result);
+
+    return result;
+  } catch (err) {
+    logger.error(`Error:`, err);
   }
 }
 

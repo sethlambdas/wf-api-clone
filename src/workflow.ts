@@ -30,8 +30,9 @@ import { WorkflowStep } from './graphql/workflow-steps/workflow-step.entity';
 import { WorkflowStepService } from './graphql/workflow-steps/workflow-step.service';
 import { WorkflowVersionService } from './graphql/workflow-versions/workflow-version.service';
 import { WorkflowService } from './graphql/workflow/workflow.service';
-import { PaymentService } from './graphql/payments/payments.service';
+import { BillingService } from './graphql/billing/billing.service';
 import { OrganizationService } from './graphql/organizations/organization.service';
+import { CreateWorkflowExecutionInput } from './graphql/workflow-executions/inputs/post.inputs';
 
 export default class Workflow {
   private logger: Logger;
@@ -40,7 +41,7 @@ export default class Workflow {
   private workflowExecutionService: WorkflowExecutionService;
   private workflowStepExecutionHistoryService: WorkflowStepExecutionHistoryService;
   private workflowVersionService: WorkflowVersionService;
-  private paymentService: PaymentService;
+  private billingService: BillingService;
   private organizationService: OrganizationService;
 
   constructor(
@@ -50,7 +51,7 @@ export default class Workflow {
     workflowExecutionService: WorkflowExecutionService,
     workflowStepExecutionHistoryService: WorkflowStepExecutionHistoryService,
     workflowVersionService: WorkflowVersionService,
-    paymentService: PaymentService,
+    billingService: BillingService,
     organizationService: OrganizationService,
   ) {
     this.logger = logger;
@@ -59,7 +60,7 @@ export default class Workflow {
     this.workflowExecutionService = workflowExecutionService;
     this.workflowStepExecutionHistoryService = workflowStepExecutionHistoryService;
     this.workflowVersionService = workflowVersionService;
-    this.paymentService = paymentService;
+    this.billingService = billingService;
     this.organizationService = organizationService;
   }
 
@@ -179,17 +180,27 @@ export default class Workflow {
 
       if (timedTrigger) {
         const org = await this.organizationService.getOrganization({ PK: OrgId });
+        let usageRecord;
         if (org) {
-          const usageRecord = await this.paymentService.reportUsageRecord(org.subscriptionId);
+          usageRecord = await this.billingService.reportUsageRecord(OrgId, org.subscriptionId);
           this.logger.log('Stripe usage-record:', usageRecord);
-        }        
+        }
         const WSXH_SK = `WSXH|${OrgId}|Timed|${v4()}`;
-        const wfExec = await this.workflowExecutionService.createWorkflowExecution({
+
+        const wfExecData: CreateWorkflowExecutionInput = {
           WorkflowVersionKeys: { PK: WorkflowVersionKeys.PK, SK: WorkflowVersionKeys.SK },
           STE: '{}',
           WSXH_IDS: [WSXH_SK],
           STATUS: WorkflowExecStatus.Running,
-        });
+        };
+
+        if (usageRecord) {
+          const { usageRecord: record } = usageRecord;
+          wfExecData.subscriptionItem = record.subscription_item;
+          wfExecData.usageRecordId = record.id;
+        }
+
+        const wfExec = await this.workflowExecutionService.createWorkflowExecution(wfExecData);
 
         wfExecKeys = { PK: wfExec.PK, SK: wfExec.SK };
 

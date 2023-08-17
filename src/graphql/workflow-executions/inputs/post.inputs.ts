@@ -21,4 +21,10 @@ export class CreateWorkflowExecutionInput {
 
   @Field()
   STATUS: string;
+
+  @Field()
+  subscriptionItem?: string;
+
+  @Field()
+  usageRecordId?: string;
 }

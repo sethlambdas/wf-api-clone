@@ -8,6 +8,7 @@ import { SimplePrimaryKey } from '../common/interfaces/dynamodb-keys.interface';
 import { IRefreshToken, ISignOut, RefreshToken, User } from './user.entity';
 import { HttpMethod, IGraphqlPayload, networkClient } from '../../utils/helpers/networkRequest.util';
 import { LOGOUT_QL, REFRESH_TOKEN_QL } from './user.qgl-queries';
+import { getApiGatewayApiKey } from 'aws-services/api-gateway/api-gateway.util';
 
 const endpoint = ConfigUtil.get('authBeEndpoint') || 'http://localhost:3001/api/graphql';
 @Injectable()
@@ -31,7 +32,7 @@ export class UserRepository {
 
   async getAllUsersOfOrg() {
     const users: User[] = await this.userModel.scan().all().exec();
-    return users
+    return users;
   }
 
   async getUserByEmail(email: string) {
@@ -54,6 +55,12 @@ export class UserRepository {
 
     await this.setCookie(res, response?.data?.RefreshToken);
     res.json(response?.data?.RefreshToken);
+  }
+
+  async apiKeyValue(res: any, payload: any) {
+    const { apiKey } = payload;
+    const apiKeyValue = await getApiGatewayApiKey({ apiKey, includeValue: true });
+    res.json(apiKeyValue);
   }
 
   async setCookie(res: any, token: RefreshToken) {

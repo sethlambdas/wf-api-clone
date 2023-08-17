@@ -21,6 +21,15 @@ export const OrganizationSchema = new Schema(
     subscriptionId: {
       type: String,
     },
+    apiKey: {
+      type: String,
+    },
+    endpointId: {
+      type: String,
+    },
+    usagePlanId: {
+      type: String,
+    },
   },
   {
     timestamps: {

@@ -37,6 +37,15 @@ export const WorkflowExecutionSchema = new Schema(
     STATUS: {
       type: String,
     },
+
+    subscriptionItem: {
+      type: String,
+    },
+
+    usageRecordId: {
+      type: String,
+      required: false,
+    },
   },
   {
     timestamps: {

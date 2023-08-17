@@ -198,3 +198,51 @@ export AWS_REGION=ap-southeast-2
 export WORKFLOW_QUEUE=WORKFLOW_QUEUE
 export WORKFLOW_QUEUE_ERROR=WORKFLOW_QUEUE_ERROR
 
+## CREATE APIGATEWAY TEMPLATE USING AWS CLI
+
+awslocal apigateway create-rest-api --name clone-1 --description "clone for the default authorizer"
+
+awslocal apigateway create-resource --rest-api-id bqf818n6fj  --parent-id bqf818n6fj --path-part ""
+
+awslocal apigateway create-resource --rest-api-id bqf818n6fj  --parent-id 577f9kxohh --path-part "trigger"
+
+awslocal apigateway create-resource --rest-api-id bqf818n6fj --parent-id yyxomkew25 --path-part "{aid}"
+
+awslocal apigateway put-method --rest-api-id bqf818n6fj --resource-id 4lkgy5rhv5 --http-method POST --authorization-type "NONE"
+
+awslocal apigateway put-integration --rest-api-id bqf818n6fj --resource-id 4lkgy5rhv5 --http-method POST --type AWS_PROXY --integration-http-method POST --uri "arn:aws:apigateway:ap-southeast-2:lambda:path/2015-03-31/functions/arn:aws:lambda:ap-southeast-2:000000000000:function:srvls-authorizer-svc-local-authorizerFunc/invocations"
+
+<!-- deployment -->
+awslocal apigateway create-deployment --rest-api-id bqf818n6fj --stage-name local
+
+<!-- stage -->
+awslocal apigateway create-stage --rest-api-id bqf818n6fj --stage-name local --deployment-id xaz2vorl2z
+
+<!-- usage plans -->
+awslocal apigateway create-usage-plan --name "Basic Plan" --description "Basic usage plan" --api-stages "apiId=bqf818n6fj,stage=local"
+
+awslocal apigateway create-api-key --name "ApiKeyForBasicPlan" --description "API key for BasicPlan usage plan"
+
+awslocal apigateway create-usage-plan-key --usage-plan-id t0eooakcev --key-id l1s1vshbcn --key-type "API_KEY"
+
+<!-- to enable api key -->
+awslocal apigateway update-api-key --api-key frzetdph2l --patch-operations op='replace',path='/enabled',value='false'
+
+<!-- to know the usageplan quoata/limit -->
+awslocal apigateway get-usage-plan --usage-plan-id wlcrdmeuwy
+
+awslocal apigateway update-usage-plan --usage-plan-id wlcrdmeuwy --patch-operations op="add",path="/quota/limit",value="1"
+
+awslocal apigateway update-usage-plan --usage-plan-id wlcrdmeuwy --patch-operations op="replace",path="/quota/period",value="MONTH"
+
+awslocal apigateway update-usage-plan --usage-plan-id wlcrdmeuwy --patch-operations op="replace",path="/throttle/rateLimit",value="1"
+
+awslocal apigateway update-usage-plan --usage-plan-id wlcrdmeuwy --patch-operations op="replace",path="/throttle/burstLimit",value="1"
+<!-- to get the usage -->
+awslocal apigateway get-usage --usage-plan-id wlcrdmeuwy --key-id tx5o9t2plk --start-date "2023-08-01T00:00:00Z" --end-date "2023-08-02T00:00:00Z"
+
+<!-- localstack -->
+wwywvfmhwulmho@exelica.com
+Password123!
+
+awslocal apigateway get-api-key --api-key tx5o9t2plk

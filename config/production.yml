@@ -15,6 +15,9 @@ dynamodb:
 stripe:
   sk: ${STRIPE_SECRET_KEY}
 
+apiGateway:
+  resourceId: '5oskav0j4h'
+
 email:
   gmail:
     user: ${NODEMAILER_GMAIL_USERNAME}

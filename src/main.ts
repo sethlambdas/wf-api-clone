@@ -7,7 +7,7 @@ import * as cookieParser from 'cookie-parser';
 import { ConfigUtil } from '@lambdascrew/utility';
 
 import { AppModule } from './graphql/app.module';
-import { PaymentService } from './graphql/payments/payments.service';
+import { BillingService } from './graphql/billing/billing.service';
 import { WorkflowExecutionService } from './graphql/workflow-executions/workflow-execution.service';
 import { WorkflowStepExecutionHistoryService } from './graphql/workflow-steps-executions-history/workflow-steps-wxh.service';
 import { WorkflowStepService } from './graphql/workflow-steps/workflow-step.service';
@@ -71,7 +71,7 @@ async function bootstrap() {
   const workflowExecutionService = app.get(WorkflowExecutionService);
   const workflowStepExecutionHistoryService = app.get(WorkflowStepExecutionHistoryService);
   const workflowVersionService = app.get(WorkflowVersionService);
-  const paymentService = app.get(PaymentService);
+  const billingService = app.get(BillingService);
 
   if (process.env.NODE_ENV === 'development') {
     logger.log('Setting up local stack');
@@ -157,7 +157,7 @@ async function bootstrap() {
     workflowExecutionService,
     workflowStepExecutionHistoryService,
     workflowVersionService,
-    paymentService,
+    billingService,
     organizationService,
   );
   await workflow.run();

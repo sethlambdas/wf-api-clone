@@ -19,4 +19,13 @@ export class SaveOrganizationInput {
 
   @Field({ nullable: true })
   subscriptionId?: string;
+
+  @Field({ nullable: true })
+  apiKey?: string;
+
+  @Field({ nullable: true })
+  endpointId?: string;
+
+  @Field({ nullable: true })
+  usagePlanId?: string;
 }

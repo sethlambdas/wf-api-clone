@@ -18,7 +18,7 @@ export async function deleteEventRule(name: string) {
     const removedTargets = await EB.removeTargets({ Ids: targetIds, Rule: name }).promise();
     logger.log('Removed-targets:', removedTargets);
     const isDeleted = await EB.deleteRule({ Name: name }).promise();
-    logger.log('Is Removed:',isDeleted);
+    logger.log('Is Removed:', isDeleted);
 
     return;
   } catch (err) {
@@ -41,7 +41,6 @@ export async function putEventsEB(putEventsParams: PutEventsInput) {
     logger.log('Putting Events on EventBridge');
 
     const events = await EB.putEvents(putEventsParams).promise();
-    logger.log(events);
 
     return events;
   } catch (err) {

@@ -20,4 +20,13 @@ export class Organization implements SimplePrimaryKey {
 
   @Field()
   subscriptionId?: string;
+
+  @Field()
+  apiKey?: string;
+
+  @Field()
+  endpointId?: string;
+
+  @Field()
+  usagePlanId?: string;
 }

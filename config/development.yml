@@ -3,7 +3,7 @@ oauth:
   redirectUriPath: 'http://localhost:3001'
 aws:
   kms:
-    keyId: '9e9ebe9d-f617-4956-a376-34a6239ff245'
+    keyId: 'ad2ffc9b-55da-4a88-a33b-e23af349ad85'
     alias: 'alias/Workflow'
 
 jwt:
@@ -22,3 +22,6 @@ integrations:
   sendle:
     api: 'sandbox_tVXmzStvRsn38xHfZ8mTnzDr'
     url: 'sandbox'
+
+apiGateway:
+  resourceId: '826s933pdz'

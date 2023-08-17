@@ -112,10 +112,10 @@ export class WorkflowExecutionService {
     // current month workflow executions count
     let currentWFE: any = await this.workflowExecutionRepository.listWorkflowExecutionsOfAnOrganization({
       ...listWorkflowExecutionsOfAnOrganizationInput,
-      filter: {
-        startDate: startOfMonth.toString(),
-        endDate: endOfMonth.toString(),
-      },
+      // filter: {
+      //   startDate: startOfMonth.toString(),
+      //   endDate: endOfMonth.toString(),
+      // },
     });
 
     return {

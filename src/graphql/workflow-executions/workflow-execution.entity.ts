@@ -55,6 +55,12 @@ export class WorkflowExecution implements CompositePrimaryKey {
 
   @Field()
   created_at?: string;
+
+  @Field()
+  subscriptionItem?: string;
+
+  @Field()
+  usageRecordId?: string;
 }
 
 @ObjectType()

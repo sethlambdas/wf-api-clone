@@ -18,6 +18,18 @@ import { GraphQLError } from 'graphql';
 import { SimplePrimaryKey } from '../common/interfaces/dynamodb-keys.interface';
 import { Organization } from '../../graphql/organizations/organization.entity';
 import { UserRoleEnum } from '../common/enums/user-roles.enum';
+import {
+  createApiKeyAPIGateway,
+  createResourceAPIGateway,
+  createRestApiAPIGateway,
+  createUsagePlanAPIGateway,
+  createUsagePlanKeyAPIGateway,
+  getResourcesAPIGateway,
+  getUsagePlansAPIGateway,
+  putIntegrationAPIGateway,
+  putMethodAPIGateway,
+} from 'aws-services/api-gateway/api-gateway.util';
+import { SaveOrganizationInput } from '../organizations/inputs/save-organization.input';
 
 @Injectable()
 export class UserService {
@@ -34,8 +46,8 @@ export class UserService {
     const { name, username, email, password, orgName, orgId: organizationId } = signUpCredentialsInput;
 
     const getUser = await this.userRepository.getUserByEmail(email);
-    // by default it is admin or either TRIAL
-    let userRole = UserRoleEnum.ADMINISTRATOR;
+    // by default it is TRIAL
+    let userRole = UserRoleEnum.TRIAL;
     if (getUser) {
       throw new ConflictException('Email already exists.');
     }
@@ -49,12 +61,13 @@ export class UserService {
         organization = await this.organizationService.createOrganization({
           ORGNAME: orgName,
         });
-        userRole = UserRoleEnum.ADMINISTRATOR;
+        userRole = UserRoleEnum.TRIAL;
       }
     } else {
       organization = await this.organizationService.createOrganization({
         ORGNAME: orgName,
       });
+      await this.createApiGateway(organization);
     }
 
     const orgId = organization.PK;
@@ -143,10 +156,14 @@ export class UserService {
   }
 
   async generateToken(user: User): Promise<AuthCredentials> {
+    const { apiKey, endpointId } = await this.organizationService.getOrganization({ PK: user.PK.split('|')[0] });
     const signedData = {
       PK: user.PK,
       email: user.email,
       role: user.role,
+      endpointId: endpointId,
+      apiKey: apiKey,
+      stripeCustomerId: user.stripeCustomerId,
     };
     const accessToken = await this.jwtService.sign(signedData);
     const refreshTokenGenerate = await this.jwtService.sign(signedData, {
@@ -258,5 +275,90 @@ export class UserService {
 
   async hashPassword(password: string, salt: string): Promise<string> {
     return bcrypt.hash(password, salt);
+  }
+
+  async createApiGateway(organization: Organization) {
+    /*
+      creation of apigateway per organization
+      flow: defaultApiGatewayResource is the apigateway deployed using the serverless
+      create apigateway > resources > usagePlan > api key > attach api key to usage plan
+    */
+    const defaultApiGatewayResource = await getResourcesAPIGateway({
+      restApiId: ConfigUtil.get('apiGateway.resourceId'),
+    });
+
+    const apiGateway = await createRestApiAPIGateway({ name: organization.PK });
+
+    const baseResource = await getResourcesAPIGateway({
+      restApiId: apiGateway.id,
+    });
+
+    const triggerResource = await createResourceAPIGateway({
+      restApiId: apiGateway.id,
+      parentId: baseResource.items[0].id,
+      pathPart: 'trigger',
+    });
+    const aidResource = await createResourceAPIGateway({
+      restApiId: apiGateway.id,
+      parentId: triggerResource.id,
+      pathPart: '{aid}',
+    });
+    const putMethod = await putMethodAPIGateway({
+      authorizationType: 'NONE',
+      httpMethod: 'POST',
+      restApiId: apiGateway.id,
+      apiKeyRequired: true,
+      resourceId: aidResource.id,
+    });
+    const apiGatewayIntegration = await putIntegrationAPIGateway({
+      restApiId: apiGateway.id,
+      httpMethod: 'POST',
+      integrationHttpMethod: 'POST',
+      type: 'AWS_PROXY',
+      uri: defaultApiGatewayResource.items[defaultApiGatewayResource.items.length - 1].resourceMethods.POST
+        .methodIntegration.uri,
+      resourceId: aidResource.id,
+    });
+
+    /*
+      default is BASIC PLAN with 5 executions 
+      this is not included in the stripe products.
+      note:
+      (local) -> quota doesn't work
+      (prod) -> quota works
+     */
+    const usagePlans = await getUsagePlansAPIGateway({});
+    const filteredUsagePlansCount = usagePlans.items.filter((usageplan) =>
+      usageplan.name.includes(organization.PK),
+    ).length;
+    const usagePlan = await createUsagePlanAPIGateway({
+      apiStages: [{ apiId: apiGateway.id, stage: 'local' }],
+      name: `PLAN-${organization.ORGNAME}-${filteredUsagePlansCount}`,
+      quota: {
+        limit: 5,
+        offset: 0,
+        period: 'MONTH',
+      },
+    });
+
+    const apiKey = await createApiKeyAPIGateway({
+      enabled: true,
+      generateDistinctId: true,
+      name: `APIKEY#${organization.PK}`,
+    });
+
+    const usagePlanApiKey = await createUsagePlanKeyAPIGateway({
+      keyId: apiKey.id,
+      keyType: 'API_KEY',
+      usagePlanId: usagePlan.id,
+    });
+
+    const organizationInput: SaveOrganizationInput = {
+      PK: organization.PK,
+      apiKey: apiKey.id,
+      endpointId: apiGateway.id,
+      usagePlanId: usagePlan.id,
+    };
+    await this.organizationService.saveOrganization(organizationInput);
   }
 }

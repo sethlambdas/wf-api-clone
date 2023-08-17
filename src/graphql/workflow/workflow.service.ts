@@ -1,5 +1,5 @@
 import { ConfigUtil } from '@lambdascrew/utility';
-import { Inject, Injectable, Logger } from '@nestjs/common';
+import { forwardRef, Inject, Injectable, Logger } from '@nestjs/common';
 import { Response as Res } from 'express';
 import * as moment from 'moment';
 import { v4 } from 'uuid';
@@ -45,7 +45,8 @@ import { WorkflowExecutionService } from '../workflow-executions/workflow-execut
 import { WorkflowStepService } from '../workflow-steps/workflow-step.service';
 import { WorkflowVersionService } from '../workflow-versions/workflow-version.service';
 import { WorkflowRepository } from './workflow.repository';
-import { PaymentService } from '../../graphql/payments/payments.service';
+import { BillingService } from '../../graphql/billing/billing.service';
+import { CreateWorkflowExecutionInput } from '../../graphql/workflow-executions/inputs/post.inputs';
 
 @Injectable()
 export class WorkflowService {
@@ -58,7 +59,8 @@ export class WorkflowService {
     private workflowVersionService: WorkflowVersionService,
     private workflowExecutionService: WorkflowExecutionService,
     private organizationService: OrganizationService,
-    private paymentService: PaymentService,
+    @Inject(forwardRef(() => BillingService))
+    private billingService: BillingService,
   ) {}
 
   async createWorkflow(createWorkflowInput: CreateWorkflowInput): Promise<CreateWorkflowResponse> {
@@ -365,6 +367,7 @@ export class WorkflowService {
     workflowKeys: { PK: string; SK: string },
     workflowVersionsKeys: { PK: string; SK: string },
     executeWorkflowStepKey: { PK: string; SK: string },
+    timeTriggeredRuleName?: string,
   ) {
     const workflowStep = await this.workflowStepService.getWorkflowStepByKey(executeWorkflowStepKey);
 
@@ -456,7 +459,6 @@ export class WorkflowService {
             },
           ],
         };
-
         await putTargetsEB(putTargetsParams);
       }
     }
@@ -572,11 +574,12 @@ export class WorkflowService {
     const workflow = await this.workflowRepository.getWorkflowByUniqueKey({ UniqueKey: workflowId });
     // get workflow organization
     const org = await this.organizationService.getOrganization({ PK: workflow.PK.split('|')[0] });
+    let usageRecord;
     if (org) {
-      const usageRecord = await this.paymentService.reportUsageRecord(org.subscriptionId);
+      usageRecord = await this.billingService.reportUsageRecord(org.PK, org.subscriptionId);
       this.logger.log('Usage-record:', usageRecord);
     }
-
+    this.logger.log('Usage-record:', usageRecord);
     if (workflow.TriggerStatus === 'disabled') {
       this.logger.log('Workflow trigger is disabled');
       const errorData = {
@@ -611,12 +614,20 @@ export class WorkflowService {
 
       const WSXH_SK = `WSXH|${workflowStep.ACT.MD.OrgId}|HTTP|${v4()}`;
 
-      const wfExec = await this.workflowExecutionService.createWorkflowExecution({
+      const wfExecData: CreateWorkflowExecutionInput = {
         WorkflowVersionKeys: { PK: workflowVersion.PK, SK: workflowVersion.SK },
         STE: '{}',
         WSXH_IDS: [WSXH_SK],
         STATUS: WorkflowExecStatus.Running,
-      });
+      };
+
+      if (usageRecord) {
+        const { usageRecord: record } = usageRecord;
+        wfExecData.subscriptionItem = record.subscription_item;
+        wfExecData.usageRecordId = record.id;
+      }
+
+      const wfExec = await this.workflowExecutionService.createWorkflowExecution(wfExecData);
 
       workflowExecutionPK = wfExec.PK;
 
