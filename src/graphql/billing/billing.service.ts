@@ -1,10 +1,11 @@
 import { ConfigUtil } from '@lambdascrew/utility';
 import { forwardRef, Inject, Injectable, Logger } from '@nestjs/common';
 import {
-  getApiGatewayApiKey, updateApiGatewayApiKey,
-  updateUsagePlanAPIGateway
-} from 'aws-services/api-gateway/api-gateway.util';
-import { disableRule, enableRule } from 'aws-services/event-bridge/event-bridge.util';
+  getApiGatewayApiKey,
+  updateApiGatewayApiKey,
+  updateUsagePlanAPIGateway,
+} from '../../aws-services/api-gateway/api-gateway.util';
+import { disableRule, enableRule } from '../../aws-services/event-bridge/event-bridge.util';
 import { UserRoleEnum } from '../common/enums/user-roles.enum';
 import { SaveOrganizationInput } from '../organizations/inputs/save-organization.input';
 import { OrganizationService } from '../organizations/organization.service';

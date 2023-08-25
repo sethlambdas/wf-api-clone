@@ -38,7 +38,7 @@ export const InvokeLambda = async (
       const result = JSON.parse(response.Payload as any);
       const url = await UploadFileToS3(Buffer.from(result.body.data), targetFileName);
 
-      result.body = [{ url, name: targetFileName  }];
+      result.body = [{ url, name: targetFileName }];
 
       const specialResponse = JSON.stringify({ ...result });
 
@@ -50,3 +50,36 @@ export const InvokeLambda = async (
     logger.log(`Error, ${err}`);
   }
 };
+
+interface AddApiGatewayLambdaPermissionProps {
+  FunctionName: string;
+  StatementId: string;
+  Action: string;
+  Principal: string;
+  SourceArn: string;
+  apiGatewayId: string;
+  aidResourcePathPart: string;
+}
+
+export const addApiGatewayLambdaPermission = async (props: AddApiGatewayLambdaPermissionProps) => {
+  const { Action, FunctionName, Principal, SourceArn, StatementId, aidResourcePathPart, apiGatewayId } = props;
+  logger.log(`Adding API Gateway Permission`);
+
+  try {
+    const addPermissionParams = {
+      FunctionName,
+      StatementId,
+      Action,
+      Principal,
+      SourceArn,
+    };
+
+    await Lambda.addPermission(addPermissionParams).promise();
+    Logger.log(`Permission added for [API Gateway:${SourceArn}] to invoke Lambda: ${FunctionName}`);
+  } catch (err) {
+    logger.log(`Error, ${err}`);
+  }
+};
+
+// nesh@lambdas.io
+// yxk1RBN-bpv2djr5zqb

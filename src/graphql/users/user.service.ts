@@ -20,16 +20,19 @@ import { Organization } from '../../graphql/organizations/organization.entity';
 import { UserRoleEnum } from '../common/enums/user-roles.enum';
 import {
   createApiKeyAPIGateway,
+  createDeploymentAPIGateway,
   createResourceAPIGateway,
   createRestApiAPIGateway,
+  createStageApiGateway,
   createUsagePlanAPIGateway,
   createUsagePlanKeyAPIGateway,
   getResourcesAPIGateway,
   getUsagePlansAPIGateway,
   putIntegrationAPIGateway,
   putMethodAPIGateway,
-} from 'aws-services/api-gateway/api-gateway.util';
+} from '../../aws-services/api-gateway/api-gateway.util';
 import { SaveOrganizationInput } from '../organizations/inputs/save-organization.input';
+import { addApiGatewayLambdaPermission } from '../../aws-services/aws-lambda/lambda.util';
 
 @Injectable()
 export class UserService {
@@ -287,7 +290,14 @@ export class UserService {
       restApiId: ConfigUtil.get('apiGateway.resourceId'),
     });
 
-    const apiGateway = await createRestApiAPIGateway({ name: organization.PK });
+    const apiGateway = await createRestApiAPIGateway({
+      name: organization.PK,
+      endpointConfiguration: {
+        types: ['REGIONAL'],
+      },
+    });
+
+    Logger.log('Created API Gateway:', apiGateway);
 
     const baseResource = await getResourcesAPIGateway({
       restApiId: apiGateway.id,
@@ -315,11 +325,26 @@ export class UserService {
       httpMethod: 'POST',
       integrationHttpMethod: 'POST',
       type: 'AWS_PROXY',
-      uri: defaultApiGatewayResource.items[defaultApiGatewayResource.items.length - 1].resourceMethods.POST
-        .methodIntegration.uri,
+      uri:
+        process.env.NODE_ENV !== 'development'
+          ? ConfigUtil.get('lambda.apigatewayFunctionArn')
+          : defaultApiGatewayResource.items[defaultApiGatewayResource.items.length - 1].resourceMethods.POST
+              .methodIntegration.uri,
       resourceId: aidResource.id,
     });
 
+    if (process.env.NODE_ENV !== 'development') {
+      // ADD apigateway permission to trigger lambda function
+      await addApiGatewayLambdaPermission({
+        Action: 'lambda:InvokeFunction',
+        FunctionName: ConfigUtil.get('lambda.apiGatewayFunctionName'),
+        aidResourcePathPart: aidResource.pathPart,
+        apiGatewayId: apiGateway.id,
+        Principal: 'apigateway.amazonaws.com',
+        SourceArn: `arn:aws:execute-api:ap-southeast-2:917209780752:${apiGateway.id}/*/*`,
+        StatementId: `api-gateway-access-${organization.PK.replace('#', '')}`,
+      });
+    }
     /*
       default is BASIC PLAN with 5 executions 
       this is not included in the stripe products.
@@ -331,8 +356,23 @@ export class UserService {
     const filteredUsagePlansCount = usagePlans.items.filter((usageplan) =>
       usageplan.name.includes(organization.PK),
     ).length;
+
+    // TODO: add deployment and stage
+    if (process.env.NODE_ENV === 'production') {
+      const deployment = await createDeploymentAPIGateway({
+        restApiId: apiGateway.id,
+        stageName: ConfigUtil.get('apiGateway.stage'),
+      });
+
+      const stage = await createStageApiGateway({
+        deploymentId: deployment.id,
+        restApiId: apiGateway.id,
+        stageName: ConfigUtil.get('apiGateway.stage'),
+      });
+    }
+
     const usagePlan = await createUsagePlanAPIGateway({
-      apiStages: [{ apiId: apiGateway.id, stage: 'local' }],
+      apiStages: [{ apiId: apiGateway.id, stage: ConfigUtil.get('apiGateway.stage') }],
       name: `PLAN-${organization.ORGNAME}-${filteredUsagePlansCount}`,
       quota: {
         limit: 5,

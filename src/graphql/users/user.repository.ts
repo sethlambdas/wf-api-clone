@@ -8,7 +8,7 @@ import { SimplePrimaryKey } from '../common/interfaces/dynamodb-keys.interface';
 import { IRefreshToken, ISignOut, RefreshToken, User } from './user.entity';
 import { HttpMethod, IGraphqlPayload, networkClient } from '../../utils/helpers/networkRequest.util';
 import { LOGOUT_QL, REFRESH_TOKEN_QL } from './user.qgl-queries';
-import { getApiGatewayApiKey } from 'aws-services/api-gateway/api-gateway.util';
+import { getApiGatewayApiKey } from '../../aws-services/api-gateway/api-gateway.util';
 
 const endpoint = ConfigUtil.get('authBeEndpoint') || 'http://localhost:3001/api/graphql';
 @Injectable()

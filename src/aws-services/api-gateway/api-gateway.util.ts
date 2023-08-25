@@ -142,8 +142,8 @@ export async function putMethodResponseAPIGateway(putMethodResponseParams: PutMe
 interface CreateDeploymentInput {
   restApiId: string;
   stageName: string;
-  stageDescription: string;
-  description: string;
+  stageDescription?: string;
+  description?: string;
 }
 
 export async function createDeploymentAPIGateway(createDeploymentParams: CreateDeploymentInput) {
@@ -151,6 +151,25 @@ export async function createDeploymentAPIGateway(createDeploymentParams: CreateD
     logger.log('Create Deployment on API Gateway');
 
     const result = await APIGateway.createDeployment(createDeploymentParams).promise();
+    logger.log(result);
+
+    return result;
+  } catch (err) {
+    logger.error(`Error:`, err);
+  }
+}
+
+interface CreateStageInput {
+  restApiId: string;
+  stageName: string;
+  deploymentId: string;
+}
+
+export async function createStageApiGateway(createStageParams: CreateStageInput) {
+  try {
+    logger.log('Create Stage on API Gateway');
+
+    const result = await APIGateway.createStage(createStageParams).promise();
     logger.log(result);
 
     return result;

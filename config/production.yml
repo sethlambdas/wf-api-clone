@@ -17,6 +17,7 @@ stripe:
 
 apiGateway:
   resourceId: '5oskav0j4h'
+  stage: 'production'
 
 email:
   gmail:
@@ -29,6 +30,10 @@ sqs:
 
 lambda:
   webServiceFunctionName: 'srvls-generic-svc-production-genericFunction'
+  apiGatewayFunctionName: 'srvls-authorizer-svc-production-authorizerFunc'
+  apigatewayFunctionArn: 'arn:aws:apigateway:ap-southeast-2:lambda:path/2015-03-31/functions/arn:aws:lambda:ap-southeast-2:917209780752:function:srvls-authorizer-svc-production-authorizerFunc/invocations'
+  # apigatewayFunction: 'arn:aws:lambda:ap-southeast-2:917209780752:function:srvls-authorizer-svc-production-authorizerFunc/invocations'
+
 
 integrations:
   twilio:

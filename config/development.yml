@@ -3,7 +3,7 @@ oauth:
   redirectUriPath: 'http://localhost:3001'
 aws:
   kms:
-    keyId: 'ad2ffc9b-55da-4a88-a33b-e23af349ad85'
+    keyId: '2d41b5b8-2fe7-4c69-8f42-6870aa8360bc'
     alias: 'alias/Workflow'
 
 jwt:
@@ -24,4 +24,9 @@ integrations:
     url: 'sandbox'
 
 apiGateway:
-  resourceId: '826s933pdz'
+  resourceId: '5oskav0j4h'
+  stage: 'local'
+
+lambda:
+  webServiceFunctionName: 
+  apigatewayFunction: 
