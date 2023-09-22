@@ -91,17 +91,27 @@ export class BillingService {
           await this.workflowService.enableWorkflowTrigger({ PK: wfElement.PK, SK: wfElement.SK });
         }
         await updateApiGatewayApiKey(apiKey.id, [{ op: 'replace', path: '/enabled', value: 'true' }]);
-        // TODO: update usage plan for every subscription changes to apply the stripe logic into apigateway
+        const product = await stripe.products.retrieve(subscription.items.data[0].price.product);
+        const metadata = product.metadata;
+
+        let patchOperations: any = [
+          { op: 'replace', path: '/quota/period', value: 'MONTH' },
+          { op: 'replace', path: '/throttle/rateLimit', value: metadata?.rateLimit || '10' },
+          { op: 'replace', path: '/throttle/burstLimit', value: metadata?.burstLimit || '10' },
+        ];
+
+        if (metadata?.limit == -1) {
+          patchOperations.push({ op: 'remove', path: '/quota' });
+        } else {
+          patchOperations.push({ op: 'replace', path: '/quota/limit', value: metadata?.limit || '15' });
+        }
+        Logger.log('Patch:', patchOperations);
+
         let usagePlan: any;
-        // TODO: will update here soon base on stripe description of executions
+
         usagePlan = await updateUsagePlanAPIGateway({
           usagePlanId: organization.usagePlanId,
-          patchOperations: [
-            { op: 'replace', path: '/quota/period', value: 'MONTH' },
-            { op: 'replace', path: '/throttle/rateLimit', value: '10' },
-            { op: 'replace', path: '/throttle/burstLimit', value: '10' },
-            { op: 'replace', path: '/quota/limit', value: '15' },
-          ],
+          patchOperations: patchOperations,
         });
 
         const saveUser = await this.userService.saveUser(pk, {
@@ -249,6 +259,20 @@ export class BillingService {
           quantity: 1,
           timestamp: Math.floor(currentDate.getTime() / 1000),
         });
+
+        // check usage record summary
+        Logger.log('check usage record summary');
+        const usageRecordSummaries = await stripe.subscriptionItems.listUsageRecordSummaries(subscriptionItemId);
+        Logger.log('Usage Record Summary:', usageRecordSummaries);
+        const totalUsage = usageRecordSummaries?.data[0]?.total_usage || 0;
+        const product = await stripe.products.retrieve(subscription.items.data[0].price.product);
+        const metadata = product.metadata;
+        if (metadata?.limit != -1) {
+          if (totalUsage >= metadata?.limit) {
+            await this.disableRuleAndApiKey(orgId);
+          }
+        }
+        Logger.log('Usage Record log:', usageRecord);
         if (usageRecord) {
           return { status: 200, usageRecord };
         }

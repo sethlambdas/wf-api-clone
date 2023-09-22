@@ -373,7 +373,7 @@ export class UserService {
 
     const usagePlan = await createUsagePlanAPIGateway({
       apiStages: [{ apiId: apiGateway.id, stage: ConfigUtil.get('apiGateway.stage') }],
-      name: `PLAN-${organization.ORGNAME}-${filteredUsagePlansCount}`,
+      name: `PLAN-${organization.PK}-${filteredUsagePlansCount}`,
       quota: {
         limit: 5,
         offset: 0,
