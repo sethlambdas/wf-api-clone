@@ -226,7 +226,7 @@ export class WorkflowService {
       },
       WorkflowVersionKeys: {
         PK: workflowVersion.PK,
-        SK: workflowVersion.SK,
+        SK: `${workflowVersion.SK}`,
       },
       WorkflowVersion: WV,
       IsWorkflowNameExist: false,
@@ -615,7 +615,7 @@ export class WorkflowService {
       const WSXH_SK = `WSXH|${workflowStep.ACT.MD.OrgId}|HTTP|${v4()}`;
 
       const wfExecData: CreateWorkflowExecutionInput = {
-        WorkflowVersionKeys: { PK: workflowVersion.PK, SK: workflowVersion.SK },
+        WorkflowVersionKeys: { PK: workflowVersion.PK, SK: `${workflowVersion.SK}` },
         STE: '{}',
         WSXH_IDS: [WSXH_SK],
         STATUS: WorkflowExecStatus.Running,
@@ -664,7 +664,7 @@ export class WorkflowService {
           WLFN: workflow.WLFN,
           WorkflowVersionKeys: {
             PK: workflowVersion.PK,
-            SK: workflowVersion.SK,
+            SK: `${workflowVersion.SK}`,
           },
           wfExecKeys: {
             PK: wfExec.PK,

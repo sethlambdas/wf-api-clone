@@ -188,7 +188,7 @@ export default class Workflow {
         const WSXH_SK = `WSXH|${OrgId}|Timed|${v4()}`;
 
         const wfExecData: CreateWorkflowExecutionInput = {
-          WorkflowVersionKeys: { PK: WorkflowVersionKeys.PK, SK: WorkflowVersionKeys.SK },
+          WorkflowVersionKeys: { PK: WorkflowVersionKeys.PK, SK: `${WorkflowVersionKeys.SK}` },
           STE: '{}',
           WSXH_IDS: [WSXH_SK],
           STATUS: WorkflowExecStatus.Running,
@@ -871,7 +871,7 @@ export default class Workflow {
       const WSXH_SK = `WSXH|${workflowStep.ACT.MD.OrgId}|HTTP|${v4()}`;
 
       const wfExec = await this.workflowExecutionService.createWorkflowExecution({
-        WorkflowVersionKeys: { PK: workflowVersion.PK, SK: workflowVersion.SK },
+        WorkflowVersionKeys: { PK: workflowVersion.PK, SK: `${workflowVersion.SK}` },
         STE: '{}',
         WSXH_IDS: [WSXH_SK],
         STATUS: WorkflowExecStatus.Running,
@@ -908,7 +908,7 @@ export default class Workflow {
           WLFN: workflow.WLFN,
           WorkflowVersionKeys: {
             PK: workflowVersion.PK,
-            SK: workflowVersion.SK,
+            SK: `${workflowVersion.SK}`,
           },
           wfExecKeys: {
             PK: wfExec.PK,
