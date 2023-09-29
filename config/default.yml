@@ -53,8 +53,8 @@ jwt:
 
 email:
   gmail:
-    user: 'some@some.com'
-    password: 'somePassword'
+    user: 'noreply@lambdas.io'
+    password: 'hkjoenhotemfsiuf'
 
 apiGateway:
   endpoint: 'http://host.docker.internal:4566'
@@ -96,14 +96,15 @@ lambda:
 
 mailgun:
   test: false
-  apiKey: '839b890b5e34d37dfc5c4564170a40e5-2bf328a5-8ef298c2'
-  domain: 'sandboxfce6122a4b56445895c58d09b9b5496b.mailgun.org'
-  fromEmail: 'CoWo Team <support@cowo.io>'
-  toEmail: 'seth@lambdas.io'
-  ccEmail: 'notifications@lambdas.io'
+  apiKey: '81b633d6f0fd62a67e92eaa76892851e-db137ccd-16abdd84'
+  domain: 'sandbox3cfc659034a84c7d8815e8a8ac6a848a.mailgun.org'
+  fromEmail: 'CoWo Team <noreply@lambdas.io>'
+  toEmail: 'noreply@lambdas.io'
+  ccEmail: 'noreply@lambdas.io'
 
 stripe:
   sk: 'test_key'
+  defaultPlan: 'free'
 
 oauth:
   redirectUriPath: 'https://workflow-api.lambdas.io'

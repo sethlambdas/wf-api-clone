@@ -17,14 +17,18 @@ export async function mailgunSendEmail(payload: { Email: string; Body: string; S
   const data = {
     from: ConfigUtil.get('mailgun.fromEmail'),
     to: Email,
-    // cc: ConfigUtil.get('mailgun.ccEmail'), gets an error if included
+    cc: ConfigUtil.get('mailgun.ccEmail'),
     subject: Subject,
     html: Body,
   };
 
   logger.log('Executing mailgun to send email');
+  logger.log('data:', data);
   mg.messages
     .create(domain, data)
-    .then((msg) => logger.log(msg))
-    .catch((err) => logger.log(err));
+    .then((msg) => logger.log('Mailgun log:', msg))
+    .catch((err) => {
+      logger.error('Mailgun response:', err.message);
+      logger.error('Mailgun response:', err.details);
+    });
 }

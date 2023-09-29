@@ -242,7 +242,7 @@ awslocal apigateway update-usage-plan --usage-plan-id wlcrdmeuwy --patch-operati
 awslocal apigateway get-usage --usage-plan-id wlcrdmeuwy --key-id tx5o9t2plk --start-date "2023-08-01T00:00:00Z" --end-date "2023-08-02T00:00:00Z"
 
 <!-- localstack -->
-wwywvfmhwulmho@exelica.com
+vaknedifyo@gufum.com
 Password123!
 
 awslocal apigateway get-api-key --api-key tx5o9t2plk
