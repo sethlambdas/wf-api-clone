@@ -96,7 +96,7 @@ const mysqlQuery = async ({ configs }: DBConfigsProps): Promise<any> => {
     const { fieldName, fieldValue } = el;
     mysqlConfig = {
       ...mysqlConfig,
-      [fieldName]: !isNaN(parseInt(fieldValue)) ? parseInt(fieldValue) : fieldValue,
+      [fieldName]: fieldValue,
     };
   });
 
@@ -141,7 +141,7 @@ const mongoQuery = async ({ configs }: DBConfigsProps): Promise<any> => {
     const { fieldName, fieldValue } = el;
     mongoConfig = {
       ...mongoConfig,
-      [fieldName]: !isNaN(parseInt(fieldValue)) ? parseInt(fieldValue) : fieldValue,
+      [fieldName]: fieldValue,
     };
   });
 
@@ -185,7 +185,7 @@ const dynamoQuery = async ({ configs }: DBConfigsProps): Promise<any> => {
     const { fieldName, fieldValue } = el;
     dynamoConfig = {
       ...dynamoConfig,
-      [fieldName]: !isNaN(parseInt(fieldValue)) ? parseInt(fieldValue) : fieldValue,
+      [fieldName]: fieldValue,
     };
   });
 
@@ -218,7 +218,7 @@ const postgresQuery = async ({ configs }: DBConfigsProps): Promise<any> => {
     const { fieldName, fieldValue } = el;
     postgresConfig = {
       ...postgresConfig,
-      [fieldName]: !isNaN(parseInt(fieldValue)) ? parseInt(fieldValue) : fieldValue,
+      [fieldName]: fieldValue,
     };
   });
   const pool = new pg.Pool(postgresConfig);
@@ -256,7 +256,7 @@ const mssqlQuery = async ({ configs }: DBConfigsProps): Promise<any> => {
     try {
       value = JSON.parse(fieldValue);
     } catch (err) {
-      value = !isNaN(parseInt(fieldValue)) ? parseInt(fieldValue) : fieldValue;
+      value = fieldValue;
     }
     msSql = {
       ...msSql,
@@ -293,7 +293,7 @@ const oracleQuery = async ({ configs }: DBConfigsProps): Promise<any> => {
     try {
       value = JSON.parse(fieldValue);
     } catch (err) {
-      value = !isNaN(parseInt(fieldValue)) ? parseInt(fieldValue) : fieldValue;
+      value = fieldValue;
     }
     oracleSQL = {
       ...oracleSQL,
