@@ -28,4 +28,10 @@ export class SaveOrganizationInput {
 
   @Field({ nullable: true })
   usagePlanId?: string;
+
+  @Field({ nullable: true })
+  safeDelete?: boolean;
+
+  @Field({ nullable: true })
+  requestRemovalDate?: string;
 }

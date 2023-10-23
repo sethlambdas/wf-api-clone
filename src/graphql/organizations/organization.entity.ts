@@ -29,4 +29,10 @@ export class Organization implements SimplePrimaryKey {
 
   @Field()
   usagePlanId?: string;
+
+  @Field()
+  safeDelete?: boolean;
+
+  @Field()
+  requestRemovalDate?: string;
 }

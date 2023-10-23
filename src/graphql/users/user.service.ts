@@ -106,6 +106,10 @@ export class UserService {
     if (!user) {
       throw new UnauthorizedException('Invalid credentials');
     }
+    const organization = await this.organizationService.getOrganization({ PK: user.PK.split('|')[0] });
+    if (organization.safeDelete && organization.requestRemovalDate) {
+      throw new UnauthorizedException('Invalid credentials');
+    }
     const payload: User = user;
     this.logger.log('signIn - generateToken');
     const { accessToken, refreshTokenGenerate } = await this.generateToken(payload);

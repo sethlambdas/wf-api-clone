@@ -30,6 +30,12 @@ export const OrganizationSchema = new Schema(
     usagePlanId: {
       type: String,
     },
+    safeDelete: {
+      type: Boolean,
+    },
+    requestRemovalDate: {
+      type: String,
+    },
   },
   {
     timestamps: {
