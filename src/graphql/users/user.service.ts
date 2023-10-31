@@ -361,7 +361,6 @@ export class UserService {
       usageplan.name.includes(organization.PK),
     ).length;
 
-    // TODO: add deployment and stage
     if (process.env.NODE_ENV === 'production') {
       const deployment = await createDeploymentAPIGateway({
         restApiId: apiGateway.id,
