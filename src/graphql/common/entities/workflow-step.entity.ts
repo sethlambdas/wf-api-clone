@@ -77,6 +77,9 @@ export class MD {
   @Field({ nullable: true })
   DefaultNext?: string;
 
+  @Field({ nullable: true })
+  Operand?: string;
+
   // AssignData
   @Field({ nullable: true })
   CustomVariables?: string;

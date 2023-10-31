@@ -11,34 +11,25 @@ export function replaceAt(text: string, index: number, lastIndex: number, replac
 }
 
 export function getMentionedData(unresolvedString: string, state?: any) {
-  const regexBrackets = /{{(.*?)}}/gm;
+  const regexBrackets = /{{(.*?)}}/g;
   let resolvedString = unresolvedString;
-  while (true) {
-    const match = regexBrackets.exec(resolvedString);
-    if (!match) break;
-    
-    const { 0: origWord, 1: word, index } = match;
-    const lastIndex = index + origWord.length;
-    const trimWord = word.trim();
 
+  resolvedString = resolvedString.replace(regexBrackets, (match, word) => {
+    const trimWord = word.trim();
     let replacement: any;
 
-    if (credentials.includes(trimWord)) replacement = `{{${word}}}`;
-    else replacement = get(state, trimWord);
+    if (credentials.includes(trimWord)) {
+      replacement = `{{${word}}}`;
+    } else {
+      replacement = get(state, trimWord);
+    }
 
-    resolvedString = replaceAt(
-      resolvedString,
-      index,
-      lastIndex,
-      typeof replacement === 'object' ? JSON.stringify(replacement) : replacement,
-    );
-  }
-
-  logger.log('RESOLVED STRING');
-  logger.log(resolvedString);
+    return typeof replacement === 'object' ? JSON.stringify(replacement) : replacement;
+  });
 
   return resolvedString;
 }
+
 
 export function resolveMentionDataFromMatchingData(unresolvedString: string, state?: any) {
   const regexBrackets = /{{(.*?)}}/gm;
@@ -46,7 +37,7 @@ export function resolveMentionDataFromMatchingData(unresolvedString: string, sta
   while (true) {
     const match = regexBrackets.exec(resolvedString);
     if (!match) break;
-    
+
     const { 0: origWord, 1: word, index } = match;
     const lastIndex = index + origWord.length;
     const trimWord = word.trim();
@@ -71,7 +62,7 @@ export function resolveMentionDataFromMatchingData(unresolvedString: string, sta
   return resolvedString;
 }
 
-export function resolveValueOfVariableFromState(variable: string, state? :any) {
+export function resolveValueOfVariableFromState(variable: string, state?: any) {
   const regexBrackets = /{{(.*?)}}/gm;
   let resolveVariable = variable;
 
@@ -89,7 +80,7 @@ export function resolveValueOfVariableFromState(variable: string, state? :any) {
 
   logger.log('RESOLVED VARIABLE');
   logger.log(replacement);
-  logger.log(typeof replacement)
+  logger.log(typeof replacement);
 
   return replacement;
 }

@@ -247,38 +247,39 @@ export class BillingService {
   async reportUsageRecord(orgId: string, subscriptionId?: string): Promise<any> {
     try {
       const organization = await this.organizationService.getOrganization({ PK: orgId });
-      if (subscriptionId) {
-        const stripe = require('stripe')(ConfigUtil.get('stripe.sk'));
-        const currentDate = new Date();
+      // TODO: uncomment if stripe is working
+      // if (subscriptionId) {
+      //   const stripe = require('stripe')(ConfigUtil.get('stripe.sk'));
+      //   const currentDate = new Date();
 
-        const subscription = await stripe.subscriptions.retrieve(subscriptionId);
+      //   const subscription = await stripe.subscriptions.retrieve(subscriptionId);
 
-        const subscriptionItemId = subscription.items.data[0].id;
+      //   const subscriptionItemId = subscription.items.data[0].id;
 
-        const usageRecord = await stripe.subscriptionItems.createUsageRecord(subscriptionItemId, {
-          quantity: 1,
-          timestamp: Math.floor(currentDate.getTime() / 1000),
-        });
+      //   const usageRecord = await stripe.subscriptionItems.createUsageRecord(subscriptionItemId, {
+      //     quantity: 1,
+      //     timestamp: Math.floor(currentDate.getTime() / 1000),
+      //   });
 
-        // check usage record summary
-        Logger.log('check usage record summary');
-        const usageRecordSummaries = await stripe.subscriptionItems.listUsageRecordSummaries(subscriptionItemId);
-        Logger.log('Usage Record Summary:', usageRecordSummaries);
-        const totalUsage = usageRecordSummaries?.data[0]?.total_usage || 0;
-        const product = await stripe.products.retrieve(subscription.items.data[0].price.product);
-        const metadata = product.metadata;
-        if (metadata?.limit != -1) {
-          if (totalUsage >= metadata?.limit) {
-            await this.disableRuleAndApiKey(orgId);
-          }
-        }
-        Logger.log('Usage Record log:', usageRecord);
-        if (usageRecord) {
-          return { status: 200, usageRecord };
-        }
-      } else {
-        await this.disableRuleAndApiKey(orgId);
-      }
+      //   // check usage record summary
+      //   Logger.log('check usage record summary');
+      //   const usageRecordSummaries = await stripe.subscriptionItems.listUsageRecordSummaries(subscriptionItemId);
+      //   Logger.log('Usage Record Summary:', usageRecordSummaries);
+      //   const totalUsage = usageRecordSummaries?.data[0]?.total_usage || 0;
+      //   const product = await stripe.products.retrieve(subscription.items.data[0].price.product);
+      //   const metadata = product.metadata;
+      //   if (metadata?.limit != -1) {
+      //     if (totalUsage >= metadata?.limit) {
+      //       await this.disableRuleAndApiKey(orgId);
+      //     }
+      //   }
+      //   Logger.log('Usage Record log:', usageRecord);
+      //   if (usageRecord) {
+      //     return { status: 200, usageRecord };
+      //   }
+      // } else {
+      //   await this.disableRuleAndApiKey(orgId);
+      // }
     } catch (error) {
       return { status: 500, error };
     }

@@ -379,7 +379,7 @@ export class UserService {
       apiStages: [{ apiId: apiGateway.id, stage: ConfigUtil.get('apiGateway.stage') }],
       name: `PLAN-${organization.PK}-${filteredUsagePlansCount}`,
       quota: {
-        limit: 5,
+        limit: 99,//TODO: return value to 5 if stripe is working...
         offset: 0,
         period: 'MONTH',
       },

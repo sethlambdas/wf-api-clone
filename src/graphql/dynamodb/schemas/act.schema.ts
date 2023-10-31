@@ -53,6 +53,9 @@ export const MDSchema = new Schema({
   DefaultNext: {
     type: String,
   },
+  Operand: {
+    type: String,
+  },
   // AssignData
   CustomVariables: {
     type: String,
