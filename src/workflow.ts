@@ -33,7 +33,7 @@ import { WorkflowService } from './graphql/workflow/workflow.service';
 import { BillingService } from './graphql/billing/billing.service';
 import { OrganizationService } from './graphql/organizations/organization.service';
 import { CreateWorkflowExecutionInput } from './graphql/workflow-executions/inputs/post.inputs';
-import { getMentionedData } from 'utils/helpers/string-helpers.util';
+import { getMentionedData } from './utils/helpers/string-helpers.util';
 
 export default class Workflow {
   private logger: Logger;
