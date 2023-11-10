@@ -33,6 +33,7 @@ import { WorkflowService } from './graphql/workflow/workflow.service';
 import { BillingService } from './graphql/billing/billing.service';
 import { OrganizationService } from './graphql/organizations/organization.service';
 import { CreateWorkflowExecutionInput } from './graphql/workflow-executions/inputs/post.inputs';
+import { getMentionedData } from 'utils/helpers/string-helpers.util';
 
 export default class Workflow {
   private logger: Logger;
@@ -251,13 +252,40 @@ export default class Workflow {
         }
       }
 
+      const parsedSte = JSON.parse(wfExec.STE);
+      let parsedPayload;
+      try {
+        if (payload) {
+          parsedPayload = {
+            body: JSON.parse(JSON.parse(JSON.stringify(payload)).body),
+          };
+        }
+      } catch (error) {
+        parsedPayload = payload;
+      }
+      //TODO: state reference here
+      const state = {
+        ...parsedSte,
+        ...(httpTrigger && httpTrigger.IsHttpTriggered
+          ? {
+              [httpTrigger.httpACT.MD.Name]: {
+                ...parsedSte.data,
+                ...parsedPayload,
+                ...JSON.parse(httpTrigger.httpACT.MD.Body),
+              },
+            }
+          : {}),
+      };
+
       if ((Object as any).values(ExternalActivityTypes).includes(act.T) && !externalService) {
         const activeWorkflowDetails = {
           ...detail,
           wfExecKeys: { PK: wfExec.PK, SK: wfExec.SK },
           WorkflowStepExecutionHistorySK: wfStepExecHistory.SK,
         };
-        await runExternalService(act, activeWorkflowDetails);
+        const mentionedData = getMentionedData(act.MD.code, state);
+        this.logger.log('mentioned data:', mentionedData);
+        await runExternalService({ ...act, MD: { ...act.MD, code: mentionedData } }, activeWorkflowDetails);
         return;
       }
 
@@ -286,29 +314,6 @@ export default class Workflow {
             currentParallelIndex = parallelStatus.updatedParallelIndex;
             currentParallelIndexes = parallelStatus.updatedParallelIndexes;
 
-            const parsedSte = JSON.parse(wfExec.STE);
-            let parsedPayload;
-            try {
-              if (payload) {
-                parsedPayload = {
-                  body: JSON.parse(JSON.parse(JSON.stringify(payload)).body),
-                };
-              }
-            } catch (error) {
-              parsedPayload = payload;
-            }
-            const state = {
-              ...parsedSte,
-              ...(httpTrigger && httpTrigger.IsHttpTriggered
-                ? {
-                    [httpTrigger.httpACT.MD.Name]: {
-                      ...parsedSte.data,
-                      ...parsedPayload,
-                      ...JSON.parse(httpTrigger.httpACT.MD.Body),
-                    },
-                  }
-                : {}),
-            };
             this.logger.log('================WF Execution State===============');
             this.logger.log(state);
             this.logger.log('================WF Execution State===============');
