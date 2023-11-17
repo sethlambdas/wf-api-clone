@@ -122,7 +122,6 @@ export default class Workflow {
         WSID: currentWorkflowStep.SK,
         Status: '',
       };
-
       if (act.T === ActivityTypes.End) {
         await this.workflowExecutionService.saveWorkflowExecution(wfExecKeys, {
           STATUS: WorkflowExecStatus.Finished,
@@ -263,7 +262,6 @@ export default class Workflow {
       } catch (error) {
         parsedPayload = payload;
       }
-      //TODO: state reference here
       const state = {
         ...parsedSte,
         ...(httpTrigger && httpTrigger.IsHttpTriggered
@@ -275,6 +273,7 @@ export default class Workflow {
               },
             }
           : {}),
+        ...(parentWSXH?.state || {}),
       };
 
       if ((Object as any).values(ExternalActivityTypes).includes(act.T) && !externalService) {
@@ -358,7 +357,6 @@ export default class Workflow {
             } else if (externalService && externalService.results) STE = { ...STE, ...externalService.results };
 
             const source = Workflow.getSource();
-
             await this.workflowExecutionService.saveWorkflowExecution(
               { PK: wfExec.PK, SK: wfExec.SK },
               {
@@ -492,6 +490,7 @@ export default class Workflow {
                   act.MD.WorkflowKeys as any,
                   { PK: wfStepExecHistory.PK, SK: wfStepExecHistory.SK },
                   params,
+                  state
                 );
                 return;
               } else if (act.T === ActivityTypes.ManualApproval && !ManualApproval) {
@@ -611,9 +610,14 @@ export default class Workflow {
       Status: act.Status,
       UQ_OVL: act.Status,
     };
+    this.logger.log('webServiceTriggerResult: ', webServiceTriggerResult);
     if (act.MD) inputs.MD = act.MD;
     if (act.END) inputs.END = act.END;
-    if (webServiceTriggerResult) inputs.WEB_SERVICE = webServiceTriggerResult;
+    if (webServiceTriggerResult) {
+      if (webServiceTriggerResult.Request && webServiceTriggerResult.Result && webServiceTriggerResult.Error) {
+        inputs.WEB_SERVICE = webServiceTriggerResult;
+      }
+    }
     return await this.workflowStepExecutionHistoryService.createWorkflowStepExecutionHistory(inputs);
   }
 
@@ -634,7 +638,6 @@ export default class Workflow {
     const WSXH_SK = loopConfig
       ? `WSXH|LOOP-${loopConfig.currentLoop}|${OrgId}|${ActivityType}|${v4()}`
       : `WSXH|${OrgId}|${ActivityType}|${v4()}`;
-
     if (wfExecKeys) {
       wfExec = await this.workflowExecutionService.getWorkflowExecutionByKey(wfExecKeys);
 
@@ -662,7 +665,7 @@ export default class Workflow {
           PK: wfExecKeys.PK,
           SK: WorkflowStepExecutionHistorySK,
         });
-      else
+      else {
         wfStepExecHistory = await this.createStepExecHistory(
           OrgId,
           wfExec.PK,
@@ -671,6 +674,7 @@ export default class Workflow {
           CurrentWorkflowStepSK,
           WorkflowName,
         );
+      }
     } else if (!wfExecKeys) {
       act.Status = WorkflowStepStatus.Started;
       wfExec = await this.workflowExecutionService.createWorkflowExecution({
@@ -854,6 +858,7 @@ export default class Workflow {
     subWorkflowKeys: CompositePrimaryKey,
     parentWSXHKeys: CompositePrimaryKey,
     nextParentWSXHParams: EventParams,
+    parentWorkflowState?: any,
   ) {
     this.logger.log('RUN SUB WORKFLOW');
     const workflow = await this.workflowService.getWorkflowByKey(subWorkflowKeys);
@@ -874,7 +879,6 @@ export default class Workflow {
       });
 
       const WSXH_SK = `WSXH|${workflowStep.ACT.MD.OrgId}|HTTP|${v4()}`;
-
       const wfExec = await this.workflowExecutionService.createWorkflowExecution({
         WorkflowVersionKeys: { PK: workflowVersion.PK, SK: `${workflowVersion.SK}` },
         STE: '{}',
@@ -923,6 +927,7 @@ export default class Workflow {
           parentWSXH: {
             keys: parentWSXHKeys,
             nextParentWSXHParams,
+            state: parentWorkflowState || {},
           },
         };
 
@@ -937,7 +942,6 @@ export default class Workflow {
           Source: Workflow.getSource(),
         });
       }
-
       await putEventsEB(paramsEB);
     }
   }

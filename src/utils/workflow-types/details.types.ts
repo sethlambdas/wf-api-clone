@@ -40,6 +40,7 @@ export interface IDetail {
   parentWSXH?: {
     keys: CompositePrimaryKey;
     nextParentWSXHParams: EventParams;
+    state?: any;
   };
 }
 
