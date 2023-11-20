@@ -60,6 +60,7 @@ export interface HttpTrigger {
   Status?: WorkflowStepStatus;
   Body?: string;
   NetworkRequest?: NetworkRequest;
+  ParentWLFN?: string;
 }
 
 export interface NetworkRequest {

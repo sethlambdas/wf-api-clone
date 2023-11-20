@@ -221,6 +221,8 @@ export default class Workflow {
           httpTrigger.HTTP_WSXH_SK,
           WLFN,
           webServiceHttpTriggerRes,
+          httpTrigger.ParentWLFN,
+          parentWSXH?.keys.PK,
         );
       }
       if (isRerun) {
@@ -490,7 +492,8 @@ export default class Workflow {
                   act.MD.WorkflowKeys as any,
                   { PK: wfStepExecHistory.PK, SK: wfStepExecHistory.SK },
                   params,
-                  state
+                  state,
+                  WLFN,
                 );
                 return;
               } else if (act.T === ActivityTypes.ManualApproval && !ManualApproval) {
@@ -598,6 +601,8 @@ export default class Workflow {
     CurrentWorkflowStepSK: string,
     WorkflowName: string,
     webServiceTriggerResult?: WebServiceInput,
+    ParentWLFN?: string,
+    ParentWLFID?: string,
   ) {
     const inputs: CreateWorkflowStepExecutionHistoryInput = {
       OrgId,
@@ -613,9 +618,14 @@ export default class Workflow {
     this.logger.log('webServiceTriggerResult: ', webServiceTriggerResult);
     if (act.MD) inputs.MD = act.MD;
     if (act.END) inputs.END = act.END;
+
     if (webServiceTriggerResult) {
       if (webServiceTriggerResult.Request && webServiceTriggerResult.Result && webServiceTriggerResult.Error) {
         inputs.WEB_SERVICE = webServiceTriggerResult;
+      } else {
+        inputs.WEB_SERVICE = {
+          Request: JSON.stringify({ ParentWorkflowName: ParentWLFN, ParentWorkflowID: ParentWLFID }),
+        };
       }
     }
     return await this.workflowStepExecutionHistoryService.createWorkflowStepExecutionHistory(inputs);
@@ -715,8 +725,11 @@ export default class Workflow {
     WSXH_SK: string,
     WorkflowName: string,
     webServiceTriggerResult?: WebServiceInput,
+    ParentWLFN?: string,
+    ParentWLFID?: string,
   ) {
     act.Status = WorkflowStepStatus.Finished;
+    // TODO: add also ID here
     await this.createStepExecHistory(
       OrgId,
       wfExecKeys.PK,
@@ -725,6 +738,8 @@ export default class Workflow {
       CurrentWorkflowStepSK,
       WorkflowName,
       webServiceTriggerResult,
+      ParentWLFN,
+      ParentWLFID,
     );
   }
 
@@ -859,6 +874,7 @@ export default class Workflow {
     parentWSXHKeys: CompositePrimaryKey,
     nextParentWSXHParams: EventParams,
     parentWorkflowState?: any,
+    WLFN?: string,
   ) {
     this.logger.log('RUN SUB WORKFLOW');
     const workflow = await this.workflowService.getWorkflowByKey(subWorkflowKeys);
@@ -899,6 +915,7 @@ export default class Workflow {
         httpACT,
         HTTP_WSXH_SK: WSXH_SK,
         HTTP_workflowStepSK: workflowStep.SK,
+        ParentWLFN: WLFN,
       };
 
       let i = 0;
