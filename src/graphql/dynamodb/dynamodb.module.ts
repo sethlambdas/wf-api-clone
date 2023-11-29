@@ -21,6 +21,7 @@ import { EntityCountSchema } from '../entity-count/entitiy-count.schema';
 import { UserSchema } from '../users/user.schema';
 import { OrganizationSchema } from '../organizations/organization.schema';
 import { ResourcesSchema } from '../resources/resources.schema';
+import { GlobalVariableSchema } from '../global-variables/global-variables.schema';
 
 const workflowModel = DynamooseModule.forFeature([
   {
@@ -58,6 +59,10 @@ const workflowModel = DynamooseModule.forFeature([
   {
     name: ConfigUtil.get('dynamodb.schema.resources'),
     schema: [ResourcesSchema],
+  },
+  {
+    name: ConfigUtil.get('dynamodb.schema.globalVariables'),
+    schema: [GlobalVariableSchema],
   },
 ]);
 

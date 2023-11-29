@@ -39,6 +39,7 @@ dynamodb:
     authUsers: 'auth-users'
     apigwAuthorizer: 'apigw-authorizer'
     resources: 'resources'
+    globalVariables: 'globalVariables'
 
 jwt:
   secret: 'TokenSecret'
@@ -103,7 +104,7 @@ mailgun:
   ccEmail: 'noreply@lambdas.io'
 
 stripe:
-  sk: 'test_key'
+  sk: 'test'
   defaultPlan: 'free'
 
 oauth:

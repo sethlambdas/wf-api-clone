@@ -67,6 +67,7 @@ export const ClientSchema = new Schema(
     },
     name: {
       type: String,
+      required: false
     },
     type: {
       type: String,

@@ -39,6 +39,7 @@ export const IntegrationAppsSchema = new Schema(
     },
     name: {
       type: String,
+      required: false,
     },
     type: {
       type: String,

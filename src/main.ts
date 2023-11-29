@@ -56,6 +56,7 @@ import { setupTypeForm } from './initialSetup/typeform.setup';
 import { setUpYHFinance } from './initialSetup/yhfinance.setup';
 import { setUpAWSSignature } from './initialSetup/aws.setup';
 import { setUpMicrosoftAzure } from './initialSetup/azure.setup';
+import { GlobalVariablesService } from './graphql/global-variables/global-variables.service';
 
 AWS.config.update({ region: ConfigUtil.get('aws.region') });
 
@@ -72,6 +73,7 @@ async function bootstrap() {
   const workflowStepExecutionHistoryService = app.get(WorkflowStepExecutionHistoryService);
   const workflowVersionService = app.get(WorkflowVersionService);
   const billingService = app.get(BillingService);
+  const globalVariableService = app.get(GlobalVariablesService);
 
   if (process.env.NODE_ENV === 'development') {
     logger.log('Setting up local stack');
@@ -159,6 +161,7 @@ async function bootstrap() {
     workflowVersionService,
     billingService,
     organizationService,
+    globalVariableService,
   );
   await workflow.run();
   logger.log('Workflow has started running...');

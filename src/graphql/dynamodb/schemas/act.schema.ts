@@ -79,9 +79,11 @@ export const MDSchema = new Schema({
   },
   ClientPK: {
     type: String,
+    required: false,
   },
   ClientSK: {
     type: String,
+    required: false,
   },
   Headers: {
     type: String,

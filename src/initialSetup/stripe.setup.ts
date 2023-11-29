@@ -7,6 +7,7 @@ import { CreateIntegrationAppInput } from '../graphql/integration-app/inputs/cre
 
 import { ClientService } from '../graphql/client/client.service';
 import { IntegrationAppService } from '../graphql/integration-app/integration-app.service';
+import { ClientIntegrationDetailsPlacementOption } from '../graphql/integration-app/integration-app.enum';
 
 const logger = new Logger('SetupStripe');
 
@@ -19,6 +20,7 @@ export async function setupStripe(app: INestApplication) {
   const createIntegrationAppInput: CreateIntegrationAppInput = {
     name: 'Stripe',
     type: AuthType.BASIC,
+    clientDetailsPlacement: ClientIntegrationDetailsPlacementOption.HEADERS,
     version: 1,
     headers: [
       {

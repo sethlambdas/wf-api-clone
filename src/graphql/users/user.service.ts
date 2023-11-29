@@ -33,6 +33,8 @@ import {
 } from '../../aws-services/api-gateway/api-gateway.util';
 import { SaveOrganizationInput } from '../organizations/inputs/save-organization.input';
 import { addApiGatewayLambdaPermission } from '../../aws-services/aws-lambda/lambda.util';
+import { GlobalVariablesService } from '../../graphql/global-variables/global-variables.service';
+import { GlobalVariableInput } from '../../graphql/global-variables/dto/create-global-variable.input';
 
 @Injectable()
 export class UserService {
@@ -42,6 +44,7 @@ export class UserService {
     @Inject(UserRepository)
     private userRepository: UserRepository,
     private organizationService: OrganizationService,
+    private globalVariableService: GlobalVariablesService,
     private jwtService: JwtService,
   ) {}
 
@@ -72,6 +75,24 @@ export class UserService {
       });
       await this.createApiGateway(organization);
     }
+    const globalVariablesInput: GlobalVariableInput = {
+      PK: `GV|${organization.PK}`,
+      environmentValues: [
+        {
+          default: true,
+          fieldName: 'date_now',
+          fieldValue: 'new Date',
+        },
+        {
+          default: true,
+          fieldName: 'organization',
+          fieldValue: organization.ORGNAME,
+        },
+      ],
+    };
+
+    // create default environment variables
+    const globalVariables = await this.globalVariableService.create(globalVariablesInput);
 
     const orgId = organization.PK;
 
@@ -378,7 +399,7 @@ export class UserService {
       apiStages: [{ apiId: apiGateway.id, stage: ConfigUtil.get('apiGateway.stage') }],
       name: `PLAN-${organization.PK}-${filteredUsagePlansCount}`,
       quota: {
-        limit: 99,//TODO: return value to 5 if stripe is working...
+        limit: 99, //TODO: return value to 5 if stripe is working...
         offset: 0,
         period: 'MONTH',
       },

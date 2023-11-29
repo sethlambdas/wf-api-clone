@@ -11,6 +11,8 @@ import { UserRepository } from './user.repository';
 import { UserResolver } from './user.resolver';
 import { UserService } from './user.service';
 import { UserController } from './user.controller';
+import { GlobalVariablesModule } from '../../graphql/global-variables/global-variables.module';
+import { GlobalVariablesService } from '../../graphql/global-variables/global-variables.service';
 // import { DynamoDBModule } from '../dynamodb/dynamodb.module';
 
 @Module({
@@ -24,9 +26,10 @@ import { UserController } from './user.controller';
     }),
     DynamoDBModule,
     OrganizationModule,
+    GlobalVariablesModule,
   ],
   controllers: [UserController],
-  providers: [JwtStrategy, UserResolver, UserService, UserRepository],
+  providers: [JwtStrategy, UserResolver, UserService, UserRepository, GlobalVariablesService],
   exports: [PassportModule, JwtStrategy, UserService],
 })
 export class UserModule {}

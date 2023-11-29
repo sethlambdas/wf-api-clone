@@ -8,6 +8,7 @@ import { Client, IListClients } from './client.entity';
 import { FindClientByNameInput, ListClientsInput } from './inputs/find-client.input';
 import { HttpMethod, IGraphqlPayload, networkClient } from '../../utils/helpers/networkRequest.util';
 import { LIST_CLIENTS } from './client.gql-queries';
+import { AuthType, ClientStatus } from '../common/enums/authentication.enum';
 
 const endpoint = ConfigUtil.get('authBeEndpoint') || 'http://localhost:3001/api/graphql';
 @Injectable()
@@ -18,8 +19,17 @@ export class ClientRepository {
   ) {}
 
   async createClient(client: Client): Promise<Client> {
-    const results = await this.clientModel.create(client);
-    Logger.log(client)
+    const results = await this.clientModel.create({
+      PK: client.PK,
+      SK: client.SK,
+      name: client.name,
+      type: client.type,
+      status: client.status,
+      intAppId: client.intAppId,
+      secrets: client.secrets,
+      headers: client.headers,
+    });
+    Logger.log(client);
     return results;
   }
 

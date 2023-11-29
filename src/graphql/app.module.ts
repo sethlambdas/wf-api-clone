@@ -28,6 +28,7 @@ import { WorkflowModule } from './workflow/workflow.module';
 import { ResourcesModule } from './resources/resources.module';
 import { ApolloDriver, ApolloDriverConfig } from '@nestjs/apollo';
 import { BillingModule } from './billing/billing.module';
+import { GlobalVariablesModule } from './global-variables/global-variables.module';
 
 const region = ConfigUtil.get('aws.region');
 const accessKeyId = ConfigUtil.get('aws.accessKeyId');
@@ -90,6 +91,7 @@ const secretAccessKey = ConfigUtil.get('aws.secretAccessKey');
     DBEngineModule,
     ResourcesModule,
     BillingModule,
+    GlobalVariablesModule
   ],
 })
 export class AppModule {}

@@ -34,6 +34,7 @@ import { BillingService } from './graphql/billing/billing.service';
 import { OrganizationService } from './graphql/organizations/organization.service';
 import { CreateWorkflowExecutionInput } from './graphql/workflow-executions/inputs/post.inputs';
 import { getMentionedData } from './utils/helpers/string-helpers.util';
+import { GlobalVariablesService } from './graphql/global-variables/global-variables.service';
 
 export default class Workflow {
   private logger: Logger;
@@ -44,6 +45,7 @@ export default class Workflow {
   private workflowVersionService: WorkflowVersionService;
   private billingService: BillingService;
   private organizationService: OrganizationService;
+  private globalVariableService: GlobalVariablesService;
 
   constructor(
     logger: Logger,
@@ -54,6 +56,7 @@ export default class Workflow {
     workflowVersionService: WorkflowVersionService,
     billingService: BillingService,
     organizationService: OrganizationService,
+    globalVariableService: GlobalVariablesService
   ) {
     this.logger = logger;
     this.workflowService = workflowService;

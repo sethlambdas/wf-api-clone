@@ -1,4 +1,4 @@
-import { Inject, Injectable } from '@nestjs/common';
+import { Inject, Injectable, Logger } from '@nestjs/common';
 import { v4 } from 'uuid';
 
 import { CompositePrimaryKeyInput } from '../common/inputs/workflow-key.input';
@@ -31,24 +31,53 @@ export class WorkflowStepService {
     return this.workflowStepRepository.createWorkflowStep(workflowStep);
   }
 
+  /*
+    just remove the FileTypeOption if value is null
+  */
+  removeFileTypeOption(dataArray) {
+    const newArray = [...dataArray];
+    newArray.forEach((item) => {
+      if (item.data) {
+        if (typeof item.data.variables?.FileTypeOption !== 'undefined') {
+          if (!item.data.variables?.FileTypeOption) {
+            delete item.data.variables.FileTypeOption;
+          }
+        }
+      }
+    });
+
+    return newArray;
+  }
+
   async batchCreateWorkflowStep(createWorkflowStepInputs: CreateWorkflowStepInput[]) {
     const workflowSteps: WorkflowStep[] = [];
     for (const input of createWorkflowStepInputs) {
       const { WorkflowVersionSK, NAID, AID, ACT } = input;
       const workflowStepSK = `WS#${v4()}`;
       const transformedAID = `AID#${AID}`;
+      const modifiedMD = ACT?.MD || null;
+      // just remove the FileTypeOption if value is null
+      if (modifiedMD) {
+        if (!modifiedMD?.FileTypeOption) delete modifiedMD.FileTypeOption;
+      }
+      Logger.log('modifiedMD', this.removeFileTypeOption(ACT.DESIGN));
       const workflowStep = {
         PK: WorkflowVersionSK,
         SK: workflowStepSK,
         AID: transformedAID,
         DATA: transformedAID,
         NAID,
-        ACT,
+        ACT: {
+          ...ACT,
+          DESIGN: [...this.removeFileTypeOption(ACT.DESIGN)],
+          MD: { ...modifiedMD },
+        },
       } as WorkflowStep;
       workflowSteps.push(workflowStep);
     }
-
+    Logger.log('batchCreateWorkflowStep:', workflowSteps);
     const { unprocessedItems } = await this.workflowStepRepository.batchCreateWorkflowStep(workflowSteps);
+    Logger.log('unprocessedItems|||:', unprocessedItems);
     if (unprocessedItems.length > 0) return false;
     else return workflowSteps;
   }
