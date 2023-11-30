@@ -94,6 +94,8 @@ export interface IManualApproval {
 }
 
 export interface ILoopConfig {
+  Name: string;
+  index?: string;
   maxLoop: number;
   currentLoop: number;
   firstLoopActivity: CompositePrimaryKey;

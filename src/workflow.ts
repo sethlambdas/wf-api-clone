@@ -33,6 +33,7 @@ import { WorkflowService } from './graphql/workflow/workflow.service';
 import { BillingService } from './graphql/billing/billing.service';
 import { OrganizationService } from './graphql/organizations/organization.service';
 import { CreateWorkflowExecutionInput } from './graphql/workflow-executions/inputs/post.inputs';
+import { createGlobalVariableObject } from './utils/helpers/global-variable-helpers.util';
 import { getMentionedData } from './utils/helpers/string-helpers.util';
 import { GlobalVariablesService } from './graphql/global-variables/global-variables.service';
 
@@ -56,7 +57,7 @@ export default class Workflow {
     workflowVersionService: WorkflowVersionService,
     billingService: BillingService,
     organizationService: OrganizationService,
-    globalVariableService: GlobalVariablesService
+    globalVariableService: GlobalVariablesService,
   ) {
     this.logger = logger;
     this.workflowService = workflowService;
@@ -66,6 +67,7 @@ export default class Workflow {
     this.workflowVersionService = workflowVersionService;
     this.billingService = billingService;
     this.organizationService = organizationService;
+    this.globalVariableService = globalVariableService;
   }
 
   static getRule() {
@@ -117,7 +119,7 @@ export default class Workflow {
       }: IDetail = detail;
 
       let wfExecKeys = WorkflowExecKeys;
-
+      let globalVariables;
       const act: CAT = {
         T: currentWorkflowStep?.ACT.T,
         NM: currentWorkflowStep?.ACT.NM,
@@ -125,6 +127,10 @@ export default class Workflow {
         WSID: currentWorkflowStep.SK,
         Status: '',
       };
+      if (OrgId) {
+        globalVariables = await this.globalVariableService.findOne(`GV|${OrgId}`);
+        this.logger.log('globalVariables:', JSON.stringify(globalVariables));
+      }
       if (act.T === ActivityTypes.End) {
         await this.workflowExecutionService.saveWorkflowExecution(wfExecKeys, {
           STATUS: WorkflowExecStatus.Finished,
@@ -267,6 +273,11 @@ export default class Workflow {
       } catch (error) {
         parsedPayload = payload;
       }
+      let gvObject = {};
+      if (globalVariables) {
+        gvObject = createGlobalVariableObject(globalVariables);
+      }
+      this.logger.log('global variables value:', gvObject);
       const state = {
         ...parsedSte,
         ...(httpTrigger && httpTrigger.IsHttpTriggered
@@ -279,6 +290,8 @@ export default class Workflow {
             }
           : {}),
         ...(parentWSXH?.state || {}),
+        ...gvObject,
+        ...(loopConfig ? { [loopConfig.Name]: { ...loopConfig, index: loopConfig.currentLoop } } : {}),
       };
 
       if ((Object as any).values(ExternalActivityTypes).includes(act.T) && !externalService) {
@@ -385,6 +398,7 @@ export default class Workflow {
               if (parentWSXH) details.parentWSXH = parentWSXH;
               if (act.T === ActivityTypes.StartLoop) {
                 details.loopConfig = {
+                  Name: act.MD.Name,
                   maxLoop: act.MD.NLoop,
                   currentLoop: 1,
                   firstLoopActivity: { PK: getWorkflowStep.PK, SK: getWorkflowStep.SK },

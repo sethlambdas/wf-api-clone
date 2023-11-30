@@ -1,6 +1,6 @@
 import { GlobalVariableProps } from '../../graphql/common/interfaces/globalVariable.interface';
 
-const reservedVariables = ['date_now'];
+const reservedVariables = ['datetime_now'];
 
 export function createGlobalVariableObject(globalVariables: GlobalVariableProps) {
   const gvObject = {};
@@ -18,8 +18,9 @@ export function createGlobalVariableObject(globalVariables: GlobalVariableProps)
 
 function returnReservedVariableValue(variableName: string) {
   switch (variableName) {
-    case 'date_now':
+    case 'datetime_now':
       return new Date();
+    // other reserved variables
     default:
       return new Date();
   }

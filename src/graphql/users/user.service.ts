@@ -80,7 +80,7 @@ export class UserService {
       environmentValues: [
         {
           default: true,
-          fieldName: 'date_now',
+          fieldName: 'datetime_now',
           fieldValue: 'new Date',
         },
         {
