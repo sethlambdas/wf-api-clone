@@ -1,5 +1,6 @@
 import { Logger } from '@nestjs/common';
-import { getMentionedData } from 'utils/helpers/string-helpers.util';
+
+import { getMentionedData } from '../helpers/string-helpers.util';
 
 const logger = new Logger('assignData');
 
