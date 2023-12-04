@@ -60,13 +60,6 @@ export const MDSchema = new Schema({
   CustomVariables: {
     type: String,
   },
-  // MergeData
-  StoreVariable: {
-    type: String,
-  },
-  JoinValues: {
-    type: String,
-  },
   // WebService
   Endpoint: {
     type: String,

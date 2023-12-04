@@ -84,13 +84,6 @@ export class MD {
   @Field({ nullable: true })
   CustomVariables?: string;
 
-  // MergeData
-  @Field({ nullable: true })
-  StoreVariable?: string;
-
-  @Field({ nullable: true })
-  JoinValues?: string;
-
   // WebService & HTTP
   @Field({ nullable: true })
   Endpoint?: string;

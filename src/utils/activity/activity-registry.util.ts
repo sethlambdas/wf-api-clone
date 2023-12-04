@@ -3,7 +3,6 @@ import condition from './condition.util';
 import delay from './delay.util';
 import email from './email.util';
 import manualApproval from './manual-approval.util';
-import mergeData from './merge-data.util';
 import webService from './web-service.util';
 import matchingData from './matching-data.util';
 import dbQueryBuilder from './database-builder.util';
@@ -30,7 +29,6 @@ export enum ActivityTypes {
   Email = 'Email',
   Condition = 'Condition',
   AssignData = 'Assign Data',
-  MergeData = 'Merge Data',
   ManualApproval = 'Manual Approval',
   SubWorkflow = 'SubWorkflow',
   ParallelStart = 'Parallel Start',
@@ -83,11 +81,7 @@ const activityRegistry: ActivityRegistry = {
   },
   [ActivityTypes.AssignData]: {
     label: ActivityTypes.AssignData,
-    processActivity: (payload?: any, state?: any) => assignData(payload),
-  },
-  [ActivityTypes.MergeData]: {
-    label: ActivityTypes.MergeData,
-    processActivity: (payload?: any, state?: any) => mergeData(payload, state),
+    processActivity: (payload?: any, state?: any) => assignData(payload, state),
   },
 };
 
