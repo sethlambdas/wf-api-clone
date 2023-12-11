@@ -32,6 +32,7 @@ export default async function webService(payload: any, state?: any) {
       Evaluations,
       Retries,
       Interval,
+      Timeout,
       webServiceDownloadFile,
       targetFileName,
     } = payload;
@@ -70,6 +71,7 @@ export default async function webService(payload: any, state?: any) {
         retries: Retries || 3,
         interval: Interval || 10,
       },
+      timeout: Timeout || 15000,
     };
     if (ClientPK && ClientSK) {
       eventReqPramas.auth = {

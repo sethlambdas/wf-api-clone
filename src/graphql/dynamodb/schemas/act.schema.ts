@@ -111,6 +111,9 @@ export const MDSchema = new Schema({
   Retries: {
     type: Number,
   },
+  Timeout: {
+    type: Number,
+  },
   Interval: {
     type: Number,
   },

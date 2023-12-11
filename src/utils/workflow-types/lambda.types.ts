@@ -21,6 +21,7 @@ export interface EventRequestParams {
     retries: number;
     interval: number;
   };
+  timeout: number;
 }
 
 export interface IFieldValue {

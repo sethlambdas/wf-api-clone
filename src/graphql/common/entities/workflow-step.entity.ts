@@ -136,6 +136,9 @@ export class MD {
   Retries?: number;
 
   @Field({ nullable: true })
+  Timeout?: number;
+
+  @Field({ nullable: true })
   Interval?: number;
 
   @Field({ nullable: true })
