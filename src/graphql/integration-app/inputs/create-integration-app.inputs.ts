@@ -1,11 +1,14 @@
 import { Field, InputType, Int, PartialType } from '@nestjs/graphql';
 
-import { Header, Urls } from '../integration-app.entity';
+import { AdditionalConfiguration, Header, Urls } from '../integration-app.entity';
 import { AuthType } from '../../common/enums/authentication.enum';
 import { ClientIntegrationDetailsPlacementOption, FileUploadType } from '../integration-app.enum';
 
 @InputType()
 export class HeaderInput extends PartialType(Header, InputType) {}
+
+@InputType()
+export class AdditionalConfigurationInput extends PartialType(AdditionalConfiguration, InputType) {}
 
 @InputType()
 export class UrlsInput extends PartialType(Urls, InputType) {}
@@ -38,4 +41,8 @@ export class CreateIntegrationAppInput {
 
   @Field((type) => FileUploadType, { nullable: true })
   fileUploadType?: FileUploadType;
+
+  @Field((type) => [AdditionalConfigurationInput], { nullable: true })
+  additionalConfiguration?: AdditionalConfigurationInput[];
+
 }

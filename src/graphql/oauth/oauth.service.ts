@@ -4,7 +4,6 @@ import got from 'got';
 import * as QueryString from 'querystring';
 import * as SafeBuffer from 'safe-buffer';
 
-
 import { ConfigUtil } from '@lambdascrew/utility';
 
 import { ClientTokenService } from '../client-token/client-token.service';
@@ -27,26 +26,27 @@ export class OAuthService {
     private clientService: ClientService,
     private clientTokenService: ClientTokenService,
     private integrationAppService: IntegrationAppService,
-  ) {
-  }
+  ) {}
   // prevents others from impersonating you
   codeVerifier = crypto.randomBytes(96).toString('base64'); // 128 characters
 
-  getClient(configOAuth: ClientOAuth2.Options, integrationAppName: string) {
+  getClient(configOAuth: ClientOAuth2.Options, integrationAppName: string, additionalConfigurations?: any) {
     let data = configOAuth.state;
     let buff = new Buffer(data);
     let base64state = buff.toString('base64');
 
     const codeChallengeMethod = 'S256';
     const codeChallenge = crypto
-        .createHash('sha256')
-        .update(this.codeVerifier)
-        .digest('base64')
-        .replace(/=/g, '')
-        .replace(/\+/g, '-')
-        .replace(/\//g, '_');
-    
-    let additionalConfig = {};
+      .createHash('sha256')
+      .update(this.codeVerifier)
+      .digest('base64')
+      .replace(/=/g, '')
+      .replace(/\+/g, '-')
+      .replace(/\//g, '_');
+
+    let additionalConfig = {
+      ...additionalConfigurations,
+    };
 
     if (integrationAppName === 'Airtable') {
       additionalConfig = {
@@ -54,27 +54,27 @@ export class OAuthService {
         code_verifier: this.codeVerifier,
         code_challenge_method: codeChallengeMethod,
         response_type: 'code',
-      }
+      };
     }
 
     // issue on redirect Oauth 1.0
     if (integrationAppName === 'Trello') {
       additionalConfig = {
-        expiration:'1day',
-        name:'workflow-test',
+        expiration: '1day',
+        name: 'workflow-test',
         response_type: 'fragment',
         key: configOAuth.clientId,
         callback_method: 'fragment',
-      }
+      };
     }
 
     if (integrationAppName === 'BigCommerce') {
       additionalConfig = {
         context: 'stores/cahoh0kfrc',
-        account_uuid: 'd7bc1297-4ac6-4d19-8776-39756c7513ac'
-      }
+        account_uuid: 'd7bc1297-4ac6-4d19-8776-39756c7513ac',
+      };
     }
-    
+
     const clientOauth2 = new ClientOAuth2({
       clientId: configOAuth.clientId,
       clientSecret: configOAuth.clientSecret,
@@ -85,8 +85,21 @@ export class OAuthService {
       state: base64state,
       query: {
         access_type: 'offline',
-        ...additionalConfig
-      },  
+        ...additionalConfig,
+      },
+    });
+    Logger.log('ClientOAuth2::', {
+      clientId: configOAuth.clientId,
+      clientSecret: configOAuth.clientSecret,
+      accessTokenUri: configOAuth.accessTokenUri,
+      authorizationUri: configOAuth.authorizationUri,
+      redirectUri: configOAuth.redirectUri,
+      scopes: configOAuth.scopes,
+      state: base64state,
+      query: {
+        access_type: 'offline',
+        ...additionalConfig,
+      },
     });
     return clientOauth2;
   }
@@ -116,17 +129,17 @@ export class OAuthService {
       PK: clientPK,
       SK: clientSK,
     });
-
+    Logger.log('oauith', client);
     if (process.env.NODE_ENV === 'test') {
       return true;
     }
-
+    Logger.log('oauith2', client);
     const integrationApp = await this.integrationAppService.findIntegrationAppByPK({
       PK: client.intAppId,
       SK: `${client.intAppId}||metadata`,
     });
-
-    if(integrationApp.name === 'Amadeus') {
+    Logger.log('integrationApp:::', JSON.stringify(integrationApp));
+    if (integrationApp.name === 'Amadeus') {
       const result: any = await this.getAccessToken(
         integrationApp.urls.authorize,
         {
@@ -136,7 +149,7 @@ export class OAuthService {
         },
         { client_id: client.secrets.clientId, client_secret: client.secrets.clientSecret },
         integrationApp.clientDetailsPlacement,
-        integrationApp.name
+        integrationApp.name,
       );
       if (result.error) throw new Error(result.error);
 
@@ -151,8 +164,8 @@ export class OAuthService {
       await this.clientTokenService.createClientToken(createClientTokenInput);
 
       return 'success';
-    } 
-    
+    }
+
     if (integrationApp.clientDetailsPlacement === ClientIntegrationDetailsPlacementOption.QUERY_PARAMS) {
       return 'success';
     } else {
@@ -167,13 +180,14 @@ export class OAuthService {
           }),
         ),
       );
-  
-      const getClient = this.getClient(configOAuth, integrationApp.name);
+      Logger.log('configOAuth:::', configOAuth);
+      const getClient = this.getClient(configOAuth, integrationApp.name, integrationApp.additionalConfiguration);
       const authLink = getClient.code.getUri();
       return authLink;
     }
   }
 
+  // TODO: check here for generic integrations
   async getAccessToken(
     accessTokenUrl: string,
     getAccessTokenOptions: GetAccessTokenOptions,
@@ -196,10 +210,11 @@ export class OAuthService {
     if (integrationAppName !== 'Amadeus') {
       const url = typeof codeUrl === 'object' ? codeUrl : new URL(codeUrl, 'https://extractcode.com/');
 
-      if (!url.search || !url.search.substr(1)) return Promise.reject(new TypeError('Unable to process uri: ' + codeUrl));
+      if (!url.search || !url.search.substr(1))
+        return Promise.reject(new TypeError('Unable to process uri: ' + codeUrl));
 
       const data = typeof url.search === 'string' ? QueryString.parse(url.search.substr(1)) : url.search || {};
-    
+
       getAccessTokenOptions.code = data.code as string;
       // airtable config
       if (integrationAppName === 'Airtable') {
@@ -211,13 +226,13 @@ export class OAuthService {
         getAccessTokenOptions.context = data.context as string;
       }
       // bigcommerce & bitly config
-      if ( integrationAppName === 'BigCommerce' || integrationAppName === 'Bitly') {
-        body = QueryString.stringify({ ...getAccessTokenOptions, ...credentials});
+      if (integrationAppName === 'BigCommerce' || integrationAppName === 'Bitly') {
+        body = QueryString.stringify({ ...getAccessTokenOptions, ...credentials });
       } else {
         body = QueryString.stringify({ ...getAccessTokenOptions });
       }
       // bitly config
-      if ( integrationAppName === 'Bitly' ) {
+      if (integrationAppName === 'Bitly') {
         headers = {
           ...headers,
           Accept: 'application/json',
@@ -228,12 +243,11 @@ export class OAuthService {
           Authorization: 'Basic ' + btoa(credentials.client_id + ':' + credentials.client_secret),
         };
       }
-     
     } else {
       // amadeus config
       body = QueryString.stringify({ ...credentials, grant_type: 'client_credentials' });
     }
-    
+
     const response = await got
       .post(accessTokenUrl, {
         headers,
@@ -283,7 +297,9 @@ export class OAuthService {
           accessTokenUri,
           {
             grant_type: 'authorization_code',
-            redirect_uri: `${ConfigUtil.get('oauth.redirectUriPath')}/${ConfigUtil.get('server.prefix')}/oauth/callback`,
+            redirect_uri: `${ConfigUtil.get('oauth.redirectUriPath')}/${ConfigUtil.get(
+              'server.prefix',
+            )}/oauth/callback`,
             code: req.url,
           },
           { client_id: client.secrets.clientId, client_secret: client.secrets.clientSecret },
@@ -305,7 +321,7 @@ export class OAuthService {
 
         res.redirect(getFromUrl(integrationApp.PK, client.PK, client.SK, 'success'));
       } catch (err) {
-        logger.log('ERROR HERE:');
+        logger.log('ERROR:');
         logger.log(err);
         const client = await this.clientService.findClientByPK({
           PK: state.clientPK,
@@ -314,7 +330,7 @@ export class OAuthService {
         res.redirect(getFromUrl(client.intAppId, client.PK, client.SK, 'error'));
       }
     } catch (error) {
-      res.redirect(`${ConfigUtil.get('server.origin')}/integrations`)
+      res.redirect(`${ConfigUtil.get('server.origin')}/integrations`);
     }
   }
 }

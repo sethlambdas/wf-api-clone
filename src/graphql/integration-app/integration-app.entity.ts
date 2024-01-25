@@ -14,6 +14,15 @@ export class Header {
 }
 
 @ObjectType()
+export class AdditionalConfiguration {
+  @Field({ nullable: true })
+  fieldName?: string;
+
+  @Field({ nullable: true })
+  fieldValue?: string;
+}
+
+@ObjectType()
 export class Urls {
   @Field({ nullable: true })
   authorize?: string;
@@ -59,6 +68,9 @@ export class IntegrationApp implements CompositePrimaryKey {
 
   @Field((type) => FileUploadType, { nullable: true })
   fileUploadType?: FileUploadType;
+
+  @Field((type) => [AdditionalConfiguration], { nullable: true })
+  additionalConfiguration?: AdditionalConfiguration[];
 }
 
 export interface IListIntegrationApps {
