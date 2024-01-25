@@ -43,7 +43,7 @@ export default async function manualApproval(payload: any, state?: any) {
         ActivityType,
       };
       const searchString = stringify(searchParams);
-      const approvalUrl = `${origin}/designer/getDesign?${searchString}`;
+      const approvalUrl = `${origin}/designer/get-design?${searchString}`;
       const workflowName = decodeURIComponent(mapManualApprovalEmailParams.WorkflowName);
       const workflowVersion = decodeURIComponent(mapManualApprovalEmailParams.WorkflowVersion);
       const Subject = `APPROVAL NEEDED: Workflow "${workflowName}"`;

@@ -12,6 +12,17 @@ export const HeaderSchema = new Schema({
   },
 });
 
+export const AdditionalConfigurationSchema = new Schema({
+  fieldName: {
+    type: String,
+    required: false,
+  },
+  fieldValue: {
+    type: String,
+    required: false,
+  },
+});
+
 export const UrlsSchema = new Schema({
   authorize: {
     type: String,
@@ -66,6 +77,10 @@ export const IntegrationAppsSchema = new Schema(
     headers: {
       type: Array,
       schema: [HeaderSchema],
+    },
+    additionalConfiguration: {
+      type: Array,
+      schema: [AdditionalConfigurationSchema],
     },
     fileUploadType: {
       type: String,
