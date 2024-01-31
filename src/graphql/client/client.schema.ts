@@ -71,7 +71,7 @@ export const ClientSchema = new Schema(
     },
     type: {
       type: String,
-      enum: ['API-KEY', 'BASIC', 'OAUTH', 'COOKIE','AWS Signature'],
+      enum: ['API_KEY', 'BASIC', 'OAUTH', 'COOKIE','AWS Signature'],
     },
     status: {
       type: String,

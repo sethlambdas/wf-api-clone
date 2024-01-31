@@ -30,7 +30,7 @@ export async function setupGoogleDrive(app: INestApplication) {
       },
       {
         fieldName: 'Authorization',
-        fieldValue: 'Bearer {{accessToken}}',
+        fieldValue: 'Bearer {{secret}}',
       },
     ],
     fileUploadType: FileUploadType.MULTIPART_RELATED

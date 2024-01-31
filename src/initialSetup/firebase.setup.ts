@@ -31,7 +31,7 @@ export async function setUpFirebase(app: INestApplication) {
       },
       {
         fieldName: 'Authorization',
-        fieldValue: 'Bearer {{accessToken}}',
+        fieldValue: 'Bearer {{secret}}',
       },
     ],
   };

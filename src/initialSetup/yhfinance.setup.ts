@@ -27,6 +27,10 @@ export async function setUpYHFinance(app: INestApplication) {
         fieldName: 'Content-Type',
         fieldValue: 'application/json',
       },
+      {
+        fieldName: 'Authorization',
+        fieldValue: 'Bearer {{secret}}',
+      },
     ],
   };
 

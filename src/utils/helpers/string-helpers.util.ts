@@ -1,7 +1,7 @@
 import { get } from 'lodash';
 import { Logger as logger } from '@nestjs/common';
 
-const credentials: string[] = ['accessToken', 'clientId', 'clientSecret', 'username', 'password'];
+const credentials: string[] = ['secret','accessToken', 'clientId', 'clientSecret', 'username', 'password'];
 
 export function replaceAt(text: string, index: number, lastIndex: number, replacement: string) {
   if (index >= text.length || index >= lastIndex || lastIndex > text.length) {

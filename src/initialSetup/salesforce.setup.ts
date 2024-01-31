@@ -31,7 +31,7 @@ export async function setUpSalesForce(app: INestApplication) {
       },
       {
         fieldName: 'Authorization',
-        fieldValue: 'Bearer {{accessToken}}',
+        fieldValue: 'Bearer {{secret}}',
       },
     ],
   };

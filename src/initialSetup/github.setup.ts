@@ -30,7 +30,7 @@ export async function setupGithub(app: INestApplication) {
       },
       {
         fieldName: 'Authorization',
-        fieldValue: 'token {{accessToken}}',
+        fieldValue: 'token {{secret}}',
       },
     ],
   };

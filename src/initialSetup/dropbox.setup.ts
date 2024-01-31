@@ -39,7 +39,7 @@ export async function setupDropbox(app: INestApplication) {
       },
       {
         fieldName: 'Authorization',
-        fieldValue: 'Bearer {{accessToken}}',
+        fieldValue: 'Bearer {{secret}}',
       },
     ],
     fileUploadType: FileUploadType.DIRECT_BODY

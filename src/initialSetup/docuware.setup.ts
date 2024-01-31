@@ -49,7 +49,7 @@ export async function setupDocuware(app: INestApplication) {
       },
       {
         fieldName: 'Authorization',
-        fieldValue: 'Bearer {{accessToken}}',
+        fieldValue: 'Bearer {{secret}}',
       },
     ],
     secrets: {

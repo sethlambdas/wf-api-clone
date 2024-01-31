@@ -32,7 +32,7 @@ export async function setupMYOB(app: INestApplication) {
       },
       {
         fieldName: 'Authorization',
-        fieldValue: 'Bearer {{accessToken}}',
+        fieldValue: 'Bearer {{secret}}',
       },
       {
         fieldName: 'x-myobapi-key',

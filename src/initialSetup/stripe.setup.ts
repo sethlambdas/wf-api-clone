@@ -27,6 +27,10 @@ export async function setupStripe(app: INestApplication) {
         fieldName: 'Content-Type',
         fieldValue: 'application/x-www-form-urlencoded',
       },
+      {
+        fieldName: 'Authorization',
+        fieldValue: 'Bearer {{secret}}',
+      },
     ],
   };
 
@@ -47,7 +51,7 @@ export async function setupStripe(app: INestApplication) {
       },
       {
         fieldName: 'Authorization',
-        fieldValue: 'Bearer {{accessToken}}',
+        fieldValue: 'Bearer {{secret}}',
       },
     ],
     secrets: {

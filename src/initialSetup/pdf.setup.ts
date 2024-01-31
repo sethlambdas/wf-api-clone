@@ -29,7 +29,7 @@ export async function setupPdf(app: INestApplication) {
       },
       {
         fieldName: 'x-api-key',
-        fieldValue: '{{accessToken}}',
+        fieldValue: '{{secret}}',
       },
     ],
   };
@@ -52,7 +52,7 @@ export async function setupPdf(app: INestApplication) {
       },
       {
         fieldName: 'x-api-key',
-        fieldValue: '{{accessToken}}',
+        fieldValue: '{{secret}}',
       },
     ],
     secrets: {

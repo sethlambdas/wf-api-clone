@@ -1,7 +1,7 @@
 import { registerEnumType } from '@nestjs/graphql';
 
 export enum AuthType {
-  'APIKey' = 'API-KEY',
+  "API_KEY" = "API_KEY",
   'BASIC' = 'BASIC',
   'OAUTH' = 'OAUTH',
   'COOKIE' = 'COOKIE',
@@ -17,7 +17,7 @@ registerEnumType(AuthType, {
   name: 'AuthType',
   description: 'The authentication types supported',
   valuesMap: {
-    APIKey: {
+    API_KEY: {
       description: 'equals to API-KEY',
     },
     BASIC: {

@@ -552,7 +552,7 @@ export class WorkflowService {
       endpoint,
       headers: {
         ...req.headers,
-        ...this.maskAuthorizationHeader(req.body.headers),
+        ...this.maskAuthorizationHeaders(req.body.headers),
       },
       queryString: req.query,
       body: reqBody,
@@ -762,15 +762,30 @@ export class WorkflowService {
     });
   }
 
-  private maskAuthorizationHeader(header: any) {
+  private maskAuthorizationHeaders(headers: any) {
+    this.logger.log('MASKING HEADERS: ', headers);
+    let updatedHeaders = {};
+    const regexBrackets = /{{(.*?)}}/gm;
     try {
-      let maskedHeader = header;
-      if (header.Authorization) {
-        maskedHeader.Authorization = 'Bearer ****';
-      }
-      return maskedHeader;
+      Object.entries(headers).map((header) => {
+        const match = regexBrackets.exec(header[1] as string);
+        if (typeof header[1] === 'string' && (header[1] as string).match(regexBrackets)) {
+          const variableName = match[1].trim();
+          if (variableName === 'accessToken' || variableName === 'secret') {
+            updatedHeaders[header[0]] = `${(header[1] as string).replace(
+              match[0],
+              '******************',
+            )}`;
+          } else {
+            updatedHeaders[header[0]] = `${(header[1] as string).replace(match[0],  '******************',)}`;
+          }
+        } else {
+          updatedHeaders[header[0]] = header[1];
+        }
+      });
+      return updatedHeaders;
     } catch (error) {
-      return header;
+      return updatedHeaders;
     }
   }
 }

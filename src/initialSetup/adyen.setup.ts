@@ -49,7 +49,7 @@ export async function setupAdyen(app: INestApplication) {
       },
       {
         fieldName: 'X-API-Key',
-        fieldValue: '{{accessToken}}',
+        fieldValue: '{{secret}}',
       },
     ],
     secrets: {

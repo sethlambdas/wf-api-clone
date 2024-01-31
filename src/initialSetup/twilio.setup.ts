@@ -29,6 +29,10 @@ export async function setupTwilio(app: INestApplication) {
         fieldName: 'Content-Type',
         fieldValue: 'application/json',
       },
+      {
+        fieldName: 'Authorization',
+        fieldValue: 'Bearer {{secret}}',
+      },
     ],
   };
 
@@ -50,7 +54,7 @@ export async function setupTwilio(app: INestApplication) {
       },
       {
         fieldName: 'Authorization',
-        fieldValue: 'Basic {{accessToken}}',
+        fieldValue: 'Basic {{secret}}',
       },
     ],
     secrets: {

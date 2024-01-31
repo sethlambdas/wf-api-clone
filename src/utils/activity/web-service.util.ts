@@ -10,7 +10,7 @@ import { EventRequestParams, IFieldValue } from '../workflow-types/lambda.types'
 
 const logger = new Logger('webService');
 
-const credentials: string[] = ['accessToken', 'clientId', 'clientSecret', 'username', 'password'];
+const credentials: string[] = ['secret','accessToken', 'clientId', 'clientSecret', 'username', 'password'];
 
 export default async function webService(payload: any, state?: any) {
   logger.log('Web Service Activity');
@@ -136,7 +136,8 @@ export default async function webService(payload: any, state?: any) {
         parseData = removeAWSHeaders(JSON.parse(data));
       }
     }
-
+    requestParams.headers = {...maskAuthorizationHeaders(requestParams.headers)}
+    logger.log('LOG:::', requestParams);
     return { request: requestParams, response: parseData };
   } catch (err) {
     logger.log('ERROR OCCURED:');
@@ -223,3 +224,33 @@ const evalOperations = {
       };
   },
 };
+
+const  maskAuthorizationHeaders = (headers: any) =>{
+  logger.log('MASKING HEADERS: ', headers);
+  let updatedHeaders = {};
+  const regexBrackets = /{{(.*?)}}/gm;
+  const reservedHeaderKeys = ['Authorization', 'API-Key','X-API-Key']
+  try {
+    Object.entries(headers).map((header) => {
+      const match = regexBrackets.exec(header[1] as string);
+      if (typeof header[1] === 'string' && (header[1] as string).match(regexBrackets)) {
+        const variableName = match[1].trim();
+        if (variableName === 'accessToken' || variableName === 'secret') {
+          updatedHeaders[header[0]] = `${(header[1] as string).replace(
+            match[0],
+            '******************',
+          )}`;
+        }
+      }
+      if (reservedHeaderKeys.includes(header[0])) {
+        updatedHeaders[header[0]] = '******************';
+      } 
+      else {
+        updatedHeaders[header[0]] = header[1];
+      }
+    });
+    return updatedHeaders;
+  } catch (error) {
+    return updatedHeaders;
+  }
+}

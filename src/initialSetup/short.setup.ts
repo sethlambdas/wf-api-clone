@@ -29,7 +29,7 @@ export async function setupShort(app: INestApplication) {
       },
       {
         fieldName: 'authorization',
-        fieldValue: '{{accessToken}}',
+        fieldValue: '{{secret}}',
       },
     ],
   };
@@ -52,7 +52,7 @@ export async function setupShort(app: INestApplication) {
       },
       {
         fieldName: 'authorization',
-        fieldValue: '{{accessToken}}',
+        fieldValue: '{{secret}}',
       },
     ],
     secrets: {

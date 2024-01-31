@@ -28,6 +28,10 @@ export async function setUpMailChimp(app: INestApplication) {
         fieldName: 'Content-Type',
         fieldValue: 'application/json',
       },
+      {
+        fieldName: 'Authorization',
+        fieldValue: 'Bearer {{secret}}',
+      },
     ],
   };
 

@@ -29,7 +29,7 @@ export async function setupShopify(app: INestApplication) {
       },
       {
         fieldName: 'X-Shopify-Access-Token',
-        fieldValue: '{{accessToken}}',
+        fieldValue: '{{secret}}',
       },
     ],
   };

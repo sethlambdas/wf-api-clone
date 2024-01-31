@@ -28,6 +28,10 @@ export async function setupMailgun(app: INestApplication) {
         fieldName: 'Content-Type',
         fieldValue: 'application/json',
       },
+      {
+        fieldName: 'Authorization',
+        fieldValue: 'Basic {{secret}}',
+      },
     ],
   };
 
@@ -49,7 +53,7 @@ export async function setupMailgun(app: INestApplication) {
       },
       {
         fieldName: 'Authorization',
-        fieldValue: 'Basic {{accessToken}}',
+        fieldValue: 'Basic {{secret}}',
       },
     ],
     secrets: {

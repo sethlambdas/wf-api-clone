@@ -33,6 +33,10 @@ export async function setupSendle(app: INestApplication) {
         fieldName: 'Accept',
         fieldValue: 'application/json',
       },
+      {
+        fieldName: 'Authorization',
+        fieldValue: 'Bearer {{secret}}',
+      },
     ],
   };
 

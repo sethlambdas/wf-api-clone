@@ -19,7 +19,7 @@ variable "wf_api_image" {
 
 variable "wf_api_image_tag" {
   description = "WF API image"
-  default = "latest"
+  default = "manual-1.2"
 }
 
 variable "fargate_cpu" {

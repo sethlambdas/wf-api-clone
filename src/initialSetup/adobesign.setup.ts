@@ -44,7 +44,7 @@ export async function setupAdobesign(app: INestApplication) {
       },
       {
         fieldName: 'Authorization',
-        fieldValue: 'Bearer {{accessToken}}',
+        fieldValue: 'Bearer {{secret}}',
       },
     ],
     fileUploadType: FileUploadType.DIRECT_BODY,
