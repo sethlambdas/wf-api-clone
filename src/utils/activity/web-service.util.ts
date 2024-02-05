@@ -229,7 +229,31 @@ const  maskAuthorizationHeaders = (headers: any) =>{
   logger.log('MASKING HEADERS: ', headers);
   let updatedHeaders = {};
   const regexBrackets = /{{(.*?)}}/gm;
-  const reservedHeaderKeys = ['Authorization', 'API-Key','X-API-Key']
+  const reservedHeaderKeys = [
+    'Authorization',
+    'API-Key',
+    'X-API-Key',
+    'API',
+    'token',
+    'Authentication',
+    'Bearer',
+    'OAuth',
+    'JWT',
+    'Nonce',
+    'Timestamp',
+    'Signature',
+    'HMAC',
+    'Client-ID',
+    'Client-Secret',
+    'Session-ID',
+    'Access-Token',
+    'Refresh-Token',
+    'Auth-Scheme',
+    'Nonce',
+    'Realm',
+    'Digest',
+    'Basic',
+  ];
   try {
     Object.entries(headers).map((header) => {
       const match = regexBrackets.exec(header[1] as string);
@@ -242,7 +266,7 @@ const  maskAuthorizationHeaders = (headers: any) =>{
           )}`;
         }
       }
-      if (reservedHeaderKeys.includes(header[0])) {
+      if (reservedHeaderKeys.map((header)=>header.toLowerCase()).includes(header[0].toLowerCase())) {
         updatedHeaders[header[0]] = '******************';
       } 
       else {

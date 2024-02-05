@@ -10,7 +10,7 @@ import { ClientTokenService } from '../client-token/client-token.service';
 import { CreateClientTokenInput } from '../client-token/inputs/create-client-token.inputs';
 import { Client } from '../client/client.entity';
 import { ClientService } from '../client/client.service';
-import { IntegrationApp } from '../integration-app/integration-app.entity';
+import { AdditionalConfiguration, IntegrationApp } from '../integration-app/integration-app.entity';
 import { IntegrationAppService } from '../integration-app/integration-app.service';
 import { ConnectOAuthInput } from './inputs/connect-oauth.input';
 import { GetAccessTokenCredentials, GetAccessTokenOptions } from './oauth.entity';
@@ -27,8 +27,11 @@ export class OAuthService {
     private clientTokenService: ClientTokenService,
     private integrationAppService: IntegrationAppService,
   ) {}
-  // prevents others from impersonating you
-  codeVerifier = crypto.randomBytes(96).toString('base64'); // 128 characters
+  codeVerifierBytes = crypto.randomBytes(32);
+  codeVerifier = this.codeVerifierBytes.toString('base64')
+    .replace(/\+/g, '-') 
+    .replace(/\//g, '_') 
+    .replace(/=/g, ''); 
 
   getClient(configOAuth: ClientOAuth2.Options, integrationAppName: string, additionalConfigurations?: any) {
     let data = configOAuth.state;
@@ -88,19 +91,7 @@ export class OAuthService {
         ...additionalConfig,
       },
     });
-    Logger.log('ClientOAuth2::', {
-      clientId: configOAuth.clientId,
-      clientSecret: configOAuth.clientSecret,
-      accessTokenUri: configOAuth.accessTokenUri,
-      authorizationUri: configOAuth.authorizationUri,
-      redirectUri: configOAuth.redirectUri,
-      scopes: configOAuth.scopes,
-      state: base64state,
-      query: {
-        access_type: 'offline',
-        ...additionalConfig,
-      },
-    });
+
     return clientOauth2;
   }
 
@@ -123,6 +114,15 @@ export class OAuthService {
     return configOAuth;
   }
 
+  containsGrantType(array: AdditionalConfiguration[]) {
+    return array.some(obj => {
+        if (obj.fieldName === 'grant_type' && obj.fieldValue === 'client_credentials') {
+            return true
+        }
+        return false;
+    });
+}
+
   async connectOAuth(connectOAuthInput: ConnectOAuthInput) {
     const { clientPK, clientSK, fromUrl } = connectOAuthInput;
     const client = await this.clientService.findClientByPK({
@@ -138,8 +138,7 @@ export class OAuthService {
       PK: client.intAppId,
       SK: `${client.intAppId}||metadata`,
     });
-    Logger.log('integrationApp:::', JSON.stringify(integrationApp));
-    if (integrationApp.name === 'Amadeus') {
+    if (this.containsGrantType(integrationApp.additionalConfiguration)) {
       const result: any = await this.getAccessToken(
         integrationApp.urls.authorize,
         {
@@ -150,6 +149,7 @@ export class OAuthService {
         { client_id: client.secrets.clientId, client_secret: client.secrets.clientSecret },
         integrationApp.clientDetailsPlacement,
         integrationApp.name,
+        integrationApp.additionalConfiguration
       );
       if (result.error) throw new Error(result.error);
 
@@ -179,21 +179,20 @@ export class OAuthService {
             clientSK,
           }),
         ),
-      );
-      Logger.log('configOAuth:::', configOAuth);
+      );      
       const getClient = this.getClient(configOAuth, integrationApp.name, integrationApp.additionalConfiguration);
       const authLink = getClient.code.getUri();
       return authLink;
     }
   }
 
-  // TODO: check here for generic integrations
   async getAccessToken(
     accessTokenUrl: string,
     getAccessTokenOptions: GetAccessTokenOptions,
     credentials: GetAccessTokenCredentials,
     clientDetailsPlacement: ClientIntegrationDetailsPlacementOption,
     integrationAppName?: string,
+    additionalConfigurations?: any
   ) {
     const codeUrl = getAccessTokenOptions.code;
     let btoa;
@@ -207,47 +206,54 @@ export class OAuthService {
     };
     let body;
     let headers: any = { ...DEFAULT_HEADERS };
-    if (integrationAppName !== 'Amadeus') {
-      const url = typeof codeUrl === 'object' ? codeUrl : new URL(codeUrl, 'https://extractcode.com/');
-
-      if (!url.search || !url.search.substr(1))
-        return Promise.reject(new TypeError('Unable to process uri: ' + codeUrl));
-
-      const data = typeof url.search === 'string' ? QueryString.parse(url.search.substr(1)) : url.search || {};
-
-      getAccessTokenOptions.code = data.code as string;
-      // airtable config
-      if (integrationAppName === 'Airtable') {
-        getAccessTokenOptions.code_challenge = data.code_challenge as string;
-        getAccessTokenOptions.code_verifier = this.codeVerifier as string;
-      }
-      // bigcommerce config
-      if (integrationAppName === 'BigCommerce') {
-        getAccessTokenOptions.context = data.context as string;
-      }
-      // bigcommerce & bitly config
-      if (integrationAppName === 'BigCommerce' || integrationAppName === 'Bitly') {
-        body = QueryString.stringify({ ...getAccessTokenOptions, ...credentials });
+    if(!additionalConfigurations){
+      if (integrationAppName !== 'Amadeus') {
+        const url = typeof codeUrl === 'object' ? codeUrl : new URL(codeUrl, 'https://extractcode.com/');
+  
+        if (!url.search || !url.search.substr(1))
+          return Promise.reject(new TypeError('Unable to process uri: ' + codeUrl));
+  
+        const data = typeof url.search === 'string' ? QueryString.parse(url.search.substr(1)) : url.search || {};
+  
+        getAccessTokenOptions.code = data.code as string;
+        // airtable config
+        if (integrationAppName === 'Airtable') {
+          getAccessTokenOptions.code_challenge = data.code_challenge as string;
+          getAccessTokenOptions.code_verifier = this.codeVerifier as string;
+        }
+        // bigcommerce config
+        if (integrationAppName === 'BigCommerce') {
+          getAccessTokenOptions.context = data.context as string;
+        }
+        // bigcommerce & bitly config
+        if (integrationAppName === 'BigCommerce' || integrationAppName === 'Bitly') {
+          body = QueryString.stringify({ ...getAccessTokenOptions, ...credentials });
+        } else {
+          body = QueryString.stringify({ ...getAccessTokenOptions });
+        }
+        // bitly config
+        if (integrationAppName === 'Bitly') {
+          headers = {
+            ...headers,
+            Accept: 'application/json',
+          };
+        } else {
+          headers = {
+            ...headers,
+            Authorization: 'Basic ' + btoa(credentials.client_id + ':' + credentials.client_secret),
+          };
+        }
       } else {
-        body = QueryString.stringify({ ...getAccessTokenOptions });
-      }
-      // bitly config
-      if (integrationAppName === 'Bitly') {
-        headers = {
-          ...headers,
-          Accept: 'application/json',
-        };
-      } else {
-        headers = {
-          ...headers,
-          Authorization: 'Basic ' + btoa(credentials.client_id + ':' + credentials.client_secret),
-        };
+        // amadeus config
+        body = QueryString.stringify({ ...credentials, grant_type: 'client_credentials' });
       }
     } else {
-      // amadeus config
-      body = QueryString.stringify({ ...credentials, grant_type: 'client_credentials' });
+      const mappedAddiotionalConfiguration = additionalConfigurations.map((field) => ({[field.fieldName]:field.fieldValue}));
+      mappedAddiotionalConfiguration.forEach(config => {
+        credentials = { ...credentials, ...config };
+      });
+      body = QueryString.stringify({ ...credentials });
     }
-
     const response = await got
       .post(accessTokenUrl, {
         headers,
