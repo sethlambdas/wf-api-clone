@@ -15,7 +15,7 @@ import { IntegrationAppService } from '../integration-app/integration-app.servic
 import { ConnectOAuthInput } from './inputs/connect-oauth.input';
 import { GetAccessTokenCredentials, GetAccessTokenOptions } from './oauth.entity';
 import { ClientIntegrationDetailsPlacementOption } from '../integration-app/integration-app.enum';
-import { ClientToken } from '@src:graphql/client-token/client-token.entity';
+import { ClientToken } from '../client-token/client-token.entity';
 
 const Buffer = SafeBuffer.Buffer;
 const logger = new Logger('OAUTH SERVICE');

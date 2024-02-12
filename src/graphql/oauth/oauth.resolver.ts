@@ -1,7 +1,7 @@
 import { Args, Mutation, Query, Resolver } from '@nestjs/graphql';
 import { ConnectOAuthInput, RefreshOAuthInput } from './inputs/connect-oauth.input';
 import { OAuthService } from './oauth.service';
-import { ClientToken } from '@src:graphql/client-token/client-token.entity';
+import { ClientToken } from '../../graphql/client-token/client-token.entity';
 
 @Resolver()
 export class OAuthResolver {
