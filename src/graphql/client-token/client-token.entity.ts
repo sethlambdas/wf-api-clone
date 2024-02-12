@@ -3,6 +3,14 @@ import { Field, ObjectType, PartialType } from '@nestjs/graphql';
 import { SimplePrimaryKey } from '../common/interfaces/dynamodb-keys.interface';
 
 @ObjectType()
+export class TimestampSchema {
+  @Field({ nullable: true })
+  createdAt?: number;
+
+  @Field({ nullable: true })
+  updatedAt?: number;
+}
+@ObjectType()
 export class ClientToken implements SimplePrimaryKey {
   @Field()
   PK: string;
@@ -18,6 +26,9 @@ export class ClientToken implements SimplePrimaryKey {
 
   @Field()
   clientPK: string;
+
+  @Field((type) => TimestampSchema, { nullable: true })
+  timestamp?: TimestampSchema;
 }
 
 @ObjectType()

@@ -1,4 +1,4 @@
-import { Inject, Injectable } from '@nestjs/common';
+import { Inject, Injectable, Logger } from '@nestjs/common';
 
 import { SimplePrimaryKey } from '../common/interfaces/dynamodb-keys.interface';
 import { cipherCMS, KMSType } from '../../utils/kms.util';
@@ -79,6 +79,10 @@ export class ClientTokenService {
       if (cipherData.refreshToken) {
         clientToken.refreshToken = cipherData.refreshToken;
       }
+      clientToken.timestamp = {
+        createdAt: clientToken['created_at'],
+        updatedAt: clientToken['updated_at'],
+      };
 
       return clientToken;
     }

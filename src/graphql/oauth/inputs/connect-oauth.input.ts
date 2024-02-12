@@ -11,3 +11,13 @@ export class ConnectOAuthInput {
   @Field()
   fromUrl: string;
 }
+
+
+@InputType()
+export class RefreshOAuthInput {
+  @Field()
+  clientPK: string;
+
+  @Field()
+  clientSK: string;
+}

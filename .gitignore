@@ -22,6 +22,8 @@ cli
 
 docker-test.env
 
+dockerscript.txt
+
 .env
 # Local .terraform directories
 **/.terraform/*
