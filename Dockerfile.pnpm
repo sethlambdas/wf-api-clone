@@ -17,45 +17,33 @@ WORKDIR /app
 
 COPY package*.json ./
 
-RUN npm config list
+COPY pnpm-lock.yaml ./
 
-RUN npm ci \
-    && npm cache clean --force
+RUN npm install -g pnpm
+
+RUN pnpm config list
+
+RUN pnpm install --no-frozen-lockfile
 
 ENV PATH /app/node_modules/.bin:$PATH
 
-RUN apk add --no-cache tini
-RUN apk add curl
+RUN apk add --no-cache tini curl
 
 RUN addgroup appgroup \
     && adduser -G appgroup -D appuser
 
-ENTRYPOINT ["tini", "--", "sh","./entrypoint.sh"]
-
-# CMD ["node", "main.js"]
+ENTRYPOINT ["tini", "--", "sh", "./entrypoint.sh"]
 
 ####################################
 ### DEV
 ####################################
 FROM base as dev
 
-ENV NODE_ENV=production
-# ENV AWS_SECRET_ACCESS_KEY sampleSecretAccessKey
-# ENV AWS_ACCESS_KEY_ID sampleAccessKeyId
-# ENV AWS_REGION ap-southeast-2
-# ENV WORKFLOW_QUEUE WORKFLOW_QUEUE
-# ENV WORKFLOW_QUEUE_ERROR WORKFLOW_QUEUE_ERROR
+ENV NODE_ENV=development
 
-#RUN apt-get update -qq && apt-get install -qy \
-RUN apk add --no-cache \
-    ca-certificates \
-    bzip2 \
-    curl
+RUN pnpm config list
 
-RUN npm config list
-
-RUN npm install --only=development --legacy-peer-deps \
-    && npm cache clean --force
+RUN pnpm install --no-frozen-lockfile
 
 RUN chown -R appuser:appgroup /app
 
@@ -70,28 +58,17 @@ FROM dev as test
 
 COPY . .
 
-# TODO: fix later
-# RUN npm audit --audit-level=critical
-
-# ARG MICROSCANNER_TOKEN
-
-# ADD https://get.aquasec.com/microscanner /
-
-USER root
-
-# RUN chmod +x /microscanner
-
-# RUN /microscanner $MICROSCANNER_TOKEN --continue-on-failure
+# Add any test related commands here
 
 ####################################
 ### PRE PRODUCTION
 ####################################
 FROM test as pre-prod
 
-RUN npm run build
+RUN pnpm run build
 
-RUN rm -rf ./test* \
-    && rm -rf ./node_modules
+# RUN rm -rf ./test* \
+#     && rm -rf ./node_modules
 
 ####################################
 ### PRODUCTION

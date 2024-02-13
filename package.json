@@ -1,7 +1,7 @@
 {
   "name": "nestjs-task-management",
   "version": "0.0.1",
-  "description": "",
+  "description": "- Development\r ![Build badge](https://s3-extras-bucket-coredocs-workflow-api-dev.s3-ap-southeast-2.amazonaws.com/badges/badge-build-action-build.svg)\r ![Unit Tests badge](https://s3-extras-bucket-coredocs-workflow-api-dev.s3-ap-southeast-2.amazonaws.com/badges/badge-unit-test-action-build.svg)\r ![E2E Tests badge](https://s3-extras-bucket-coredocs-workflow-api-dev.s3-ap-southeast-2.amazonaws.com/badges/badge-e2e-test-action-build.svg)\r ![Deployment status badge](https://s3-extras-bucket-coredocs-workflow-api-dev.s3-ap-southeast-2.amazonaws.com/badges/badge-deployment-status.svg)",
   "author": "",
   "license": "MIT",
   "scripts": {
@@ -87,6 +87,7 @@
     "reflect-metadata": "0.1.13",
     "rimraf": "3.0.2",
     "rxjs": "^7.8.0",
+    "safe-buffer": "^5.2.1",
     "sqs-consumer": "5.5.0",
     "stripe": "^12.11.0",
     "ts-morph": "^17.0.1",
@@ -148,5 +149,19 @@
       "npm run lint",
       "npm run prettier"
     ]
-  }
+  },
+  "main": "commitlint.config.js",
+  "directories": {
+    "doc": "docs",
+    "test": "test"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/lambdas-crew/workflow-api.git"
+  },
+  "keywords": [],
+  "bugs": {
+    "url": "https://github.com/lambdas-crew/workflow-api/issues"
+  },
+  "homepage": "https://github.com/lambdas-crew/workflow-api#readme"
 }

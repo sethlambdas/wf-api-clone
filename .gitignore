@@ -17,7 +17,7 @@ temp/
 
 uploads/
 sample.sh
-pnpm-lock.yaml
+
 cli
 
 docker-test.env
