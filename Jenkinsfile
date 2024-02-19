@@ -55,7 +55,7 @@ pipeline {
                 withCredentials([[$class: 'AmazonWebServicesCredentialsBinding', credentialsId: 'aws-credentials']]) {
                     script {
                         // Build the Docker image
-                        sh "docker build --build-arg AWS_SECRET_ACCESS_KEY=${env.AWS_SECRET_ACCESS_KEY} --build-arg AWS_ACCESS_KEY_ID=${env.AWS_ACCESS_KEY_ID} -t ${IMAGE_NAME}:${APP_VERSION} ."
+                        sh "docker build --build-arg AWS_SECRET_ACCESS_KEY=${env.AWS_SECRET_ACCESS_KEY} --build-arg AWS_ACCESS_KEY_ID=${env.AWS_ACCESS_KEY_ID} -f Dockerfile.pnpm -t ${IMAGE_NAME}:${APP_VERSION} ."
                     }
                 }
             }
