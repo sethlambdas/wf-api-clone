@@ -10,7 +10,7 @@ import { EventRequestParams, IFieldValue } from '../workflow-types/lambda.types'
 
 const logger = new Logger('webService');
 
-const credentials: string[] = ['secret','accessToken', 'clientId', 'clientSecret', 'username', 'password'];
+const credentials: string[] = ['secret', 'token', 'accessToken', 'clientId', 'clientSecret', 'username', 'password'];
 
 export default async function webService(payload: any, state?: any) {
   logger.log('Web Service Activity');
@@ -136,7 +136,7 @@ export default async function webService(payload: any, state?: any) {
         parseData = removeAWSHeaders(JSON.parse(data));
       }
     }
-    requestParams.headers = {...maskAuthorizationHeaders(requestParams.headers)}
+    requestParams.headers = { ...maskAuthorizationHeaders(requestParams.headers) }
     logger.log('LOG:::', requestParams);
     return { request: requestParams, response: parseData };
   } catch (err) {
@@ -225,7 +225,7 @@ const evalOperations = {
   },
 };
 
-const  maskAuthorizationHeaders = (headers: any) =>{
+const maskAuthorizationHeaders = (headers: any) => {
   logger.log('MASKING HEADERS: ', headers);
   let updatedHeaders = {};
   const regexBrackets = /{{(.*?)}}/gm;
@@ -266,9 +266,9 @@ const  maskAuthorizationHeaders = (headers: any) =>{
           )}`;
         }
       }
-      if (reservedHeaderKeys.map((header)=>header.toLowerCase()).includes(header[0].toLowerCase())) {
+      if (reservedHeaderKeys.map((header) => header.toLowerCase()).includes(header[0].toLowerCase())) {
         updatedHeaders[header[0]] = '******************';
-      } 
+      }
       else {
         updatedHeaders[header[0]] = header[1];
       }

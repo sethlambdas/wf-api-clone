@@ -29,7 +29,7 @@ export async function setupStripe(app: INestApplication) {
       },
       {
         fieldName: 'Authorization',
-        fieldValue: 'Bearer {{secret}}',
+        fieldValue: 'Bearer {{token}}',
       },
     ],
   };
