@@ -14,7 +14,7 @@ export async function setupOnedrive(app: INestApplication) {
   const integrationAppService = app.get(IntegrationAppService);
 
   const createIntegrationAppInput: CreateIntegrationAppInput = {
-    name: 'Imgur',
+    name: 'One Drive',
     type: AuthType.OAUTH,
     clientDetailsPlacement: ClientIntegrationDetailsPlacementOption.HEADERS,
     version: 1,

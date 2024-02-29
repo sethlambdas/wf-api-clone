@@ -14,6 +14,7 @@ export const ClientTokenSchema = new Schema(
     },
     expTime: {
       type: Number,
+      required: false,
     },
     clientPK: {
       type: String,

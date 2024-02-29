@@ -21,8 +21,8 @@ export class ClientToken implements SimplePrimaryKey {
   @Field()
   refreshToken: string;
 
-  @Field()
-  expTime: number;
+  @Field((type) => Number, { nullable: true })
+  expTime?: number;
 
   @Field()
   clientPK: string;

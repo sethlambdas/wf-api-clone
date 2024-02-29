@@ -60,6 +60,10 @@ export const IntegrationAppsSchema = new Schema(
       type: String,
       enum: ['BODY', 'QUERY_PARAMS', 'HEADERS'],
     },
+    secretDetailsPlacement: {
+      type: String,
+      enum: ['BODY', 'QUERY_PARAMS', 'HEADERS'],
+    },
     version: {
       type: Number,
     },

@@ -27,7 +27,7 @@ export class OAuthService {
     private clientService: ClientService,
     private clientTokenService: ClientTokenService,
     private integrationAppService: IntegrationAppService,
-  ) {}
+  ) { }
   codeVerifierBytes = crypto.randomBytes(32);
   codeVerifier = this.codeVerifierBytes.toString('base64').replace(/\+/g, '-').replace(/\//g, '_').replace(/=/g, '');
 
@@ -55,6 +55,16 @@ export class OAuthService {
         code_verifier: this.codeVerifier,
         code_challenge_method: codeChallengeMethod,
         response_type: 'code',
+      };
+    }
+
+    if (integrationAppName === 'Facebook') {
+      additionalConfig = {
+        code_challenge: codeChallenge,
+        code_verifier: this.codeVerifier,
+        code_challenge_method: codeChallengeMethod,
+        response_type: 'code',
+        nonce: this.codeVerifierBytes
       };
     }
 
@@ -130,19 +140,40 @@ export class OAuthService {
     const clientToken = await this.clientTokenService.findClientTokenByPK({
       PK: clientSK,
     });
-    Logger.log('clientToken::', JSON.stringify(clientToken));
-    Logger.log('oauith', JSON.stringify(client));
     if (process.env.NODE_ENV === 'test') {
       return true;
     }
-    Logger.log('oauith2', client);
     const integrationApp = await this.integrationAppService.findIntegrationAppByPK({
       PK: client.intAppId,
       SK: `${client.intAppId}||metadata`,
     });
-    Logger.log('integrationApp', JSON.stringify(integrationApp));
-    if (integrationApp.additionalConfiguration && this.containsGrantType(integrationApp.additionalConfiguration)) {
+    if (integrationApp.name === 'Amadeus') {
+      const result: any = await this.getAccessToken(
+        integrationApp.urls.authorize,
+        {
+          grant_type: '',
+          redirect_uri: '',
+          code: '',
+        },
+        { client_id: client.secrets.clientId, client_secret: client.secrets.clientSecret },
+        integrationApp.clientDetailsPlacement,
+        integrationApp.name
+      );
+      if (result.error) throw new Error(result.error);
 
+      const createClientTokenInput: CreateClientTokenInput = {
+        PK: clientSK,
+        accessToken: result.access_token,
+        refreshToken: result.refresh_token,
+        expTime: result.expires_in ? typeof result.expires_in === 'string' ? parseInt(result.expires_in, 10) : result.expires_in : undefined,
+        clientPK: clientPK,
+      };
+
+      await this.clientTokenService.createClientToken(createClientTokenInput);
+
+      return 'success';
+    }
+    if (integrationApp.additionalConfiguration && this.containsGrantType(integrationApp.additionalConfiguration)) {
       const result: any = await this.getAccessToken(
         integrationApp.urls.authorize,
         {
@@ -161,7 +192,7 @@ export class OAuthService {
         PK: clientSK,
         accessToken: result.access_token,
         refreshToken: result.refresh_token,
-        expTime: typeof result.expires_in === 'string' ? parseInt(result.expires_in, 10) : result.expires_in,
+        expTime: result.expires_in ? typeof result.expires_in === 'string' ? parseInt(result.expires_in, 10) : result.expires_in : undefined,
         clientPK: clientPK,
       };
 
@@ -169,8 +200,30 @@ export class OAuthService {
 
       return 'success';
     }
-
     if (integrationApp.clientDetailsPlacement === ClientIntegrationDetailsPlacementOption.QUERY_PARAMS) {
+      // get access token via query params
+      const result: any = await this.getAccessToken(
+        integrationApp.urls.authorize,
+        {
+          grant_type: '',
+          redirect_uri: '',
+          code: '',
+        },
+        { client_id: client.secrets.clientId, client_secret: client.secrets.clientSecret },
+        integrationApp.clientDetailsPlacement,
+        integrationApp.name
+      );
+      if (result.error) throw new Error(result.error);
+
+      const createClientTokenInput: CreateClientTokenInput = {
+        PK: clientSK,
+        accessToken: result.access_token,
+        refreshToken: result.refresh_token,
+        expTime: result.expires_in ? typeof result.expires_in === 'string' ? parseInt(result.expires_in, 10) : result.expires_in : undefined,
+        clientPK: clientPK,
+      };
+
+      await this.clientTokenService.createClientToken(createClientTokenInput);
       return 'success';
     } else {
       const configOAuth = this.getConfigOAuth(
@@ -184,8 +237,6 @@ export class OAuthService {
           }),
         ),
       );
-      // const getRefreshTest = this.getRefreshToken(client, clientToken, integrationApp);
-      // logger.log('newRefresh:', getRefreshTest);
       const getClient = this.getClient(configOAuth, integrationApp.name, integrationApp.additionalConfiguration);
       const authLink = getClient.code.getUri();
       return authLink;
@@ -211,42 +262,48 @@ export class OAuthService {
       'Accept-Encoding': 'gzip, deflate, br',
     };
     let body;
+    let searchParams;
     let headers: any = { ...DEFAULT_HEADERS };
     if (!additionalConfigurations) {
       if (integrationAppName !== 'Amadeus') {
-        const url = typeof codeUrl === 'object' ? codeUrl : new URL(codeUrl, 'https://extractcode.com/');
-
-        if (!url.search || !url.search.substr(1))
-          return Promise.reject(new TypeError('Unable to process uri: ' + codeUrl));
-
-        const data = typeof url.search === 'string' ? QueryString.parse(url.search.substr(1)) : url.search || {};
-        getAccessTokenOptions.code = data.code as string;
-        // airtable config
-        if (integrationAppName === 'Airtable') {
-          getAccessTokenOptions.code_challenge = data.code_challenge as string;
-          getAccessTokenOptions.code_verifier = this.codeVerifier as string;
-        }
-        // bigcommerce config
-        if (integrationAppName === 'BigCommerce') {
-          getAccessTokenOptions.context = data.context as string;
-        }
-        // bigcommerce & bitly config
-        if (integrationAppName === 'BigCommerce' || integrationAppName === 'Bitly') {
-          body = QueryString.stringify({ ...getAccessTokenOptions, ...credentials });
+        if (clientDetailsPlacement === ClientIntegrationDetailsPlacementOption.QUERY_PARAMS) {
+          const params = { ...credentials, grant_type: 'client_credentials' };
+          searchParams = new URLSearchParams(params);
         } else {
-          body = QueryString.stringify({ ...getAccessTokenOptions });
-        }
-        // bitly config
-        if (integrationAppName === 'Bitly') {
-          headers = {
-            ...headers,
-            Accept: 'application/json',
-          };
-        } else {
-          headers = {
-            ...headers,
-            Authorization: 'Basic ' + btoa(credentials.client_id + ':' + credentials.client_secret),
-          };
+          const url = typeof codeUrl === 'object' ? codeUrl : new URL(codeUrl, 'https://extractcode.com/');
+
+          if (!url.search || !url.search.substr(1))
+            return Promise.reject(new TypeError('Unable to process uri: ' + codeUrl));
+
+          const data = typeof url.search === 'string' ? QueryString.parse(url.search.substr(1)) : url.search || {};
+          getAccessTokenOptions.code = data.code as string;
+          // airtable config
+          if (integrationAppName === 'Airtable') {
+            getAccessTokenOptions.code_challenge = data.code_challenge as string;
+            getAccessTokenOptions.code_verifier = this.codeVerifier as string;
+          }
+          // bigcommerce config
+          if (integrationAppName === 'BigCommerce') {
+            getAccessTokenOptions.context = data.context as string;
+          }
+          // bigcommerce & bitly config
+          if (integrationAppName === 'BigCommerce' || integrationAppName === 'Bitly') {
+            body = QueryString.stringify({ ...getAccessTokenOptions, ...credentials });
+          } else {
+            body = QueryString.stringify({ ...getAccessTokenOptions });
+          }
+          // bitly config
+          if (integrationAppName === 'Bitly') {
+            headers = {
+              ...headers,
+              Accept: 'application/json',
+            };
+          } else {
+            headers = {
+              ...headers,
+              Authorization: 'Basic ' + btoa(credentials.client_id + ':' + credentials.client_secret),
+            };
+          }
         }
       } else {
         // amadeus config
@@ -261,10 +318,14 @@ export class OAuthService {
       });
       body = QueryString.stringify({ ...credentials });
     }
+    logger.log('[accessTokenUrl]:', accessTokenUrl)
+    logger.log('[searchParams]:', searchParams)
+    logger.log('[headers]:', headers)
     const response = await got
       .post(accessTokenUrl, {
         headers,
         body,
+        searchParams
       })
       .json();
     return response;
@@ -326,7 +387,7 @@ export class OAuthService {
           PK: state.clientSK,
           accessToken: result.access_token,
           refreshToken: result.refresh_token,
-          expTime: typeof result.expires_in === 'string' ? parseInt(result.expires_in, 10) : result.expires_in,
+          expTime: result.expires_in ? typeof result.expires_in === 'string' ? parseInt(result.expires_in, 10) : result.expires_in : undefined,
           clientPK: state.clientPK,
         };
 
@@ -347,10 +408,7 @@ export class OAuthService {
     }
   }
 
-  // async getRefreshToken(client: Client, clientToken: ClientToken, integrationApp: IntegrationApp) {
   async getRefreshToken({ clientPK, clientSK }: { clientPK: string; clientSK: string }) {
-    // TODO: add the refresh token for the client_credentials
-    // This only handles the authorization_code oauth not the client_credentials
     const client = await this.clientService.findClientByPK({
       PK: clientPK,
       SK: clientSK,
@@ -362,7 +420,6 @@ export class OAuthService {
       PK: client.intAppId,
       SK: `${client.intAppId}||metadata`,
     });
-    logger.log('test refresh:', client);
     let updatedClientToken: ClientToken;
     if (integrationApp.additionalConfiguration && this.containsGrantType(integrationApp.additionalConfiguration)) {
       const result: any = await this.getAccessToken(
@@ -396,9 +453,6 @@ export class OAuthService {
       });
       const tokens = clientOauth2.createToken(clientToken.accessToken, clientToken.refreshToken, 'refresh_token', {});
       await tokens.refresh().then(async (newtoken) => {
-        // TODO: update the client token
-        logger.log('token[access token]:', newtoken.accessToken);
-        logger.log('token[refresh token]:', newtoken.refreshToken);
         updatedClientToken = await this.clientTokenService.updateClientTokenByPK(
           {
             PK: clientToken.PK,
@@ -412,7 +466,6 @@ export class OAuthService {
     }
 
     const renewclientToken = await this.clientTokenService.findClientTokenByPK({ PK: clientToken.PK });
-    logger.log('renewclientToken[token]:', JSON.stringify(renewclientToken));
     return renewclientToken;
   }
 }

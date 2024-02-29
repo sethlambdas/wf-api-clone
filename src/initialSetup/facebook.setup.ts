@@ -17,6 +17,7 @@ export async function setUpFacebook(app: INestApplication) {
     name: 'Facebook',
     type: AuthType.OAUTH,
     clientDetailsPlacement: ClientIntegrationDetailsPlacementOption.QUERY_PARAMS,
+    secretDetailsPlacement: ClientIntegrationDetailsPlacementOption.HEADERS,
     fileUploadType: FileUploadType.DIRECT_BODY,
     version: 1,
     urls: {

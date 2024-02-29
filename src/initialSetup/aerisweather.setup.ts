@@ -17,6 +17,7 @@ export async function setUpAerisWeather(app: INestApplication) {
     name: 'AerisWeather',
     type: AuthType.OAUTH,
     clientDetailsPlacement: ClientIntegrationDetailsPlacementOption.QUERY_PARAMS,
+    secretDetailsPlacement: ClientIntegrationDetailsPlacementOption.HEADERS,
     fileUploadType: FileUploadType.DIRECT_BODY,
     version: 1,
     urls: {

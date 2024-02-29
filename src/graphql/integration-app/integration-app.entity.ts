@@ -51,6 +51,9 @@ export class IntegrationApp implements CompositePrimaryKey {
   @Field((type) => ClientIntegrationDetailsPlacementOption, { nullable: true })
   clientDetailsPlacement?: ClientIntegrationDetailsPlacementOption;
 
+  @Field((type) => ClientIntegrationDetailsPlacementOption, { nullable: true })
+  secretDetailsPlacement?: ClientIntegrationDetailsPlacementOption;
+
   @Field((type) => Int)
   version: number;
 

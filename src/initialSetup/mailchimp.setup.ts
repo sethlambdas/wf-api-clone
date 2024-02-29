@@ -21,7 +21,8 @@ export async function setUpMailChimp(app: INestApplication) {
     name: 'MailChimp',
     type: AuthType.BASIC,
     fileUploadType: FileUploadType.DIRECT_BODY,
-    clientDetailsPlacement: ClientIntegrationDetailsPlacementOption.BODY,
+    clientDetailsPlacement: ClientIntegrationDetailsPlacementOption.HEADERS,
+    secretDetailsPlacement: ClientIntegrationDetailsPlacementOption.HEADERS,
     version: 1,
     headers: [
       {
@@ -30,7 +31,7 @@ export async function setUpMailChimp(app: INestApplication) {
       },
       {
         fieldName: 'Authorization',
-        fieldValue: 'Bearer {{secret}}',
+        fieldValue: 'Basic {{secret}}',
       },
     ],
   };
