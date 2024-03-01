@@ -20,8 +20,8 @@ export async function setupTrello(app: INestApplication) {
     clientDetailsPlacement: ClientIntegrationDetailsPlacementOption.HEADERS,
     version: 1,
     urls: {
-      authorize: 'https://trello.com/1/OAuthAuthorizeToken',
-      token: 'https://trello.com/1/OAuthGetAccessToken',
+      authorize: 'https://trello.com/1/authorize',
+      token: 'https://trello.com/1/authorize',
     },
     scopes: ['read','write','account'],
     headers: [

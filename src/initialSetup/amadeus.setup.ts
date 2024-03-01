@@ -18,12 +18,15 @@ export async function setUpAmadeus(app: INestApplication) {
     type: AuthType.OAUTH,
     clientDetailsPlacement: ClientIntegrationDetailsPlacementOption.HEADERS,
     fileUploadType: FileUploadType.DIRECT_BODY,
+    additionalConfiguration: [
+      { fieldName: 'grant_type', fieldValue: 'client_credentials' }
+    ],
     version: 1,
     urls: {
       authorize: 'https://test.api.amadeus.com/v1/security/oauth2/token',
       token: 'https://test.api.amadeus.com/v1/security/oauth2/token',
     },
-    scopes: ['air:read','hotel:read','bus:read'],
+    scopes: ['air:read', 'hotel:read', 'bus:read'],
     headers: [
       {
         fieldName: 'Content-Type',
