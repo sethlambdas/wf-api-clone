@@ -1,5 +1,5 @@
 import { ConfigUtil } from '@lambdascrew/utility';
-import { Injectable } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import { InjectModel, Model } from 'nestjs-dynamoose';
 
 import { CompositePrimaryKey } from '../common/interfaces/dynamodb-keys.interface';
@@ -14,7 +14,7 @@ export class IntegrationAppRepository {
   constructor(
     @InjectModel(ConfigUtil.get('dynamodb.schema.integrations'))
     private integrationAppModel: Model<IntegrationApp, CompositePrimaryKey>,
-  ) {}
+  ) { }
 
   async createIntegrationApp(createIntegrationAppInput: IntegrationApp): Promise<IntegrationApp> {
     const results = await this.integrationAppModel.create(createIntegrationAppInput);
@@ -67,7 +67,7 @@ export class IntegrationAppRepository {
   }
 
   async listIntegrationAppRecords(listIntegrationAppRecordsInput: ListIntegrationAppRecordsRepoInput) {
-    const { totalIntApp, page, pageSize } = listIntegrationAppRecordsInput;
+    const { totalIntApp, page, pageSize, orgId } = listIntegrationAppRecordsInput;
 
     let results: any;
     const readItems = [];
@@ -85,6 +85,10 @@ export class IntegrationAppRepository {
     }
 
     if (readItems.length > 0) results = await this.runBatchGetItems(readItems);
+
+    if (orgId) {
+      results = results.filter(integration => integration.orgId ? integration.orgId === orgId : true)
+    }
 
     if (results) return results;
     else return [];

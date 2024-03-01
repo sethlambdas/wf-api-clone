@@ -74,6 +74,9 @@ export class IntegrationApp implements CompositePrimaryKey {
 
   @Field((type) => [AdditionalConfiguration], { nullable: true })
   additionalConfiguration?: AdditionalConfiguration[];
+
+  @Field((type) => String, { nullable: true })
+  orgId?: string;
 }
 
 export interface IListIntegrationApps {

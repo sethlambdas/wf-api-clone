@@ -19,10 +19,13 @@ export async function setUpFacebook(app: INestApplication) {
     clientDetailsPlacement: ClientIntegrationDetailsPlacementOption.QUERY_PARAMS,
     secretDetailsPlacement: ClientIntegrationDetailsPlacementOption.HEADERS,
     fileUploadType: FileUploadType.DIRECT_BODY,
+    additionalConfiguration: [
+      { fieldName: 'grant_type', fieldValue: 'client_credentials' }
+    ],
     version: 1,
     urls: {
-      authorize: 'https://www.facebook.com/v15.0/dialog/oauth',
-      token: 'https://graph.facebook.com/v15.0/oauth/access_token',
+      authorize: 'https://graph.facebook.com/oauth/access_token',
+      token: 'https://graph.facebook.com/oauth/access_token',
     },
     scopes: ['public_profile'],
     headers: [

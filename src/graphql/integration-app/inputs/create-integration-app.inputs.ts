@@ -48,4 +48,6 @@ export class CreateIntegrationAppInput {
   @Field((type) => [AdditionalConfigurationInput], { nullable: true })
   additionalConfiguration?: AdditionalConfigurationInput[];
 
+  @Field((type) => String, { nullable: true })
+  orgId?: string;
 }

@@ -2,6 +2,9 @@ import { Field, InputType, Int } from '@nestjs/graphql';
 
 @InputType()
 export class ListIntegrationAppRecordsInput {
+  @Field((type) => String, { nullable: true })
+  orgId?: string;
+
   @Field((type) => Int, { defaultValue: 1 })
   page: number;
 

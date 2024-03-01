@@ -54,7 +54,7 @@ export const IntegrationAppsSchema = new Schema(
     },
     type: {
       type: String,
-      enum: ['API_KEY', 'BASIC', 'OAUTH', 'COOKIE','AWS Signature'],
+      enum: ['API_KEY', 'BASIC', 'OAUTH', 'COOKIE', 'AWS Signature'],
     },
     clientDetailsPlacement: {
       type: String,
@@ -89,6 +89,10 @@ export const IntegrationAppsSchema = new Schema(
     fileUploadType: {
       type: String,
       enum: ['MULTIPART/RELATED', 'MULTIPART/FORM-DATA', 'DIRECT-BODY'],
+    },
+    orgId: {
+      type: String,
+      required: false
     },
   },
   {
