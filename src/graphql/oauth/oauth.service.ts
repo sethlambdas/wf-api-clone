@@ -3,7 +3,7 @@ import * as ClientOAuth2 from 'client-oauth2';
 import got from 'got';
 import * as QueryString from 'querystring';
 import * as SafeBuffer from 'safe-buffer';
-import { Issuer, generators, Client as OpenIdClient } from 'openid-client';
+import { Issuer, generators, Client as OpenIdClient, ClientAuthMethod } from 'openid-client';
 
 import { ConfigUtil } from '@lambdascrew/utility';
 
@@ -17,6 +17,7 @@ import { ConnectOAuthInput } from './inputs/connect-oauth.input';
 import { GetAccessTokenCredentials, GetAccessTokenOptions } from './oauth.entity';
 import { ClientIntegrationDetailsPlacementOption } from '../integration-app/integration-app.enum';
 import { ClientToken } from '../client-token/client-token.entity';
+import { GrantTypeEnums } from '../common/enums/oauth.enum';
 
 const Buffer = SafeBuffer.Buffer;
 const logger = new Logger('OAUTH SERVICE');
@@ -39,99 +40,25 @@ export class OAuthService {
   codeVerifierBytes = crypto.randomBytes(32);
   codeVerifier = this.codeVerifierBytes.toString('base64').replace(/\+/g, '-').replace(/\//g, '_').replace(/=/g, '');
 
-  getClient(configOAuth: ClientOAuth2.Options, integrationAppName: string, additionalConfigurations?: any) {
-    let data = configOAuth.state;
-    let buff = new Buffer(data);
-    let base64state = buff.toString('base64');
-
-    const codeChallengeMethod = 'S256';
-    const codeChallenge = crypto
-      .createHash('sha256')
-      .update(this.codeVerifier)
-      .digest('base64')
-      .replace(/=/g, '')
-      .replace(/\+/g, '-')
-      .replace(/\//g, '_');
-
-    let additionalConfig = {
-      ...additionalConfigurations,
-    };
-
-    if (integrationAppName === 'Airtable') {
-      additionalConfig = {
-        code_challenge: codeChallenge,
-        code_verifier: this.codeVerifier,
-        code_challenge_method: codeChallengeMethod,
-        response_type: 'code',
-      };
-    }
-
-    if (integrationAppName === 'Facebook') {
-      additionalConfig = {
-        code_challenge: codeChallenge,
-        code_verifier: this.codeVerifier,
-        code_challenge_method: codeChallengeMethod,
-        response_type: 'code',
-        nonce: this.codeVerifierBytes
-      };
-    }
-
-    // issue on redirect Oauth 1.0
-    if (integrationAppName === 'Trello') {
-      additionalConfig = {
-        expiration: '1day',
-        name: 'workflow-test',
-        response_type: 'fragment',
-        key: configOAuth.clientId,
-        callback_method: 'fragment',
-        return_url: `${ConfigUtil.get('oauth.redirectUriPath')}/${ConfigUtil.get('server.prefix')}/oauth/callback`,
-      };
-    }
-
-    if (integrationAppName === 'BigCommerce') {
-      additionalConfig = {
-        context: 'stores/cahoh0kfrc',
-        account_uuid: 'd7bc1297-4ac6-4d19-8776-39756c7513ac',
-      };
-    }
+  getClient(configOAuth: ClientOAuth2.Options, integrationApp: IntegrationApp) {
 
     // TODO: testing OPEN ID
     const issuer = new Issuer({
       authorization_endpoint: configOAuth.authorizationUri,
       token_endpoint: configOAuth.accessTokenUri,
-      issuer: ""
+      issuer: "",
     });
 
-    // const client = new issuer.Client({
-    //   client_id: configOAuth.clientId,
-    //   client_secret: configOAuth.clientSecret,
-    //   redirect_uris: [configOAuth.redirectUri],
-
-    // });
     this.clientIssuer = new issuer.Client({
       client_id: configOAuth.clientId,
       client_secret: configOAuth.clientSecret,
       redirect_uris: [configOAuth.redirectUri],
       response_types: ['code', 'token'],
+      token_endpoint_auth_method: integrationApp.authMethod as ClientAuthMethod || "client_secret_basic",
     });
     const client = this.clientIssuer;
 
     return client;
-    // const clientOauth2 = new ClientOAuth2({
-    //   clientId: configOAuth.clientId,
-    //   clientSecret: configOAuth.clientSecret,
-    //   accessTokenUri: configOAuth.accessTokenUri,
-    //   authorizationUri: configOAuth.authorizationUri,
-    //   redirectUri: configOAuth.redirectUri,
-    //   scopes: configOAuth.scopes,
-    //   state: base64state,
-    //   query: {
-    //     access_type: 'offline',
-    //     ...additionalConfig,
-    //   },
-    // });
-
-    // return clientOauth2;
   }
 
   getConfigOAuth(client: Client, integrationApp: IntegrationApp, state = null): ClientOAuth2.Options {
@@ -195,165 +122,96 @@ export class OAuthService {
         }),
       ),
     );
-    const getClient = this.getClient(configOAuth, integrationApp.name, integrationApp.additionalConfiguration);
-    if (integrationApp.additionalConfiguration && this.containsGrantType(integrationApp.additionalConfiguration)) {
-      const tokenSet = await getClient.grant({
-        grant_type: 'client_credentials'
-      })
-      Logger.log('[TOKEN SET]:', JSON.stringify(tokenSet))
-      const createClientTokenInput: CreateClientTokenInput = {
-        PK: clientSK,
-        accessToken: tokenSet.access_token,
-        refreshToken: tokenSet.refresh_token,
-        expTime: tokenSet.expires_in ? typeof tokenSet.expires_in === 'string' ? parseInt(tokenSet.expires_in, 10) : tokenSet.expires_in : undefined,
-        clientPK: clientPK,
-      };
+    const getClient = this.getClient(configOAuth, integrationApp);
+    let authLink;
+    const mappedAdditionalConfiguration = (integrationApp?.additionalConfiguration || []).map((field) => ({
+      [field.fieldName]: field.fieldValue,
+    })).reduce((acc, curr) => ({ ...acc, ...curr }), {});
 
-      await this.clientTokenService.createClientToken(createClientTokenInput);
+    switch (integrationApp.grantType) {
+      case GrantTypeEnums.CLIENT_CREDENTIALS:
+        const tokenSet = await getClient.grant({
+          grant_type: 'client_credentials',
+          ...mappedAdditionalConfiguration
+        })
+        Logger.log('[TOKEN SET]:', JSON.stringify(tokenSet))
+        const createClientTokenInput: CreateClientTokenInput = {
+          PK: clientSK,
+          accessToken: tokenSet.access_token,
+          refreshToken: tokenSet.refresh_token,
+          expTime: tokenSet.expires_in ? typeof tokenSet.expires_in === 'string' ? parseInt(tokenSet.expires_in, 10) : tokenSet.expires_in : undefined,
+          clientPK: clientPK,
+        };
 
-      return 'success';
-    } else {
-      // TODO: testing open ID
-      // const authLink = getClient.code.getUri();
-      // Logger.log('state:::', this.state)
-      this.codeVerifierOpenId = generators.codeVerifier();
-      this.nonce = generators.nonce();
-      const authLink = getClient.authorizationUrl({
-        state: encodeURIComponent(
-          JSON.stringify({
-            fromUrl,
-            clientPK,
-            clientSK,
-          }),
-        ),
-        scope: configOAuth.scopes.join(','),
-        code_challenge: generators.codeChallenge(this.codeVerifierOpenId),
-        code_challenge_method: 'S256',
-        redirect_uri: `${ConfigUtil.get('oauth.redirectUriPath')}/${ConfigUtil.get(
-          'server.prefix',
-        )}/oauth/callback`,
-        response_type: "code",
-        nonce: this.nonce,
-        // TODO: hardcoded trello additional configs, must figure out how to set dynamic ones
-        key: configOAuth.clientId,
-        expiration: '1day',
-        // response_type: "fragment",
-        callback_method: 'fragment',
-        return_url: `${ConfigUtil.get('oauth.redirectUriPath')}/${ConfigUtil.get('server.prefix')}/oauth/callback`,
-      });
-      Logger.log('authLink:::', authLink)
-      return authLink;
+        await this.clientTokenService.createClientToken(createClientTokenInput);
+
+        return 'success';
+      case GrantTypeEnums.AUTHORIZATION_CODE:
+        this.codeVerifierOpenId = generators.codeVerifier();
+        this.nonce = generators.nonce();
+        authLink = getClient.authorizationUrl({
+          state: encodeURIComponent(
+            JSON.stringify({
+              fromUrl,
+              clientPK,
+              clientSK,
+            }),
+          ),
+          scope: configOAuth.scopes.join(','),
+          redirect_uri: `${ConfigUtil.get('oauth.redirectUriPath')}/${ConfigUtil.get(
+            'server.prefix',
+          )}/oauth/callback`,
+          nonce: this.nonce,
+          ...mappedAdditionalConfiguration
+        });
+        Logger.log('[AUTH LINK]', authLink)
+        return authLink;
+      case GrantTypeEnums.AUTHORIZATION_CODE_WITH_PKCE:
+        this.codeVerifierOpenId = generators.codeVerifier();
+        this.nonce = generators.nonce();
+        authLink = getClient.authorizationUrl({
+          state: encodeURIComponent(
+            JSON.stringify({
+              fromUrl,
+              clientPK,
+              clientSK,
+            }),
+          ),
+          scope: configOAuth.scopes.join(','),
+          code_challenge: generators.codeChallenge(this.codeVerifierOpenId),
+          code_challenge_method: 'S256',
+          redirect_uri: `${ConfigUtil.get('oauth.redirectUriPath')}/${ConfigUtil.get(
+            'server.prefix',
+          )}/oauth/callback`,
+          nonce: this.nonce,
+          ...mappedAdditionalConfiguration
+        });
+        Logger.log('[AUTH LINK]', authLink)
+        return authLink;
+
+      default:
+        this.codeVerifierOpenId = generators.codeVerifier();
+        this.nonce = generators.nonce();
+        authLink = getClient.authorizationUrl({
+          state: encodeURIComponent(
+            JSON.stringify({
+              fromUrl,
+              clientPK,
+              clientSK,
+            }),
+          ),
+          scope: configOAuth.scopes.join(','),
+          code_challenge: generators.codeChallenge(this.codeVerifierOpenId),
+          code_challenge_method: 'S256',
+          redirect_uri: `${ConfigUtil.get('oauth.redirectUriPath')}/${ConfigUtil.get(
+            'server.prefix',
+          )}/oauth/callback`,
+          nonce: this.nonce,
+          ...mappedAdditionalConfiguration
+        });
+        Logger.log('[AUTH LINK]', authLink)
+        return authLink;
     }
-
-    // if (integrationApp.name === 'Amadeus') {
-    //   const result: any = await this.getAccessToken(
-    //     integrationApp.urls.authorize,
-    //     {
-    //       grant_type: '',
-    //       redirect_uri: '',
-    //       code: '',
-    //     },
-    //     { client_id: client.secrets.clientId, client_secret: client.secrets.clientSecret },
-    //     integrationApp.clientDetailsPlacement,
-    //     integrationApp.name
-    //   );
-    //   if (result.error) throw new Error(result.error);
-
-    //   const createClientTokenInput: CreateClientTokenInput = {
-    //     PK: clientSK,
-    //     accessToken: result.access_token,
-    //     refreshToken: result.refresh_token,
-    //     expTime: result.expires_in ? typeof result.expires_in === 'string' ? parseInt(result.expires_in, 10) : result.expires_in : undefined,
-    //     clientPK: clientPK,
-    //   };
-
-    //   await this.clientTokenService.createClientToken(createClientTokenInput);
-
-    //   return 'success';
-    // }
-    // if (integrationApp.additionalConfiguration && this.containsGrantType(integrationApp.additionalConfiguration)) {
-    //   const result: any = await this.getAccessToken(
-    //     integrationApp.urls.authorize,
-    //     {
-    //       grant_type: '',
-    //       redirect_uri: '',
-    //       code: '',
-    //     },
-    //     { client_id: client.secrets.clientId, client_secret: client.secrets.clientSecret },
-    //     integrationApp.clientDetailsPlacement,
-    //     integrationApp.name,
-    //     integrationApp.additionalConfiguration,
-    //   );
-    //   if (result.error) throw new Error(result.error);
-
-    //   const createClientTokenInput: CreateClientTokenInput = {
-    //     PK: clientSK,
-    //     accessToken: result.access_token,
-    //     refreshToken: result.refresh_token,
-    //     expTime: result.expires_in ? typeof result.expires_in === 'string' ? parseInt(result.expires_in, 10) : result.expires_in : undefined,
-    //     clientPK: clientPK,
-    //   };
-
-    //   await this.clientTokenService.createClientToken(createClientTokenInput);
-
-    //   return 'success';
-    // }
-    // if (integrationApp.clientDetailsPlacement === ClientIntegrationDetailsPlacementOption.QUERY_PARAMS) {
-    //   // get access token via query params
-    //   const result: any = await this.getAccessToken(
-    //     integrationApp.urls.authorize,
-    //     {
-    //       grant_type: '',
-    //       redirect_uri: '',
-    //       code: '',
-    //     },
-    //     { client_id: client.secrets.clientId, client_secret: client.secrets.clientSecret },
-    //     integrationApp.clientDetailsPlacement,
-    //     integrationApp.name
-    //   );
-    //   if (result.error) throw new Error(result.error);
-
-    //   const createClientTokenInput: CreateClientTokenInput = {
-    //     PK: clientSK,
-    //     accessToken: result.access_token,
-    //     refreshToken: result.refresh_token,
-    //     expTime: result.expires_in ? typeof result.expires_in === 'string' ? parseInt(result.expires_in, 10) : result.expires_in : undefined,
-    //     clientPK: clientPK,
-    //   };
-
-    //   await this.clientTokenService.createClientToken(createClientTokenInput);
-    //   return 'success';
-    // } else {
-    //   const configOAuth = this.getConfigOAuth(
-    //     client,
-    //     integrationApp,
-    //     encodeURIComponent(
-    //       JSON.stringify({
-    //         fromUrl,
-    //         clientPK,
-    //         clientSK,
-    //       }),
-    //     ),
-    //   );
-    //   const getClient = this.getClient(configOAuth, integrationApp.name, integrationApp.additionalConfiguration);
-    //   // const authLink = getClient.code.getUri();
-    //   // Logger.log('state:::', this.state)
-    //   const authLink = getClient.authorizationUrl({
-    //     state: encodeURIComponent(
-    //       JSON.stringify({
-    //         fromUrl,
-    //         clientPK,
-    //         clientSK,
-    //       }),
-    //     ),
-    //     redirect_uri: `${ConfigUtil.get('oauth.redirectUriPath')}/${ConfigUtil.get(
-    //       'server.prefix',
-    //     )}/oauth/callback`,
-    //     response_type: "code"
-    //   });
-    //   Logger.log('authLink:::', authLink)
-    //   return authLink;
-    // }
   }
 
   async getAccessToken(
@@ -447,26 +305,22 @@ export class OAuthService {
   async callbackOAuth(req, res) {
 
     let data = req.query.state;
-    logger.log('querydata:', data)
-    logger.log('[url]:', req.url)
     try {
       const params = this.clientIssuer.callbackParams(req);
-      logger.log('[params]:', params)
+      logger.log('[CALLBACK PARAMS]:', params)
       // calls the access token endpoint for getting access token
+      // `https://c82d-222-127-190-95.ngrok-free.app/api/oauth/callback`
       const tokenSet = await this.clientIssuer.oauthCallback(`${ConfigUtil.get('oauth.redirectUriPath')}/${ConfigUtil.get(
         'server.prefix',
       )}/oauth/callback`, params, { state: params.state, code_verifier: this.codeVerifierOpenId });
-      logger.log('[tokenSet]:', JSON.stringify(tokenSet))
+      logger.log('[TOKEN SET]:', JSON.stringify(tokenSet))
       // let buff = new Buffer(data, 'base64');
       let decodedData = decodeURIComponent(data);
-      logger.log('[decodedData]:', decodedData)
-      logger.log('[decodedData typeof]:', typeof decodedData)
       const state = decodedData === 'undefined' ? {
         fromUrl: this.testFromUrl,
         clientPK: this.testClientPK,
         clientSK: this.testClientSK
       } : JSON.parse(decodedData);
-      logger.log('[state]:', state)
       const getFromUrl = (intAppPK: string, clientPK: string, clientSK: string, status: string) => {
         const url = new URL(state.fromUrl);
         const searchParams = new URLSearchParams(url.search);
@@ -494,26 +348,6 @@ export class OAuthService {
           SK: `${client.intAppId}||metadata`,
         });
 
-        // const accessTokenUri = client.metadata
-        //   ? integrationApp.urls.token.replace('{{store}}', client.metadata.shopifyStore)
-        //   : integrationApp.urls.token;
-        // const result: any = await this.getAccessToken(
-        //   accessTokenUri,
-        //   {
-        //     grant_type: 'authorization_code',
-        //     // redirect_uri: `${ConfigUtil.get('oauth.redirectUriPath')}/${ConfigUtil.get(
-        //     //   'server.prefix',
-        //     // )}/oauth/callback`,
-        //     redirect_uri: `https://686f-222-127-190-95.ngrok-free.app/api/oauth/callback`,
-        //     code: req.url,
-        //   },
-        //   { client_id: client.secrets.clientId, client_secret: client.secrets.clientSecret },
-        //   integrationApp.clientDetailsPlacement,
-        //   integrationApp.name,
-        // );
-
-        // if (result.error) throw new Error(result.error);
-
         const createClientTokenInput: CreateClientTokenInput = {
           PK: state.clientSK,
           accessToken: tokenSet.access_token,
@@ -537,7 +371,7 @@ export class OAuthService {
         res.redirect(getFromUrl(client.intAppId, client.PK, client.SK, 'error'));
       }
     } catch (error) {
-      Logger.log('[OPEN ID ERROR]:', error)
+      logger.log('[OPEN ID ERROR]:', error)
       res.redirect(`${ConfigUtil.get('server.origin')}/integrations`);
     }
   }

@@ -5,6 +5,7 @@ import { CreateIntegrationAppInput } from '../graphql/integration-app/inputs/cre
 
 import { IntegrationAppService } from '../graphql/integration-app/integration-app.service';
 import { ClientIntegrationDetailsPlacementOption, FileUploadType } from '../graphql/integration-app/integration-app.enum';
+import { GrantTypeEnums } from '../graphql/common/enums/oauth.enum';
 
 const logger = new Logger('SetupAmadeus');
 
@@ -18,9 +19,7 @@ export async function setUpAmadeus(app: INestApplication) {
     type: AuthType.OAUTH,
     clientDetailsPlacement: ClientIntegrationDetailsPlacementOption.HEADERS,
     fileUploadType: FileUploadType.DIRECT_BODY,
-    additionalConfiguration: [
-      { fieldName: 'grant_type', fieldValue: 'client_credentials' }
-    ],
+    grantType: GrantTypeEnums.CLIENT_CREDENTIALS,
     version: 1,
     urls: {
       authorize: 'https://test.api.amadeus.com/v1/security/oauth2/token',

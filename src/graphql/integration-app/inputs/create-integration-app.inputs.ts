@@ -5,13 +5,13 @@ import { AuthType } from '../../common/enums/authentication.enum';
 import { ClientIntegrationDetailsPlacementOption, FileUploadType } from '../integration-app.enum';
 
 @InputType()
-export class HeaderInput extends PartialType(Header, InputType) {}
+export class HeaderInput extends PartialType(Header, InputType) { }
 
 @InputType()
-export class AdditionalConfigurationInput extends PartialType(AdditionalConfiguration, InputType) {}
+export class AdditionalConfigurationInput extends PartialType(AdditionalConfiguration, InputType) { }
 
 @InputType()
-export class UrlsInput extends PartialType(Urls, InputType) {}
+export class UrlsInput extends PartialType(Urls, InputType) { }
 
 @InputType()
 export class CreateIntegrationAppInput {
@@ -50,4 +50,10 @@ export class CreateIntegrationAppInput {
 
   @Field((type) => String, { nullable: true })
   orgId?: string;
+
+  @Field((type) => String, { nullable: true })
+  grantType?: string;
+  
+  @Field((type) => String, { nullable: true })
+  authMethod?: string;
 }

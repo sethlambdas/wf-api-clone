@@ -66,6 +66,12 @@ export class IntegrationApp implements CompositePrimaryKey {
   @Field((type) => String, { nullable: true })
   cookieName?: string;
 
+  @Field((type) => String, { nullable: true })
+  grantType?: string;
+
+  @Field((type) => String, { nullable: true })
+  authMethod?: string;
+
   @Field((type) => [Header], { nullable: true })
   headers?: Header[];
 

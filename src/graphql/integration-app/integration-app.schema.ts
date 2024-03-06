@@ -94,6 +94,14 @@ export const IntegrationAppsSchema = new Schema(
       type: String,
       required: false
     },
+    grantType: {
+      type: String,
+      required: false
+    },
+    authMethod: {
+      type: String,
+      required: false
+    },
   },
   {
     timestamps: {
