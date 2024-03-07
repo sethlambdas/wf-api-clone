@@ -5,7 +5,7 @@ import { AuthType } from '../graphql/common/enums/authentication.enum';
 import { CreateIntegrationAppInput } from '../graphql/integration-app/inputs/create-integration-app.inputs';
 
 import { IntegrationAppService } from '../graphql/integration-app/integration-app.service';
-import { ClientAuthMethodEnums } from '../graphql/common/enums/oauth.enum';
+import { ClientAuthMethodEnums, GrantTypeEnums } from '../graphql/common/enums/oauth.enum';
 
 const logger = new Logger('SetupBitly');
 
@@ -21,6 +21,7 @@ export async function setupBitly(app: INestApplication) {
     fileUploadType: FileUploadType.DIRECT_BODY,
     authMethod: ClientAuthMethodEnums.client_secret_post,
     version: 1,
+    grantType: GrantTypeEnums.AUTHORIZATION_CODE,
     urls: {
       authorize: 'https://bitly.com/oauth/authorize',
       token: 'https://api-ssl.bitly.com/oauth/access_token',

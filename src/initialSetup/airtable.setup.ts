@@ -5,6 +5,7 @@ import { CreateIntegrationAppInput } from '../graphql/integration-app/inputs/cre
 
 import { IntegrationAppService } from '../graphql/integration-app/integration-app.service';
 import { ClientIntegrationDetailsPlacementOption, FileUploadType } from '../graphql/integration-app/integration-app.enum';
+import { ClientAuthMethodEnums, GrantTypeEnums } from '../graphql/common/enums/oauth.enum';
 
 const logger = new Logger('SetupAirtable');
 
@@ -19,6 +20,11 @@ export async function setUpAirtable(app: INestApplication) {
     clientDetailsPlacement: ClientIntegrationDetailsPlacementOption.HEADERS,
     fileUploadType: FileUploadType.DIRECT_BODY,
     version: 1,
+    authMethod: ClientAuthMethodEnums.client_secret_basic,
+    grantType: GrantTypeEnums.AUTHORIZATION_CODE_WITH_PKCE,
+    additionalConfiguration: [
+      { fieldName: 'response_type', fieldValue: 'code' }
+    ],
     urls: {
       authorize: 'https://airtable.com/oauth2/v1/authorize',
       token: 'https://airtable.com/oauth2/v1/token',

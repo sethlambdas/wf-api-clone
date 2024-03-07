@@ -5,6 +5,7 @@ import { AuthType } from '../graphql/common/enums/authentication.enum';
 import { CreateIntegrationAppInput } from '../graphql/integration-app/inputs/create-integration-app.inputs';
 
 import { IntegrationAppService } from '../graphql/integration-app/integration-app.service';
+import { ClientAuthMethodEnums, GrantTypeEnums } from '../graphql/common/enums/oauth.enum';
 
 const logger = new Logger('SetupNotion');
 
@@ -19,6 +20,11 @@ export async function setupNotion(app: INestApplication) {
     clientDetailsPlacement: ClientIntegrationDetailsPlacementOption.HEADERS,
     fileUploadType: FileUploadType.DIRECT_BODY,
     version: 1,
+    additionalConfiguration: [
+      { fieldName: 'response_type', fieldValue: 'code' }
+    ],
+    grantType: GrantTypeEnums.AUTHORIZATION_CODE,
+    authMethod: ClientAuthMethodEnums.client_secret_basic,
     urls: {
       authorize: 'https://api.notion.com/v1/oauth/authorize',
       token: 'https://api.notion.com/v1/oauth/token',
