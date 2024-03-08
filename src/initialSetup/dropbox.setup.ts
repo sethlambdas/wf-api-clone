@@ -22,6 +22,9 @@ export async function setupDropbox(app: INestApplication) {
       authorize: 'https://www.dropbox.com/oauth2/authorize',
       token: 'https://api.dropboxapi.com/oauth2/token',
     },
+    additionalConfiguration: [
+      { fieldName: 'response_type', fieldValue: 'code' }
+    ],
     scopes: [
       'files.metadata.read',
       'files.metadata.write',

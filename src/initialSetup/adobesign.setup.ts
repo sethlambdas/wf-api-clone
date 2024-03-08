@@ -5,6 +5,7 @@ import { CreateIntegrationAppInput } from '../graphql/integration-app/inputs/cre
 
 import { IntegrationAppService } from '../graphql/integration-app/integration-app.service';
 import { ClientIntegrationDetailsPlacementOption, FileUploadType } from '../graphql/integration-app/integration-app.enum';
+import { ClientAuthMethodEnums } from '../graphql/common/enums/oauth.enum';
 
 const logger = new Logger('Adobesign');
 
@@ -23,6 +24,10 @@ export async function setupAdobesign(app: INestApplication) {
       token: 'https://api.na1.adobesign.com/oauth/v2/token',
       refreshToken: 'https://api.na1.adobesign.com/oauth/v2/refresh',
     },
+    additionalConfiguration: [
+      { fieldName: 'response_type', fieldValue: 'code' }
+    ],
+    authMethod: ClientAuthMethodEnums.client_secret_post,
     scopes: [
       'user_read:account',
       'user_write:account',

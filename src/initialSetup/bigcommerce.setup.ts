@@ -5,6 +5,7 @@ import { AuthType } from '../graphql/common/enums/authentication.enum';
 import { CreateIntegrationAppInput } from '../graphql/integration-app/inputs/create-integration-app.inputs';
 
 import { IntegrationAppService } from '../graphql/integration-app/integration-app.service';
+import { ClientAuthMethodEnums } from '../graphql/common/enums/oauth.enum';
 
 const logger = new Logger('SetupBigCommerce');
 
@@ -23,7 +24,7 @@ export async function setupBigCommerce(app: INestApplication) {
       authorize: 'https://login.bigcommerce.com/oauth2/authorize',
       token: 'https://login.bigcommerce.com/oauth2/token',
     },
-    scopes: ['store_v2_content_read_only','store_v2_products'],
+    scopes: ['store_v2_content_read_only', 'store_v2_products'],
     headers: [
       {
         fieldName: 'Content-Type',
@@ -34,6 +35,10 @@ export async function setupBigCommerce(app: INestApplication) {
         fieldValue: 'Bearer {{secret}}',
       },
     ],
+    additionalConfiguration: [
+      { fieldName: 'response_type', fieldValue: 'code' }
+    ],
+    authMethod: ClientAuthMethodEnums.client_secret_post
   };
 
   await integrationAppService.createIntegrationApp(createIntegrationAppInput);
