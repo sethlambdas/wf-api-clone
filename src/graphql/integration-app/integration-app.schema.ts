@@ -56,10 +56,6 @@ export const IntegrationAppsSchema = new Schema(
       type: String,
       enum: ['API_KEY', 'BASIC', 'OAUTH', 'COOKIE', 'AWS Signature'],
     },
-    clientDetailsPlacement: {
-      type: String,
-      enum: ['BODY', 'QUERY_PARAMS', 'HEADERS'],
-    },
     secretDetailsPlacement: {
       type: String,
       enum: ['BODY', 'QUERY_PARAMS', 'HEADERS'],
