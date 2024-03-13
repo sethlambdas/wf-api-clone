@@ -16,7 +16,6 @@ export async function setupTypeForm(app: INestApplication) {
   const createIntegrationAppInput: CreateIntegrationAppInput = {
     name: 'TypeForm',
     type: AuthType.OAUTH,
-    clientDetailsPlacement: ClientIntegrationDetailsPlacementOption.HEADERS,
     fileUploadType: FileUploadType.DIRECT_BODY,
     version: 1,
     urls: {

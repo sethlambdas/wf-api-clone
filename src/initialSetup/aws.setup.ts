@@ -21,7 +21,6 @@ export async function setUpAWSSignature(app: INestApplication) {
     name: 'AWS Signature',
     type: AuthType.AWSSignature,
     fileUploadType: FileUploadType.DIRECT_BODY,
-    clientDetailsPlacement: ClientIntegrationDetailsPlacementOption.HEADERS,
     version: 1,
     headers: [
       {

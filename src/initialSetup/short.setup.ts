@@ -19,7 +19,6 @@ export async function setupShort(app: INestApplication) {
   const createIntegrationAppInput: CreateIntegrationAppInput = {
     name: 'Short',
     type: AuthType.BASIC,
-    clientDetailsPlacement: ClientIntegrationDetailsPlacementOption.HEADERS,
     fileUploadType: FileUploadType.DIRECT_BODY,
     version: 1,
     headers: [

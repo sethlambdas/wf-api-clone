@@ -48,9 +48,6 @@ export class IntegrationApp implements CompositePrimaryKey {
   @Field((type) => AuthType)
   type: AuthType;
 
-  @Field((type) => ClientIntegrationDetailsPlacementOption, { nullable: true })
-  secretDetailsPlacement?: ClientIntegrationDetailsPlacementOption;
-
   @Field((type) => Int)
   version: number;
 
@@ -80,6 +77,12 @@ export class IntegrationApp implements CompositePrimaryKey {
 
   @Field((type) => String, { nullable: true })
   orgId?: string;
+
+  @Field((type) => [AdditionalConfiguration], { nullable: true })
+  apiKeyConfiguration?: AdditionalConfiguration[];
+
+  @Field((type) => String, { nullable: true })
+  addTo?: string;
 }
 
 export interface IListIntegrationApps {

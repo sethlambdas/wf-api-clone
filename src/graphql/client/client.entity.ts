@@ -81,6 +81,9 @@ export class Client implements CompositePrimaryKey {
 
   @Field((type) => [Header], { nullable: true })
   headers?: Header[];
+
+  @Field((type) => [Header], { nullable: true })
+  apiKeyConfigurations?: Header[];
 }
 export interface IListClients {
   data: {

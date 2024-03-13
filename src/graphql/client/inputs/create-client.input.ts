@@ -48,4 +48,7 @@ export class CreateClientInput {
 
   @Field((type) => [HeaderInput], { nullable: true })
   headers?: HeaderInput[];
+
+  @Field((type) => [HeaderInput], { nullable: true })
+  apiKeyConfigurations?: HeaderInput[];
 }

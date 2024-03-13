@@ -17,7 +17,6 @@ export async function setupBitly(app: INestApplication) {
   const createIntegrationAppInput: CreateIntegrationAppInput = {
     name: 'Bitly',
     type: AuthType.OAUTH,
-    clientDetailsPlacement: ClientIntegrationDetailsPlacementOption.HEADERS,
     fileUploadType: FileUploadType.DIRECT_BODY,
     authMethod: ClientAuthMethodEnums.client_secret_post,
     version: 1,

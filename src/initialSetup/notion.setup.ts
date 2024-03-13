@@ -17,7 +17,6 @@ export async function setupNotion(app: INestApplication) {
   const createIntegrationAppInput: CreateIntegrationAppInput = {
     name: 'Notion',
     type: AuthType.OAUTH,
-    clientDetailsPlacement: ClientIntegrationDetailsPlacementOption.HEADERS,
     fileUploadType: FileUploadType.DIRECT_BODY,
     version: 1,
     additionalConfiguration: [

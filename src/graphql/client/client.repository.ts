@@ -16,7 +16,7 @@ export class ClientRepository {
   constructor(
     @InjectModel(ConfigUtil.get('dynamodb.schema.integrations'))
     private clientModel: Model<Client, CompositePrimaryKey>,
-  ) {}
+  ) { }
 
   async createClient(client: Client): Promise<Client> {
     const results = await this.clientModel.create({
@@ -24,12 +24,13 @@ export class ClientRepository {
       SK: client.SK,
       name: client.name,
       type: client.type,
-      status: client.status,
+      status: client.status as ClientStatus || ClientStatus.ACTIVE,
       intAppId: client.intAppId,
       secrets: client.secrets,
       headers: client.headers,
+      apiKeyConfigurations: client.apiKeyConfigurations
     });
-    Logger.log(client);
+   
     return results;
   }
 
@@ -39,7 +40,6 @@ export class ClientRepository {
 
   async findClientByPK(primaryKey: CompositePrimaryKey): Promise<Client> {
     const results = await this.clientModel.get(primaryKey);
-
     return results;
   }
 

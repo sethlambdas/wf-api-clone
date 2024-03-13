@@ -16,7 +16,6 @@ export async function setUpFirebase(app: INestApplication) {
   const createIntegrationAppInput: CreateIntegrationAppInput = {
     name: 'Firebase',
     type: AuthType.OAUTH,
-    clientDetailsPlacement: ClientIntegrationDetailsPlacementOption.HEADERS,
     fileUploadType: FileUploadType.DIRECT_BODY,
     version: 1,
     urls: {

@@ -1,5 +1,6 @@
 import { Schema } from 'dynamoose';
 import { HeaderSchema } from '../integration-app/integration-app.schema';
+import { ClientStatus } from '../common/enums/authentication.enum';
 
 export const SecretsSchema = new Schema({
   apiKey: {
@@ -71,11 +72,12 @@ export const ClientSchema = new Schema(
     },
     type: {
       type: String,
-      enum: ['API_KEY', 'BASIC', 'OAUTH', 'COOKIE','AWS Signature'],
+      enum: ['API_KEY', 'BASIC', 'BEARER', 'OAUTH', 'COOKIE', 'AWS Signature'],
     },
     status: {
       type: String,
       enum: ['ACTIVE', 'DISABLED'],
+      default: ClientStatus.ACTIVE
     },
     fileUploadType: {
       type: String,
@@ -100,6 +102,11 @@ export const ClientSchema = new Schema(
     headers: {
       type: Array,
       schema: [HeaderSchema],
+    },
+    apiKeyConfigurations: {
+      type: Array,
+      schema: [HeaderSchema],
+      required: false
     },
   },
   {

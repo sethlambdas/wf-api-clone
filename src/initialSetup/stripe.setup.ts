@@ -19,8 +19,7 @@ export async function setupStripe(app: INestApplication) {
 
   const createIntegrationAppInput: CreateIntegrationAppInput = {
     name: 'Stripe',
-    type: AuthType.BASIC,
-    clientDetailsPlacement: ClientIntegrationDetailsPlacementOption.HEADERS,
+    type: AuthType.BEARER,
     version: 1,
     headers: [
       {

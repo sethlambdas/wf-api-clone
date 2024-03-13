@@ -20,7 +20,6 @@ export async function setUpYHFinance(app: INestApplication) {
     name: 'YH Finance',
     type: AuthType.BASIC,
     fileUploadType: FileUploadType.DIRECT_BODY,
-    clientDetailsPlacement: ClientIntegrationDetailsPlacementOption.HEADERS,
     version: 1,
     headers: [
       {

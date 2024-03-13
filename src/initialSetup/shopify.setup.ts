@@ -16,7 +16,6 @@ export async function setupShopify(app: INestApplication) {
   const createIntegrationAppInput: CreateIntegrationAppInput = {
     name: 'Shopify',
     type: AuthType.OAUTH,
-    clientDetailsPlacement: ClientIntegrationDetailsPlacementOption.HEADERS,
     version: 1,
     urls: {
       authorize: 'https://{{store}}.myshopify.com/admin/oauth/authorize',

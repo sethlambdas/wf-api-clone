@@ -17,7 +17,6 @@ export async function setUpAmadeus(app: INestApplication) {
   const createIntegrationAppInput: CreateIntegrationAppInput = {
     name: 'Amadeus',
     type: AuthType.OAUTH,
-    clientDetailsPlacement: ClientIntegrationDetailsPlacementOption.HEADERS,
     fileUploadType: FileUploadType.DIRECT_BODY,
     grantType: GrantTypeEnums.CLIENT_CREDENTIALS,
     version: 1,

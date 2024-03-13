@@ -18,8 +18,7 @@ export async function setupPdf(app: INestApplication) {
 
   const createIntegrationAppInput: CreateIntegrationAppInput = {
     name: 'Pdf',
-    type: AuthType.BASIC,
-    clientDetailsPlacement: ClientIntegrationDetailsPlacementOption.HEADERS,
+    type: AuthType.BEARER,
     fileUploadType: FileUploadType.DIRECT_BODY,
     version: 1,
     headers: [

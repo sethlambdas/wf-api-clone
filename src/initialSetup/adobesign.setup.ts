@@ -17,7 +17,6 @@ export async function setupAdobesign(app: INestApplication) {
   const createIntegrationAppInput: CreateIntegrationAppInput = {
     name: 'Adobesign',
     type: AuthType.OAUTH,
-    clientDetailsPlacement: ClientIntegrationDetailsPlacementOption.HEADERS,
     version: 1,
     urls: {
       authorize: 'https://secure.au1.adobesign.com/public/oauth/v2',

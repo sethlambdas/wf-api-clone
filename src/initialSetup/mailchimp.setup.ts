@@ -21,8 +21,6 @@ export async function setUpMailChimp(app: INestApplication) {
     name: 'MailChimp',
     type: AuthType.BASIC,
     fileUploadType: FileUploadType.DIRECT_BODY,
-    clientDetailsPlacement: ClientIntegrationDetailsPlacementOption.HEADERS,
-    secretDetailsPlacement: ClientIntegrationDetailsPlacementOption.HEADERS,
     version: 1,
     headers: [
       {

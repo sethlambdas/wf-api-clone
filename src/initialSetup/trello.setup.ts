@@ -17,7 +17,6 @@ export async function setupTrello(app: INestApplication) {
     name: 'Trello',
     type: AuthType.OAUTH,
     fileUploadType: FileUploadType.DIRECT_BODY,
-    clientDetailsPlacement: ClientIntegrationDetailsPlacementOption.HEADERS,
     version: 1,
     urls: {
       authorize: 'https://trello.com/1/authorize',

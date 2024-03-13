@@ -22,7 +22,6 @@ export async function setupMailgun(app: INestApplication) {
     type: AuthType.BASIC,
     version: 1,
     fileUploadType: FileUploadType.DIRECT_BODY,
-    clientDetailsPlacement: ClientIntegrationDetailsPlacementOption.HEADERS,
     headers: [
       {
         fieldName: 'Content-Type',

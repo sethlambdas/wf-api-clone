@@ -21,7 +21,6 @@ export async function setupAdyen(app: INestApplication) {
     name: 'Adyen',
     type: AuthType.BASIC,
     fileUploadType: FileUploadType.DIRECT_BODY,
-    clientDetailsPlacement: ClientIntegrationDetailsPlacementOption.HEADERS,
     version: 1,
     headers: [
       {

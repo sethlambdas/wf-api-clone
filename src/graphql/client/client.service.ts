@@ -10,6 +10,7 @@ import { Client } from './client.entity';
 import { ClientRepository } from './client.repository';
 import { CreateClientInput, SecretsInput } from './inputs/create-client.input';
 import { FindClientByNameInput, FindClientByPkInput, ListClientsInput } from './inputs/find-client.input';
+import { ClientStatus } from '../common/enums/authentication.enum';
 
 @Injectable()
 export class ClientService {
@@ -17,7 +18,7 @@ export class ClientService {
     @Inject(ClientRepository)
     private clientRepository: ClientRepository,
     private integrationAppService: IntegrationAppService,
-  ) {}
+  ) { }
 
   async createClient(createClientInput: CreateClientInput): Promise<Client | null> {
     const {
@@ -33,6 +34,7 @@ export class ClientService {
       metadata,
       integrationType,
       fileUploadType,
+      apiKeyConfigurations
     } = createClientInput;
 
     if (!orgId.includes('#')) return null;
@@ -45,13 +47,13 @@ export class ClientService {
       SK: sk,
       name,
       type,
-      status,
+      status: ClientStatus.ACTIVE,
       headers,
       intAppId,
       secrets,
       fileUploadType,
+      apiKeyConfigurations: apiKeyConfigurations || []
     };
-
     if (scopes) client.scopes = scopes.split(',');
     if (metadata) client.metadata = metadata;
 
@@ -76,9 +78,7 @@ export class ClientService {
     }
 
     if (secrets) client.secrets = await this.cipherClient(KMSType.ENCRYPT, secrets);
-
     const result = await this.clientRepository.createClient(client);
-
     return result;
   }
 

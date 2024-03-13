@@ -22,7 +22,6 @@ export async function setupTwilio(app: INestApplication) {
     name: 'Twilio',
     type: AuthType.BASIC,
     fileUploadType: FileUploadType.DIRECT_BODY,
-    clientDetailsPlacement: ClientIntegrationDetailsPlacementOption.HEADERS,
     version: 1,
     headers: [
       {

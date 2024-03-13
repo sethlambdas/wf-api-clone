@@ -3,8 +3,8 @@ import { INestApplication, Logger } from '@nestjs/common';
 import { AuthType } from '../graphql/common/enums/authentication.enum';
 import { CreateIntegrationAppInput } from '../graphql/integration-app/inputs/create-integration-app.inputs';
 
+import { ApiKeyConfigurationEnum, FileUploadType } from '../graphql/integration-app/integration-app.enum';
 import { IntegrationAppService } from '../graphql/integration-app/integration-app.service';
-import { ClientIntegrationDetailsPlacementOption, FileUploadType } from '../graphql/integration-app/integration-app.enum';
 
 const logger = new Logger('SetupAerisWeather');
 
@@ -15,10 +15,13 @@ export async function setUpAerisWeather(app: INestApplication) {
 
   const createIntegrationAppInput: CreateIntegrationAppInput = {
     name: 'AerisWeather',
-    type: AuthType.OAUTH,
-    clientDetailsPlacement: ClientIntegrationDetailsPlacementOption.QUERY_PARAMS,
-    secretDetailsPlacement: ClientIntegrationDetailsPlacementOption.HEADERS,
+    type: AuthType.API_KEY,
     fileUploadType: FileUploadType.DIRECT_BODY,
+    addTo: ApiKeyConfigurationEnum.QUERY_PARAMS,
+    apiKeyConfiguration: [
+      { fieldName: 'client_id', fieldValue: '' },
+      { fieldName: 'client_secret', fieldValue: '' }
+    ],
     version: 1,
     urls: {
       authorize: 'https://www.aerisweather.com/oauth/authorize',
@@ -30,10 +33,7 @@ export async function setUpAerisWeather(app: INestApplication) {
         fieldName: 'Content-Type',
         fieldValue: 'application/json',
       },
-      {
-        fieldName: 'Authorization',
-        fieldValue: 'Bearer {{secret}}',
-      },
+
     ],
   };
 

@@ -17,7 +17,6 @@ export async function setupBigCommerce(app: INestApplication) {
   const createIntegrationAppInput: CreateIntegrationAppInput = {
     name: 'BigCommerce',
     type: AuthType.OAUTH,
-    clientDetailsPlacement: ClientIntegrationDetailsPlacementOption.HEADERS,
     fileUploadType: FileUploadType.DIRECT_BODY,
     version: 1,
     urls: {

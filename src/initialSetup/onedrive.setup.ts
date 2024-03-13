@@ -16,7 +16,6 @@ export async function setupOnedrive(app: INestApplication) {
   const createIntegrationAppInput: CreateIntegrationAppInput = {
     name: 'One Drive',
     type: AuthType.OAUTH,
-    clientDetailsPlacement: ClientIntegrationDetailsPlacementOption.HEADERS,
     version: 1,
     urls: {
       authorize: 'https://login.live.com/oauth20_authorize.srf',

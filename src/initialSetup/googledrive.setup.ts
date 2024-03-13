@@ -16,7 +16,6 @@ export async function setupGoogleDrive(app: INestApplication) {
   const createIntegrationAppInput: CreateIntegrationAppInput = {
     name: 'GoogleDrive',
     type: AuthType.OAUTH,
-    clientDetailsPlacement: ClientIntegrationDetailsPlacementOption.HEADERS,
     version: 1,
     urls: {
       authorize: 'https://accounts.google.com/o/oauth2/auth',

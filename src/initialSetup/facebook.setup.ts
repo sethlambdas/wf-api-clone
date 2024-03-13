@@ -5,6 +5,7 @@ import { CreateIntegrationAppInput } from '../graphql/integration-app/inputs/cre
 
 import { IntegrationAppService } from '../graphql/integration-app/integration-app.service';
 import { ClientIntegrationDetailsPlacementOption, FileUploadType } from '../graphql/integration-app/integration-app.enum';
+import { GrantTypeEnums } from '../graphql/common/enums/oauth.enum';
 
 const logger = new Logger('SetupFacebook');
 
@@ -16,12 +17,8 @@ export async function setUpFacebook(app: INestApplication) {
   const createIntegrationAppInput: CreateIntegrationAppInput = {
     name: 'Facebook',
     type: AuthType.OAUTH,
-    clientDetailsPlacement: ClientIntegrationDetailsPlacementOption.QUERY_PARAMS,
-    secretDetailsPlacement: ClientIntegrationDetailsPlacementOption.HEADERS,
     fileUploadType: FileUploadType.DIRECT_BODY,
-    additionalConfiguration: [
-      { fieldName: 'grant_type', fieldValue: 'client_credentials' }
-    ],
+    grantType: GrantTypeEnums.CLIENT_CREDENTIALS,
     version: 1,
     urls: {
       authorize: 'https://graph.facebook.com/oauth/access_token',

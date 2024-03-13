@@ -21,12 +21,6 @@ export class CreateIntegrationAppInput {
   @Field((type) => AuthType)
   type: AuthType;
 
-  @Field((type) => ClientIntegrationDetailsPlacementOption, { nullable: true })
-  clientDetailsPlacement?: ClientIntegrationDetailsPlacementOption;
-
-  @Field((type) => ClientIntegrationDetailsPlacementOption, { nullable: true })
-  secretDetailsPlacement?: ClientIntegrationDetailsPlacementOption;
-
   @Field((type) => Int)
   version: number;
 
@@ -45,15 +39,21 @@ export class CreateIntegrationAppInput {
   @Field((type) => FileUploadType, { nullable: true })
   fileUploadType?: FileUploadType;
 
+  @Field((type) => String, { nullable: true })
+  addTo?: string;
+
   @Field((type) => [AdditionalConfigurationInput], { nullable: true })
-  additionalConfiguration?: AdditionalConfigurationInput[];
+  apiKeyConfiguration?: AdditionalConfigurationInput[];
 
   @Field((type) => String, { nullable: true })
   orgId?: string;
 
   @Field((type) => String, { nullable: true })
   grantType?: string;
-  
+
   @Field((type) => String, { nullable: true })
   authMethod?: string;
+
+  @Field((type) => [AdditionalConfigurationInput], { nullable: true })
+  additionalConfiguration?: AdditionalConfigurationInput[];
 }

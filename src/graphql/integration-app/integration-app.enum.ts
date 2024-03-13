@@ -12,6 +12,11 @@ export enum ClientIntegrationDetailsPlacementOption {
   'HEADERS' = 'HEADERS',
 }
 
+export enum ApiKeyConfigurationEnum {
+  'QUERY_PARAMS' = 'QUERY_PARAMS',
+  'HEADERS' = 'HEADERS',
+}
+
 registerEnumType(ClientIntegrationDetailsPlacementOption, {
   name: 'ClientIntegrationDetailsPlacementOption',
   description: 'client id and secret placement',
