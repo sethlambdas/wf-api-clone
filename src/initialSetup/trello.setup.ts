@@ -22,7 +22,7 @@ export async function setupTrello(app: INestApplication) {
       authorize: 'https://trello.com/1/authorize',
       token: 'https://trello.com/1/authorize',
     },
-    scopes: ['read','write','account'],
+    scopes: ['read', 'write', 'account'],
     headers: [
       {
         fieldName: 'Content-Type',
@@ -33,6 +33,13 @@ export async function setupTrello(app: INestApplication) {
         fieldValue: 'Bearer {{secret}}',
       },
     ],
+    additionalConfiguration: [
+      { fieldName: 'expiration', fieldValue: '1day' },
+      { fieldName: 'name', fieldValue: '' },
+      { fieldName: 'response_type', fieldValue: 'fragment' },
+      { fieldName: 'key', fieldValue: '' },
+      { fieldName: 'callback_method', fieldValue: 'fragment' }
+    ]
   };
 
   await integrationAppService.createIntegrationApp(createIntegrationAppInput);

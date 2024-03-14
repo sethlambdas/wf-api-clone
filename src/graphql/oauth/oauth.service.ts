@@ -3,7 +3,7 @@ import * as ClientOAuth2 from 'client-oauth2';
 import got from 'got';
 import * as QueryString from 'querystring';
 import * as SafeBuffer from 'safe-buffer';
-import { Issuer, generators, Client as OpenIdClient, ClientAuthMethod } from 'openid-client';
+import { Issuer, generators, Client as OpenIdClient, ClientAuthMethod, TokenSet } from 'openid-client';
 
 import { ConfigUtil } from '@lambdascrew/utility';
 
@@ -128,14 +128,34 @@ export class OAuthService {
       [field.fieldName]: field.fieldValue,
     })).reduce((acc, curr) => ({ ...acc, ...curr }), {});
 
+    let tokenSet: TokenSet;
+    let createClientTokenInput: CreateClientTokenInput;
+
     switch (integrationApp.grantType) {
       case GrantTypeEnums.CLIENT_CREDENTIALS:
-        const tokenSet = await getClient.grant({
+        tokenSet = await getClient.grant({
           grant_type: 'client_credentials',
           ...mappedAdditionalConfiguration
         })
-        Logger.log('[TOKEN SET]:', JSON.stringify(tokenSet))
-        const createClientTokenInput: CreateClientTokenInput = {
+        Logger.log('[CLIENT CREDENTIAL TOKEN SET]:', JSON.stringify(tokenSet))
+        createClientTokenInput = {
+          PK: clientSK,
+          accessToken: tokenSet.access_token,
+          refreshToken: tokenSet.refresh_token,
+          expTime: tokenSet.expires_in ? typeof tokenSet.expires_in === 'string' ? parseInt(tokenSet.expires_in, 10) : tokenSet.expires_in : undefined,
+          clientPK: clientPK,
+        };
+
+        await this.clientTokenService.createClientToken(createClientTokenInput);
+
+        return 'success';
+      case GrantTypeEnums.PASSWORD_CREDENTIALS:
+        tokenSet = await getClient.grant({
+          grant_type: 'password',
+          ...mappedAdditionalConfiguration
+        })
+        Logger.log('[PASSWORD TOKEN SET]:', JSON.stringify(tokenSet))
+        createClientTokenInput = {
           PK: clientSK,
           accessToken: tokenSet.access_token,
           refreshToken: tokenSet.refresh_token,
