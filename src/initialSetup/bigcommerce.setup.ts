@@ -35,7 +35,9 @@ export async function setupBigCommerce(app: INestApplication) {
       },
     ],
     additionalConfiguration: [
-      { fieldName: 'response_type', fieldValue: 'code' }
+      { fieldName: 'response_type', fieldValue: 'code' },
+      { fieldName: 'context', fieldValue: '' },
+      { fieldName: 'account_uuid', fieldValue: '' }
     ],
     authMethod: ClientAuthMethodEnums.client_secret_post
   };
