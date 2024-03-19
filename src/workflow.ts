@@ -282,12 +282,12 @@ export default class Workflow {
         ...parsedSte,
         ...(httpTrigger && httpTrigger.IsHttpTriggered
           ? {
-              [httpTrigger.httpACT.MD.Name]: {
-                ...parsedSte.data,
-                ...parsedPayload,
-                ...JSON.parse(httpTrigger.httpACT.MD.Body),
-              },
-            }
+            [httpTrigger.httpACT.MD.Name]: {
+              ...parsedSte.data,
+              ...parsedPayload,
+              ...JSON.parse(httpTrigger.httpACT.MD.Body),
+            },
+          }
           : {}),
         ...(parentWSXH?.state || {}),
         ...gvObject,
@@ -486,6 +486,14 @@ export default class Workflow {
                   } else {
                     await putEventsEB(params);
                   }
+                } else if (act.MD.ErrorAction === ErrorAction.EXITPATH) {
+                  const filteredParams: any = {
+                    Entries: params.Entries.filter(
+                      (entry: any) =>
+                        JSON.parse(entry.Detail).currentWorkflowStep.ACT.NM === act.MD.DefaultNext,
+                    ),
+                  };
+                  await putEventsEB(filteredParams);
                 } else {
                   if (act.END) {
                     this.logger.log('Workflow has finished executing!');
@@ -558,7 +566,7 @@ export default class Workflow {
                   const filteredParams: any = {
                     Entries: params.Entries.filter(
                       (entry: any) =>
-                        JSON.parse(entry.Detail).currentWorkflowStep.ACT.DESIGN[0].id !== act.MD.DefaultNext,
+                        JSON.parse(entry.Detail).currentWorkflowStep.ACT.NM !== act.MD.DefaultNext,
                     ),
                   };
                   await putEventsEB(filteredParams);

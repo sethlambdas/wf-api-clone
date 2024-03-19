@@ -61,7 +61,7 @@ export class WorkflowService {
     private organizationService: OrganizationService,
     @Inject(forwardRef(() => BillingService))
     private billingService: BillingService,
-  ) {}
+  ) { }
 
   async createWorkflow(createWorkflowInput: CreateWorkflowInput): Promise<CreateWorkflowResponse> {
     const { WorkflowPK, Design, StartAt, States, WorkflowName, OrgId } = createWorkflowInput;
@@ -395,7 +395,6 @@ export class WorkflowService {
       };
       if ((Object as any).values(TriggerTypes).includes(workflowStep.ACT.T)) {
         const { ScheduleType, RateValue, RateUnit, ExactTime, Cron } = workflowStep.ACT.MD;
-
         let Name: string;
         let ScheduleExpression: string;
 
@@ -803,9 +802,9 @@ export class WorkflowService {
             )}`;
           }
         }
-        if (reservedHeaderKeys.map((header)=>header.toLowerCase()).includes(header[0].toLowerCase())) {
+        if (reservedHeaderKeys.map((header) => header.toLowerCase()).includes(header[0].toLowerCase())) {
           updatedHeaders[header[0]] = '******************';
-        } 
+        }
         else {
           updatedHeaders[header[0]] = header[1];
         }
