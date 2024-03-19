@@ -11,7 +11,7 @@ export class ClientTokenRepository {
   constructor(
     @InjectModel(ConfigUtil.get('dynamodb.schema.integrationTokens'))
     private clientTokenModel: Model<ClientToken, SimplePrimaryKey>,
-  ) {}
+  ) { }
 
   async createClientToken(clientToken: ClientToken): Promise<ClientToken> {
     const results = await this.clientTokenModel.create(clientToken);
@@ -25,7 +25,6 @@ export class ClientTokenRepository {
 
   async findClientTokenByPK(primaryKey: SimplePrimaryKey): Promise<ClientToken> {
     const results = await this.clientTokenModel.get(primaryKey);
-
     return results;
   }
 

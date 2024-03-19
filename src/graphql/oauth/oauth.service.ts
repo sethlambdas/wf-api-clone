@@ -287,8 +287,6 @@ export class OAuthService {
           expTime: tokenSet.expires_in ? typeof tokenSet.expires_in === 'string' ? parseInt(tokenSet.expires_in, 10) : tokenSet.expires_in : undefined,
           clientPK: state.clientPK,
         };
-        // TODO: continuation here for redirecting in Trello
-        logger.log('[createClientTokenInput]', createClientTokenInput)
 
         await this.clientTokenService.createClientToken(createClientTokenInput);
 

@@ -12,12 +12,11 @@ export class ClientTokenService {
   constructor(
     @Inject(ClientTokenRepository)
     private clientTokenRepository: ClientTokenRepository,
-  ) {}
+  ) { }
 
   async createClientToken(createClientTokenInput: CreateClientTokenInput): Promise<ClientToken | null> {
     const { refreshToken, accessToken } = createClientTokenInput;
     const checkExistingRecords = await this.findClientTokenByPK({ PK: createClientTokenInput.PK });
-
     if (checkExistingRecords) {
       delete createClientTokenInput?.PK;
       const updatedResult = await this.updateClientTokenByPK(
@@ -41,7 +40,6 @@ export class ClientTokenService {
     if (cipherData.refreshToken) {
       createClientTokenInput.refreshToken = cipherData.refreshToken;
     }
-
     const result = await this.clientTokenRepository.createClientToken(createClientTokenInput);
 
     return result;
@@ -63,7 +61,6 @@ export class ClientTokenService {
 
   async findClientTokenByPK(findClientByPkInput: FindClientTokenByPkInput): Promise<ClientToken | null> {
     const clientToken = await this.clientTokenRepository.findClientTokenByPK(findClientByPkInput);
-
     if (clientToken) {
       const { refreshToken, accessToken } = clientToken;
 
