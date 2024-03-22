@@ -17,6 +17,6 @@
       "@src:config/*": ["config/*"]
     }
   },
-  "include": ["src/**/*.ts", "test/**/*.ts"],
+  "include": ["src/**/*.ts", "test-backup/**/*.ts"],
   "exclude": ["node_modules", "dist"]
 }

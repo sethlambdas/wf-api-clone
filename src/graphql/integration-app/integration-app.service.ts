@@ -1,4 +1,4 @@
-import { Inject, Injectable } from '@nestjs/common';
+import { Inject, Injectable, Logger } from '@nestjs/common';
 
 import { CompositePrimaryKey } from '../common/interfaces/dynamodb-keys.interface';
 import { EntityCountService } from '../entity-count/entitiy-count.service';
@@ -17,40 +17,40 @@ export class IntegrationAppService {
     @Inject(IntegrationAppRepository)
     private integrationAppRepository: IntegrationAppRepository,
     private entityCountService: EntityCountService,
-  ) {}
+  ) { }
 
   async createIntegrationApp(createIntegrationAppInput: CreateIntegrationAppInput): Promise<IntegrationApp | null> {
     const entityCount = await this.entityCountService.findEntityCount();
-
+    const entityCountValue = entityCount ? entityCount.totalIntApp : 0;
+    
     const isRecordExist = await this.integrationAppRepository.findIntegrationAppByName(
       createIntegrationAppInput.name.trim(),
-      entityCount.totalIntApp,
+      entityCountValue,
     );
 
     if (isRecordExist) {
       const integrationAppUpdate: Partial<IntegrationApp> = {
         ...createIntegrationAppInput,
       };
-  
+
       const result = await this.integrationAppRepository.updateIntegrationApp(
         createIntegrationAppInput.name.trim(),
-        entityCount.totalIntApp,
+        entityCountValue,
         integrationAppUpdate,
       );
       return result;
     }
 
-    const pk = 'INT-APP' + '||' + (entityCount.totalIntApp + 1);
+    const pk = 'INT-APP' + '||' + (entityCountValue + 1);
 
     const integrationApp: IntegrationApp = {
       PK: pk,
       SK: pk + '||' + 'metadata',
       ...createIntegrationAppInput,
     };
-
     const result = await this.integrationAppRepository.createIntegrationApp(integrationApp);
 
-    if (result) await this.entityCountService.saveEntityCount({ totalIntApp: entityCount.totalIntApp + 1 });
+    if (result) await this.entityCountService.saveEntityCount({ totalIntApp: entityCountValue + 1 });
 
     return result;
   }

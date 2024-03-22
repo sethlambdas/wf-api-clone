@@ -5,12 +5,12 @@ import * as request from 'supertest';
 
 import { ConfigUtil } from '@lambdascrew/utility';
 
-import { AppModule } from './../src/graphql/app.module';
-import { OrganizationService } from './../src/graphql/organizations/organization.service';
-import { WorkflowStepService } from './../src/graphql/workflow-steps/workflow-step.service';
-import { WorkflowVersionService } from './../src/graphql/workflow-versions/workflow-version.service';
-import { WorkflowRepository } from './../src/graphql/workflow/workflow.repository';
-import { WorkflowService } from './../src/graphql/workflow/workflow.service';
+import { AppModule } from '../src/graphql/app.module';
+import { OrganizationService } from '../src/graphql/organizations/organization.service';
+import { WorkflowStepService } from '../src/graphql/workflow-steps/workflow-step.service';
+import { WorkflowVersionService } from '../src/graphql/workflow-versions/workflow-version.service';
+import { WorkflowRepository } from '../src/graphql/workflow/workflow.repository';
+import { WorkflowService } from '../src/graphql/workflow/workflow.service';
 
 let app: INestApplication;
 
