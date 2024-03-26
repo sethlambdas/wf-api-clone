@@ -11,6 +11,14 @@ pipeline {
     }
 
     stages {
+        stage('Run Test Containers') {
+            steps {
+                nodejs(nodeJSInstallationName: 'node-18') {
+                    sh 'npm install -g pnpm'
+                    sh 'pnpm run test:testcontainers'
+                }
+            }
+        }
         stage('Terraform Init') {
             steps {
                 dir('terraform') {
